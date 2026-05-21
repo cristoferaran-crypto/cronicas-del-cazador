@@ -2037,8 +2037,8 @@
     <li><a onclick="showPage('home'); scrollToSection('culturas')">Culturas</a></li>
     <li><a id="nav-creator-link" onclick="showPage('creator')" style="display:none;">Crear Personaje</a></li>
     <li><a id="nav-dashboard-link" onclick="if(window._fbAuth && window._fbAuth.currentUser) window.showDashboard(window._fbAuth.currentUser)" style="display:none;">Mi Cuenta</a></li>
-    <li><a onclick="showPage('register'); setTimeout(()=>{ if(document.getElementById('login-section').style.display==='none') toggleLoginRegister(); },100)">Iniciar Sesión</a></li>
-    <li><a id="nav-register-btn" onclick="showPage('register')">Registrarse</a></li>
+    <li><a onclick="showPage('register'); setTimeout(()=>switchPanel('login'),100)">Iniciar Sesión</a></li>
+    <li><a id="nav-register-btn" onclick="showPage('register'); setTimeout(()=>switchPanel('register'),100)">Registrarse</a></li>
   </ul>
 </nav>
 
@@ -2161,12 +2161,39 @@
 <!-- ========== REGISTER PAGE ========== -->
 <div id="page-register" class="page">
   <div class="register-wrap">
-    <div class="register-card">
-      <h2>Acceder al Sistema</h2>
-      <p class="subtitle">"El mundo observará tu progreso. Y eventualmente, te exigirá resultados."</p>
+    <!-- LOGIN PANEL -->
+    <div class="register-card" id="panel-login">
+      <h2>Iniciar Sesión</h2>
+      <p class="subtitle">"El sistema reconoce a los que regresan."</p>
 
-      <div style="margin-bottom:1.25rem;">
-        <p style="font-family:'Rajdhani',sans-serif;font-size:0.8rem;font-weight:700;letter-spacing:0.15em;text-transform:uppercase;color:var(--gold-dark);margin-bottom:0.75rem;">¿Cuál es tu rol?</p>
+      <div class="form-group">
+        <label>Correo electrónico</label>
+        <input type="email" id="login-email" placeholder="tu@correo.com">
+      </div>
+
+      <div class="form-group">
+        <label>Contraseña</label>
+        <input type="password" id="login-password" placeholder="••••••••">
+      </div>
+
+      <button class="btn-primary register-submit" onclick="handleLogin()" style="margin-bottom:1rem;">
+        ⚔ Comenzar la Cacería
+      </button>
+
+      <div class="form-divider">o</div>
+
+      <button class="btn-secondary register-submit" onclick="switchPanel('register')" style="margin-top:0.5rem;width:100%;margin-left:0;">
+        Crear cuenta nueva
+      </button>
+    </div>
+
+    <!-- REGISTER PANEL -->
+    <div class="register-card" id="panel-register" style="display:none;">
+      <h2>Crear Cuenta</h2>
+      <p class="subtitle">"Tu historia comienza aquí. Elige tu rol."</p>
+
+      <div style="margin-bottom:1.5rem;">
+        <p style="font-family:'Rajdhani',sans-serif;font-size:0.75rem;font-weight:700;letter-spacing:0.2em;text-transform:uppercase;color:var(--text-muted);margin-bottom:0.75rem;">¿Cuál es tu rol?</p>
         <div class="role-selector">
           <div class="role-btn selected" id="role-jugador" onclick="selectRole('jugador')">
             🗡️ Jugador
@@ -2179,55 +2206,39 @@
 
       <div class="form-group">
         <label>Nombre de usuario</label>
-        <input type="text" placeholder="Tu alias en el mundo...">
+        <input type="text" id="reg-username" placeholder="Tu alias en el mundo...">
       </div>
 
       <div class="form-group">
         <label>Correo electrónico</label>
-        <input type="email" placeholder="tu@correo.com">
+        <input type="email" id="reg-email" placeholder="tu@correo.com">
       </div>
 
       <div class="form-group">
         <label>Contraseña</label>
-        <input type="password" placeholder="••••••••">
-      </div>
-
-      <div class="form-group">
-        <label>Confirmar contraseña</label>
-        <input type="password" placeholder="••••••••">
+        <input type="password" id="reg-password" placeholder="Mínimo 6 caracteres">
       </div>
 
       <div id="dj-code" style="display:none;">
         <div class="form-group">
           <label>Código de Director</label>
-          <input type="text" placeholder="Código otorgado por el administrador...">
+          <input type="text" id="dj-code-input" placeholder="Código otorgado por el administrador...">
         </div>
       </div>
 
       <div class="nen-alert">
-        Al registrarte aceptas que tu identidad quedará registrada en el sistema. El Director de Juego tendrá acceso a tus personajes creados.
+        Al registrarte, el Director de Juego tendrá acceso a tus personajes creados.
       </div>
 
-      <button class="btn-primary register-submit" onclick="handleRegister()">Registrar Cazador</button>
+      <button class="btn-primary register-submit" onclick="handleRegister()">
+        Registrar Cazador
+      </button>
 
       <div class="form-divider">o</div>
 
-      <div id="login-section" style="display:none;">
-        <div class="form-group">
-          <label>Correo electrónico</label>
-          <input type="email" id="login-email" placeholder="tu@correo.com">
-        </div>
-        <div class="form-group">
-          <label>Contraseña</label>
-          <input type="password" id="login-password" placeholder="••••••••">
-        </div>
-        <button class="btn-primary register-submit" onclick="handleLogin()">Iniciar Sesión</button>
-        <div style="margin-top:1rem;text-align:center;">
-          <a style="color:var(--accent-light);cursor:pointer;font-size:0.9rem;" onclick="toggleLoginRegister()">← Crear cuenta nueva</a>
-        </div>
-      </div>
-
-      <p class="login-link" id="login-toggle-p">¿Ya tienes cuenta? <a onclick="toggleLoginRegister()">Iniciar sesión</a></p>
+      <button class="btn-secondary register-submit" onclick="switchPanel('login')" style="margin-top:0.5rem;width:100%;margin-left:0;">
+        Ya tengo cuenta — Iniciar Sesión
+      </button>
     </div>
   </div>
 </div><!-- end page-register -->
@@ -2858,6 +2869,18 @@ function resetCreator() {
   goToStep(1);
 }
 
+function switchPanel(panel) {
+  const loginPanel = document.getElementById('panel-login');
+  const registerPanel = document.getElementById('panel-register');
+  if (panel === 'login') {
+    loginPanel.style.display = 'block';
+    registerPanel.style.display = 'none';
+  } else {
+    loginPanel.style.display = 'none';
+    registerPanel.style.display = 'block';
+  }
+}
+
 function toggleLoginRegister() {
   const loginSection = document.getElementById('login-section');
   const registerFields = document.querySelectorAll('#page-register .form-group:not(#login-section .form-group), #page-register .role-selector, #page-register .nen-alert, #page-register .register-submit');
@@ -3128,9 +3151,9 @@ renderAttrSidebar();
 
   // ---- REGISTER ----
   window.handleRegister = async function() {
-    const email = document.querySelector('#page-register input[type="email"]').value;
-    const password = document.querySelector('#page-register input[type="password"]').value;
-    const username = document.querySelector('#page-register input[type="text"]').value;
+    const email = document.getElementById('reg-email')?.value || '';
+    const password = document.getElementById('reg-password')?.value || '';
+    const username = document.getElementById('reg-username')?.value || '';
     const rol = document.getElementById('role-dj')?.classList.contains('selected') ? 'dj' : 'jugador';
 
     if (!email || !password || !username) {
