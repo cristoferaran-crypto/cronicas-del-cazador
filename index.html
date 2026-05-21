@@ -2037,6 +2037,7 @@
     <li><a onclick="showPage('home'); scrollToSection('culturas')">Culturas</a></li>
     <li><a id="nav-creator-link" onclick="showPage('creator')" style="display:none;">Crear Personaje</a></li>
     <li><a id="nav-dashboard-link" onclick="if(window._fbAuth && window._fbAuth.currentUser) window.showDashboard(window._fbAuth.currentUser)" style="display:none;">Mi Cuenta</a></li>
+    <li><a onclick="showPage('register'); setTimeout(()=>{ if(document.getElementById('login-section').style.display==='none') toggleLoginRegister(); },100)">Iniciar Sesión</a></li>
     <li><a id="nav-register-btn" onclick="showPage('register')">Registrarse</a></li>
   </ul>
 </nav>
@@ -2222,7 +2223,7 @@
         </div>
         <button class="btn-primary register-submit" onclick="handleLogin()">Iniciar Sesión</button>
         <div style="margin-top:1rem;text-align:center;">
-          <a style="color:var(--gold);cursor:pointer;font-size:0.9rem;" onclick="toggleLoginRegister()">← Crear cuenta nueva</a>
+          <a style="color:var(--accent-light);cursor:pointer;font-size:0.9rem;" onclick="toggleLoginRegister()">← Crear cuenta nueva</a>
         </div>
       </div>
 
@@ -2859,21 +2860,23 @@ function resetCreator() {
 
 function toggleLoginRegister() {
   const loginSection = document.getElementById('login-section');
-  const registerFields = document.querySelectorAll('#page-register .form-group, #page-register .role-selector, #page-register .nen-alert, #page-register .register-submit');
+  const registerFields = document.querySelectorAll('#page-register .form-group:not(#login-section .form-group), #page-register .role-selector, #page-register .nen-alert, #page-register .register-submit');
   const toggleP = document.getElementById('login-toggle-p');
   const title = document.querySelector('#page-register h2');
   const subtitle = document.querySelector('#page-register .subtitle');
+  const djCode = document.getElementById('dj-code');
 
-  if (loginSection.style.display === 'none') {
+  if (loginSection.style.display === 'none' || loginSection.style.display === '') {
     loginSection.style.display = 'block';
     registerFields.forEach(el => el.style.display = 'none');
-    toggleP.style.display = 'none';
+    if(djCode) djCode.style.display = 'none';
+    if(toggleP) toggleP.style.display = 'none';
     if(title) title.textContent = 'Iniciar Sesión';
     if(subtitle) subtitle.textContent = '"El sistema reconoce a los que regresan."';
   } else {
     loginSection.style.display = 'none';
     registerFields.forEach(el => el.style.display = '');
-    toggleP.style.display = 'block';
+    if(toggleP) toggleP.style.display = 'block';
     if(title) title.textContent = 'Acceder al Sistema';
     if(subtitle) subtitle.textContent = '"El mundo observará tu progreso. Y eventualmente, te exigirá resultados."';
   }
