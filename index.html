@@ -1293,6 +1293,739 @@
     .objectives-grid { grid-template-columns: 1fr; }
     .stat-summary { grid-template-columns: 1fr 1fr; }
   }
+  /* ======== DASHBOARD ======== */
+  .dash-layout {
+    display: grid;
+    grid-template-columns: 260px 1fr;
+    min-height: calc(100vh - 60px);
+  }
+
+  .dash-sidebar {
+    background: var(--dark2);
+    border-right: 1px solid var(--dark5);
+    padding: 2rem 1.5rem;
+    display: flex;
+    flex-direction: column;
+    gap: 2rem;
+    position: sticky;
+    top: 60px;
+    height: calc(100vh - 60px);
+    overflow-y: auto;
+  }
+
+  .dash-user-card {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    padding-bottom: 1.5rem;
+    border-bottom: 1px solid var(--dark5);
+  }
+
+  .dash-avatar {
+    width: 44px;
+    height: 44px;
+    background: var(--dark5);
+    border: 1px solid var(--accent-dark);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: 'Cinzel', serif;
+    font-size: 1.1rem;
+    font-weight: 700;
+    color: var(--accent);
+    flex-shrink: 0;
+  }
+
+  .dash-user-info {
+    display: flex;
+    flex-direction: column;
+    gap: 0.2rem;
+    overflow: hidden;
+  }
+
+  .dash-username {
+    font-family: 'Cinzel', serif;
+    font-size: 0.9rem;
+    color: var(--text);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .dash-role {
+    font-family: 'Rajdhani', sans-serif;
+    font-size: 0.72rem;
+    font-weight: 600;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--text-muted);
+  }
+
+  .dash-nav {
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+    flex: 1;
+  }
+
+  .dash-nav-item {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 0.75rem 1rem;
+    font-family: 'Rajdhani', sans-serif;
+    font-size: 0.85rem;
+    font-weight: 600;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--text-muted);
+    cursor: pointer;
+    border-left: 2px solid transparent;
+    transition: all 0.2s;
+    text-decoration: none;
+  }
+
+  .dash-nav-item:hover { color: var(--text); background: var(--dark3); }
+
+  .dash-nav-item.active {
+    color: var(--accent-light);
+    border-left-color: var(--accent);
+    background: rgba(192,57,43,0.08);
+  }
+
+  .dash-logout {
+    background: transparent;
+    border: 1px solid var(--dark5);
+    color: var(--text-muted);
+    padding: 0.7rem;
+    font-family: 'Rajdhani', sans-serif;
+    font-size: 0.8rem;
+    font-weight: 600;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    cursor: pointer;
+    transition: all 0.2s;
+    width: 100%;
+  }
+
+  .dash-logout:hover { border-color: var(--accent-dark); color: var(--accent-light); }
+
+  .dash-main {
+    padding: 2.5rem;
+    overflow-y: auto;
+  }
+
+  .dash-tab { display: none; }
+  .dash-tab.active { display: block; }
+
+  .dash-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 2rem;
+    padding-bottom: 1.5rem;
+    border-bottom: 1px solid var(--dark5);
+  }
+
+  .dash-title {
+    font-family: 'Cinzel', serif;
+    font-size: 1.4rem;
+    color: var(--text);
+    margin-bottom: 0.25rem;
+  }
+
+  .dash-subtitle {
+    font-size: 0.88rem;
+    color: var(--text-muted);
+    font-style: italic;
+  }
+
+  /* CHARS GRID */
+  .chars-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 1.25rem;
+  }
+
+  .char-card {
+    background: var(--dark3);
+    border: 1px solid var(--dark5);
+    border-top: 2px solid var(--accent-dark);
+    padding: 1.5rem;
+    transition: all 0.2s;
+    cursor: pointer;
+  }
+
+  .char-card:hover {
+    border-top-color: var(--accent);
+    background: var(--dark4);
+    transform: translateY(-2px);
+  }
+
+  .char-card-name {
+    font-family: 'Cinzel', serif;
+    font-size: 1.1rem;
+    color: var(--text);
+    margin-bottom: 0.25rem;
+  }
+
+  .char-card-culture {
+    font-family: 'Rajdhani', sans-serif;
+    font-size: 0.72rem;
+    font-weight: 600;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--accent);
+    margin-bottom: 1rem;
+  }
+
+  .char-card-stats {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 0.5rem;
+    margin-bottom: 1rem;
+  }
+
+  .char-stat {
+    display: flex;
+    flex-direction: column;
+    gap: 0.15rem;
+  }
+
+  .char-stat-label {
+    font-family: 'Rajdhani', sans-serif;
+    font-size: 0.65rem;
+    font-weight: 700;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--text-muted);
+  }
+
+  .char-stat-value {
+    font-family: 'Cinzel', serif;
+    font-size: 0.95rem;
+    color: var(--text);
+  }
+
+  .char-card-xp {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding-top: 0.75rem;
+    border-top: 1px solid var(--dark5);
+  }
+
+  .char-xp-label {
+    font-family: 'Rajdhani', sans-serif;
+    font-size: 0.72rem;
+    font-weight: 600;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--text-muted);
+  }
+
+  .char-xp-value {
+    font-family: 'Cinzel', serif;
+    font-size: 1rem;
+    color: var(--accent-light);
+    font-weight: 700;
+  }
+
+  /* XP SUMMARY */
+  .exp-summary {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 1rem;
+    margin-bottom: 2.5rem;
+  }
+
+  .exp-card {
+    background: var(--dark3);
+    border: 1px solid var(--dark5);
+    padding: 1.5rem;
+    text-align: center;
+  }
+
+  .exp-card-total { border-top: 2px solid var(--text-muted); }
+  .exp-card-available { border-top: 2px solid var(--accent); }
+  .exp-card-spent { border-top: 2px solid var(--dark5); }
+
+  .exp-card-label {
+    display: block;
+    font-family: 'Rajdhani', sans-serif;
+    font-size: 0.72rem;
+    font-weight: 600;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--text-muted);
+    margin-bottom: 0.75rem;
+  }
+
+  .exp-card-value {
+    font-family: 'Cinzel', serif;
+    font-size: 2.5rem;
+    font-weight: 700;
+    color: var(--text);
+  }
+
+  .exp-card-available .exp-card-value { color: var(--accent-light); }
+
+  /* SESSIONS LOG */
+  .log-title {
+    font-family: 'Cinzel', serif;
+    font-size: 1rem;
+    color: var(--text);
+    margin-bottom: 1rem;
+    letter-spacing: 0.05em;
+  }
+
+  .session-item {
+    background: var(--dark3);
+    border: 1px solid var(--dark5);
+    border-left: 2px solid var(--accent-dark);
+    padding: 1rem 1.25rem;
+    margin-bottom: 0.75rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+
+  .session-item-name {
+    font-family: 'Cinzel', serif;
+    font-size: 0.9rem;
+    color: var(--text);
+    margin-bottom: 0.2rem;
+  }
+
+  .session-item-date {
+    font-size: 0.8rem;
+    color: var(--text-muted);
+    font-style: italic;
+  }
+
+  .session-item-xp {
+    font-family: 'Cinzel', serif;
+    font-size: 1.2rem;
+    font-weight: 700;
+    color: var(--accent-light);
+  }
+
+  .session-item-criteria {
+    font-size: 0.78rem;
+    color: var(--text-muted);
+    margin-top: 0.25rem;
+  }
+
+  /* SPEND XP */
+  .spend-limits-banner {
+    background: rgba(192,57,43,0.08);
+    border: 1px solid var(--accent-dark);
+    padding: 1rem 1.5rem;
+    margin-bottom: 2rem;
+    display: flex;
+    gap: 2rem;
+    flex-wrap: wrap;
+  }
+
+  .spend-limit-item {
+    display: flex;
+    flex-direction: column;
+    gap: 0.15rem;
+  }
+
+  .spend-limit-label {
+    font-family: 'Rajdhani', sans-serif;
+    font-size: 0.7rem;
+    font-weight: 700;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--text-muted);
+  }
+
+  .spend-limit-value {
+    font-family: 'Cinzel', serif;
+    font-size: 0.95rem;
+    color: var(--accent-light);
+  }
+
+  .spend-section {
+    margin-bottom: 2.5rem;
+  }
+
+  .spend-section-title {
+    font-family: 'Cinzel', serif;
+    font-size: 1rem;
+    color: var(--text);
+    margin-bottom: 0.4rem;
+    letter-spacing: 0.05em;
+  }
+
+  .spend-section-desc {
+    font-size: 0.85rem;
+    color: var(--text-muted);
+    font-style: italic;
+    margin-bottom: 1.25rem;
+  }
+
+  .spend-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    gap: 0.75rem;
+  }
+
+  .spend-item {
+    background: var(--dark3);
+    border: 1px solid var(--dark5);
+    padding: 1rem;
+    transition: all 0.2s;
+  }
+
+  .spend-item-name {
+    font-family: 'Rajdhani', sans-serif;
+    font-size: 0.8rem;
+    font-weight: 700;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--text-muted);
+    margin-bottom: 0.5rem;
+  }
+
+  .spend-item-current {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    margin-bottom: 0.75rem;
+  }
+
+  .spend-dots {
+    display: flex;
+    gap: 3px;
+  }
+
+  .spend-dot {
+    width: 10px;
+    height: 10px;
+    border: 1px solid var(--dark5);
+  }
+
+  .spend-dot.filled { background: var(--accent); border-color: var(--accent); }
+  .spend-dot.max { background: var(--text-muted); border-color: var(--text-muted); }
+
+  .spend-btn {
+    width: 100%;
+    background: transparent;
+    border: 1px solid var(--accent-dark);
+    color: var(--accent-light);
+    padding: 0.5rem;
+    font-family: 'Rajdhani', sans-serif;
+    font-size: 0.75rem;
+    font-weight: 700;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+
+  .spend-btn:hover { background: rgba(192,57,43,0.15); }
+  .spend-btn:disabled { opacity: 0.3; cursor: not-allowed; }
+
+  .spend-btn-cost {
+    display: block;
+    font-size: 0.7rem;
+    color: var(--text-muted);
+    margin-top: 0.25rem;
+    text-align: center;
+  }
+
+  .xp-badge {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    gap: 0.15rem;
+    font-family: 'Rajdhani', sans-serif;
+    font-size: 0.75rem;
+    font-weight: 600;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--text-muted);
+  }
+
+  .xp-badge strong {
+    font-family: 'Cinzel', serif;
+    font-size: 1.6rem;
+    color: var(--accent-light);
+  }
+
+  /* DJ SESSION FORM */
+  .session-form { max-width: 800px; }
+
+  .session-player-block {
+    background: var(--dark3);
+    border: 1px solid var(--dark5);
+    border-left: 2px solid var(--accent-dark);
+    padding: 1.5rem;
+    margin-bottom: 1rem;
+  }
+
+  .session-player-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1.25rem;
+  }
+
+  .session-player-name {
+    font-family: 'Cinzel', serif;
+    font-size: 1rem;
+    color: var(--text);
+  }
+
+  .session-xp-counter {
+    font-family: 'Cinzel', serif;
+    font-size: 1.1rem;
+    color: var(--accent-light);
+    font-weight: 700;
+  }
+
+  .criteria-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 0.5rem;
+    margin-bottom: 1rem;
+  }
+
+  .criteria-item {
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+    padding: 0.5rem 0.75rem;
+    background: var(--dark4);
+    border: 1px solid var(--dark5);
+    cursor: pointer;
+    transition: all 0.15s;
+    user-select: none;
+  }
+
+  .criteria-item:hover { border-color: var(--accent-dark); }
+
+  .criteria-item.checked {
+    background: rgba(192,57,43,0.1);
+    border-color: var(--accent-dark);
+  }
+
+  .criteria-check {
+    width: 16px;
+    height: 16px;
+    border: 1px solid var(--dark5);
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.7rem;
+    color: var(--accent-light);
+    transition: all 0.15s;
+  }
+
+  .criteria-item.checked .criteria-check {
+    background: var(--accent);
+    border-color: var(--accent);
+  }
+
+  .criteria-text {
+    font-family: 'Rajdhani', sans-serif;
+    font-size: 0.78rem;
+    font-weight: 600;
+    color: var(--text-muted);
+    line-height: 1.3;
+  }
+
+  .criteria-item.checked .criteria-text { color: var(--text); }
+
+  .training-toggle {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 0.6rem 0.75rem;
+    background: var(--dark4);
+    border: 1px solid var(--dark5);
+    cursor: pointer;
+    margin-top: 0.5rem;
+    user-select: none;
+  }
+
+  .training-toggle.active {
+    background: rgba(45,122,74,0.1);
+    border-color: var(--green-light);
+  }
+
+  .training-toggle-text {
+    font-family: 'Rajdhani', sans-serif;
+    font-size: 0.78rem;
+    font-weight: 600;
+    color: var(--text-muted);
+  }
+
+  .training-toggle.active .training-toggle-text { color: #7ad49a; }
+
+  /* DJ CHARS GRID */
+  .dj-chars-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+    gap: 1.25rem;
+  }
+
+  .dj-char-card {
+    background: var(--dark3);
+    border: 1px solid var(--dark5);
+    border-top: 2px solid var(--accent-dark);
+    padding: 1.5rem;
+  }
+
+  .dj-char-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 1rem;
+    padding-bottom: 0.75rem;
+    border-bottom: 1px solid var(--dark5);
+  }
+
+  .dj-char-name {
+    font-family: 'Cinzel', serif;
+    font-size: 1rem;
+    color: var(--text);
+    margin-bottom: 0.15rem;
+  }
+
+  .dj-char-player {
+    font-family: 'Rajdhani', sans-serif;
+    font-size: 0.72rem;
+    font-weight: 600;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--text-muted);
+  }
+
+  .dj-char-level {
+    font-family: 'Cinzel', serif;
+    font-size: 0.85rem;
+    color: var(--accent-light);
+    text-align: right;
+  }
+
+  .dj-char-rank {
+    font-family: 'Rajdhani', sans-serif;
+    font-size: 0.65rem;
+    font-weight: 600;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--text-muted);
+  }
+
+  .dj-char-attrs {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 0.4rem;
+    margin-bottom: 1rem;
+  }
+
+  .dj-attr {
+    text-align: center;
+    padding: 0.4rem;
+    background: var(--dark4);
+    border: 1px solid var(--dark5);
+  }
+
+  .dj-attr-name {
+    font-family: 'Rajdhani', sans-serif;
+    font-size: 0.6rem;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--text-muted);
+    display: block;
+  }
+
+  .dj-attr-val {
+    font-family: 'Cinzel', serif;
+    font-size: 0.9rem;
+    color: var(--text);
+  }
+
+  .dj-char-footer {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding-top: 0.75rem;
+    border-top: 1px solid var(--dark5);
+  }
+
+  .dj-char-xp {
+    font-family: 'Rajdhani', sans-serif;
+    font-size: 0.75rem;
+    font-weight: 600;
+    color: var(--text-muted);
+  }
+
+  .dj-char-xp strong {
+    font-family: 'Cinzel', serif;
+    font-size: 1rem;
+    color: var(--accent-light);
+  }
+
+  .dj-levelup-btn {
+    background: transparent;
+    border: 1px solid var(--accent-dark);
+    color: var(--accent-light);
+    padding: 0.4rem 0.9rem;
+    font-family: 'Rajdhani', sans-serif;
+    font-size: 0.72rem;
+    font-weight: 700;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+
+  .dj-levelup-btn:hover { background: rgba(192,57,43,0.15); }
+
+  .empty-state {
+    text-align: center;
+    padding: 3rem;
+    color: var(--text-muted);
+    font-style: italic;
+    font-size: 0.95rem;
+    grid-column: 1 / -1;
+  }
+
+  .chars-loading {
+    text-align: center;
+    padding: 2rem;
+    color: var(--text-muted);
+    font-style: italic;
+    grid-column: 1 / -1;
+  }
+
+  .spend-selector { margin-bottom: 2rem; }
+
+  /* RESPONSIVE DASHBOARD */
+  @media (max-width: 768px) {
+    .dash-layout { grid-template-columns: 1fr; }
+    .dash-sidebar {
+      position: static;
+      height: auto;
+      flex-direction: row;
+      flex-wrap: wrap;
+      padding: 1rem;
+      gap: 1rem;
+    }
+    .dash-nav { flex-direction: row; flex-wrap: wrap; }
+    .dash-main { padding: 1.5rem 1rem; }
+    .exp-summary { grid-template-columns: 1fr; }
+    .criteria-grid { grid-template-columns: 1fr; }
+    .dj-char-attrs { grid-template-columns: repeat(3, 1fr); }
+  }
+
 </style>
 </head>
 <body>
@@ -1303,6 +2036,7 @@
     <li><a onclick="showPage('home')">Inicio</a></li>
     <li><a onclick="showPage('home'); scrollToSection('culturas')">Culturas</a></li>
     <li><a id="nav-creator-link" onclick="showPage('creator')" style="display:none;">Crear Personaje</a></li>
+    <li><a id="nav-dashboard-link" onclick="if(window._fbAuth && window._fbAuth.currentUser) window.showDashboard(window._fbAuth.currentUser)" style="display:none;">Mi Cuenta</a></li>
     <li><a id="nav-register-btn" onclick="showPage('register')">Registrarse</a></li>
   </ul>
 </nav>
@@ -2155,6 +2889,203 @@ function scrollToSection(id) {
 renderAttrSidebar();
 </script>
 
+<!-- ========== PLAYER DASHBOARD ========== -->
+<div id="page-dashboard" class="page">
+  <div class="dash-layout">
+
+    <!-- SIDEBAR -->
+    <div class="dash-sidebar">
+      <div class="dash-user-card">
+        <div class="dash-avatar" id="dash-avatar">C</div>
+        <div class="dash-user-info">
+          <span class="dash-username" id="dash-username">Cazador</span>
+          <span class="dash-role" id="dash-role">Jugador</span>
+        </div>
+      </div>
+      <nav class="dash-nav">
+        <a class="dash-nav-item active" onclick="showDashTab('tab-chars')">
+          <span>⚔</span> Mis Personajes
+        </a>
+        <a class="dash-nav-item" onclick="showDashTab('tab-exp')">
+          <span>✦</span> Experiencia
+        </a>
+        <a class="dash-nav-item" onclick="showDashTab('tab-spend')">
+          <span>▲</span> Gastar XP
+        </a>
+      </nav>
+      <button class="dash-logout" onclick="handleLogout()">Cerrar Sesión</button>
+    </div>
+
+    <!-- MAIN CONTENT -->
+    <div class="dash-main">
+
+      <!-- TAB: MIS PERSONAJES -->
+      <div id="tab-chars" class="dash-tab active">
+        <div class="dash-header">
+          <div>
+            <h2 class="dash-title">Mis Personajes</h2>
+            <p class="dash-subtitle">Tus cazadores en el mundo conocido</p>
+          </div>
+          <button class="btn-primary" onclick="showPage('creator')">+ Nuevo Personaje</button>
+        </div>
+
+        <div id="chars-list" class="chars-grid">
+          <div class="chars-loading">Cargando personajes...</div>
+        </div>
+      </div>
+
+      <!-- TAB: EXPERIENCIA -->
+      <div id="tab-exp" class="dash-tab">
+        <div class="dash-header">
+          <div>
+            <h2 class="dash-title">Experiencia</h2>
+            <p class="dash-subtitle">Tu progreso a lo largo de las sesiones</p>
+          </div>
+        </div>
+
+        <div class="exp-summary">
+          <div class="exp-card exp-card-total">
+            <span class="exp-card-label">XP Total Ganada</span>
+            <span class="exp-card-value" id="exp-total">0</span>
+          </div>
+          <div class="exp-card exp-card-available">
+            <span class="exp-card-label">XP Disponible</span>
+            <span class="exp-card-value" id="exp-available">0</span>
+          </div>
+          <div class="exp-card exp-card-spent">
+            <span class="exp-card-label">XP Gastada</span>
+            <span class="exp-card-value" id="exp-spent">0</span>
+          </div>
+        </div>
+
+        <div class="sessions-log">
+          <h3 class="log-title">Historial de Sesiones</h3>
+          <div id="sessions-list">
+            <div class="empty-state">Aún no hay sesiones registradas.</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- TAB: GASTAR XP -->
+      <div id="tab-spend" class="dash-tab">
+        <div class="dash-header">
+          <div>
+            <h2 class="dash-title">Gastar Experiencia</h2>
+            <p class="dash-subtitle">Invierte tus puntos con sabiduría</p>
+          </div>
+          <div class="xp-badge">
+            <span>XP disponible:</span>
+            <strong id="spend-xp-available">0</strong>
+          </div>
+        </div>
+
+        <div id="spend-char-selector" class="spend-selector">
+          <label class="form-label">Selecciona tu personaje</label>
+          <select class="form-input" id="spend-char-select" onchange="loadCharForSpend()">
+            <option value="">— Elige un personaje —</option>
+          </select>
+        </div>
+
+        <div id="spend-content" style="display:none;">
+
+          <div class="spend-limits-banner" id="spend-limits">
+            <!-- filled by JS -->
+          </div>
+
+          <div class="spend-section">
+            <h3 class="spend-section-title">⚔ Atributos</h3>
+            <p class="spend-section-desc">Aumentar un atributo requiere mayor inversión. Los niveles 5 y 6 son excepcionales.</p>
+            <div class="spend-grid" id="spend-attrs">
+              <!-- filled by JS -->
+            </div>
+          </div>
+
+          <div class="spend-section">
+            <h3 class="spend-section-title">📋 Habilidades</h3>
+            <p class="spend-section-desc">Las habilidades son más accesibles. Especialízate en tu estilo.</p>
+            <div class="spend-grid" id="spend-skills">
+              <!-- filled by JS -->
+            </div>
+          </div>
+
+        </div>
+      </div>
+
+    </div><!-- dash-main -->
+  </div>
+</div>
+
+<!-- ========== DJ DASHBOARD ========== -->
+<div id="page-dj" class="page">
+  <div class="dash-layout">
+
+    <!-- SIDEBAR -->
+    <div class="dash-sidebar">
+      <div class="dash-user-card">
+        <div class="dash-avatar" style="background:var(--accent);">DJ</div>
+        <div class="dash-user-info">
+          <span class="dash-username" id="dj-username">Director</span>
+          <span class="dash-role" style="color:var(--accent);">Director de Juego</span>
+        </div>
+      </div>
+      <nav class="dash-nav">
+        <a class="dash-nav-item active" onclick="showDJTab('dj-tab-players')">
+          <span>👥</span> Jugadores
+        </a>
+        <a class="dash-nav-item" onclick="showDJTab('dj-tab-session')">
+          <span>✦</span> Otorgar XP
+        </a>
+      </nav>
+      <button class="dash-logout" onclick="handleLogout()">Cerrar Sesión</button>
+    </div>
+
+    <!-- DJ MAIN -->
+    <div class="dash-main">
+
+      <!-- TAB: JUGADORES -->
+      <div id="dj-tab-players" class="dash-tab active">
+        <div class="dash-header">
+          <div>
+            <h2 class="dash-title">Personajes de la Campaña</h2>
+            <p class="dash-subtitle">Vista completa de todos los cazadores</p>
+          </div>
+          <button class="btn-secondary" onclick="loadAllChars()">↺ Actualizar</button>
+        </div>
+        <div id="dj-chars-list" class="dj-chars-grid">
+          <div class="chars-loading">Cargando personajes...</div>
+        </div>
+      </div>
+
+      <!-- TAB: OTORGAR XP -->
+      <div id="dj-tab-session" class="dash-tab">
+        <div class="dash-header">
+          <div>
+            <h2 class="dash-title">Otorgar Experiencia</h2>
+            <p class="dash-subtitle">Evalúa el desempeño de cada jugador</p>
+          </div>
+        </div>
+
+        <div class="session-form">
+          <div class="form-group">
+            <label class="form-label">Nombre de la sesión</label>
+            <input class="form-input" type="text" id="session-name" placeholder="Ej: Sesión 3 — La ciudad de Yorknew">
+          </div>
+
+          <div id="session-players-list">
+            <div class="chars-loading">Cargando jugadores...</div>
+          </div>
+
+          <button class="btn-primary" style="margin-top:2rem;width:100%;" onclick="submitSession()">
+            ✦ Confirmar y Otorgar XP
+          </button>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+
 <!-- ======== FIREBASE INTEGRATION ======== -->
 <script type="module">
   import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
@@ -2179,9 +3110,8 @@ renderAttrSidebar();
     const creatorLink = document.getElementById('nav-creator-link');
     const registerBtn = document.getElementById('nav-register-btn');
     if (user) {
-      if(registerBtn) { registerBtn.textContent = 'Mi Cuenta'; registerBtn.onclick = () => handleLogout(); }
+      if(registerBtn) { registerBtn.textContent = 'Mi Cuenta'; registerBtn.onclick = () => window.showDashboard(user); }
       if(creatorLink) creatorLink.style.display = 'block';
-      showUserWelcome(user);
     } else {
       if(registerBtn) { registerBtn.textContent = 'Registrarse'; registerBtn.onclick = () => showPage('register'); }
       if(creatorLink) creatorLink.style.display = 'none';
@@ -2224,7 +3154,7 @@ renderAttrSidebar();
       });
 
       showNotification('¡Registro exitoso! Bienvenido, ' + username, 'success');
-      setTimeout(() => showPage('creator'), 1500);
+      setTimeout(() => window.showDashboard(userCredential.user), 1500);
 
     } catch (error) {
       let msg = 'Error al registrar.';
@@ -2249,7 +3179,7 @@ renderAttrSidebar();
       showNotification('Iniciando sesión...', 'info');
       await signInWithEmailAndPassword(auth, email, password);
       showNotification('¡Bienvenido de vuelta, Cazador!', 'success');
-      setTimeout(() => showPage('home'), 1200);
+      setTimeout(() => window.showDashboard(userCredential.user), 1200);
     } catch (error) {
       let msg = 'Error al iniciar sesión.';
       if (error.code === 'auth/user-not-found') msg = 'No existe una cuenta con ese correo.';
@@ -2333,6 +3263,514 @@ renderAttrSidebar();
   // Exponer db y auth globalmente para uso externo si se necesita
   window._fbAuth = auth;
   window._fbDb = db;
+
+  // ---- DASHBOARD JS ----
+// ======== PROGRESSION SYSTEM ========
+const ATTR_COSTS = [0, 4, 8, 12, 16, 35, 42];
+const SKILL_COSTS = [0, 2, 4, 6, 8, 20, 24];
+const TRAINING_DISCOUNT = 0.20;
+
+const LEVEL_LIMITS = {
+  1:  { attrSpec: 3, attrRest: 2, skillSpec: 2, skillRest: 2, rango: 'Novato' },
+  2:  { attrSpec: 3, attrRest: 2, skillSpec: 2, skillRest: 2, rango: 'Novato' },
+  3:  { attrSpec: 3, attrRest: 3, skillSpec: 3, skillRest: 3, rango: 'Iniciado' },
+  4:  { attrSpec: 4, attrRest: 3, skillSpec: 3, skillRest: 3, rango: 'Iniciado' },
+  5:  { attrSpec: 4, attrRest: 3, skillSpec: 3, skillRest: 3, rango: 'Iniciado' },
+  6:  { attrSpec: 4, attrRest: 3, skillSpec: 4, skillRest: 3, rango: 'Practicante' },
+  7:  { attrSpec: 5, attrRest: 4, skillSpec: 5, skillRest: 4, rango: 'Practicante' },
+  8:  { attrSpec: 5, attrRest: 4, skillSpec: 5, skillRest: 4, rango: 'Practicante' },
+  9:  { attrSpec: 5, attrRest: 4, skillSpec: 5, skillRest: 4, rango: 'Practicante' },
+  10: { attrSpec: 5, attrRest: 5, skillSpec: 5, skillRest: 5, rango: 'Despertar' },
+  11: { attrSpec: 5, attrRest: 5, skillSpec: 5, skillRest: 5, rango: 'Despertar' },
+  12: { attrSpec: 6, attrRest: 5, skillSpec: 6, skillRest: 5, rango: 'Despertar' },
+  13: { attrSpec: 6, attrRest: 5, skillSpec: 6, skillRest: 5, rango: 'Despertar' },
+  14: { attrSpec: 6, attrRest: 5, skillSpec: 6, skillRest: 5, rango: 'Experto' },
+  15: { attrSpec: 6, attrRest: 5, skillSpec: 6, skillRest: 5, rango: 'Experto' },
+  16: { attrSpec: 6, attrRest: 5, skillSpec: 6, skillRest: 5, rango: 'Experto' },
+  17: { attrSpec: 6, attrRest: 5, skillSpec: 6, skillRest: 5, rango: 'Experto' },
+  18: { attrSpec: 6, attrRest: 5, skillSpec: 6, skillRest: 5, rango: 'Maestro' },
+  19: { attrSpec: 6, attrRest: 5, skillSpec: 6, skillRest: 5, rango: 'Maestro' },
+  20: { attrSpec: 6, attrRest: 5, skillSpec: 6, skillRest: 5, rango: 'Maestro' }
+};
+
+const CRITERIA = [
+  'Participó activamente en la sesión',
+  'Interpretó correctamente a su personaje',
+  'Tomó decisiones coherentes con su historia',
+  'Aportó al grupo o a la misión',
+  'Superó desafíos importantes',
+  'Utilizó estrategias o ideas creativas',
+  'Desarrolló conflictos o crecimiento narrativo',
+  'Investigó, exploró o interactuó con el mundo'
+];
+
+const ATTRS_LIST = ['fuerza','destreza','resistencia','carisma','manipulacion','compostura','percepcion','inteligencia','astucia'];
+const ATTRS_LABELS = {'fuerza':'Fuerza','destreza':'Destreza','resistencia':'Resistencia','carisma':'Carisma','manipulacion':'Manipulación','compostura':'Compostura','percepcion':'Percepción','inteligencia':'Inteligencia','astucia':'Astucia'};
+const SKILLS_LIST = ['Pelea','Esquivar','Armas Cuerpo a Cuerpo','Armas a Distancia','Armas de Fuego','Alerta','Sigilo','Callejeo / Orientación','Supervivencia','Atletismo','Seguridad','Reparación','Empatía','Subterfugio','Liderazgo','Intimidación','Trato con Animales','Investigación','Medicina','Academicismo','Informática','Conducir','Política'];
+
+let currentUserData = null;
+let currentChars = [];
+let selectedSpendChar = null;
+let djChars = [];
+let sessionPlayers = [];
+
+// ---- SHOW DASHBOARD ----
+window.showDashboard = async function(user) {
+  try {
+    const { getFirestore, doc, getDoc, collection, query, where, getDocs, onSnapshot } = await import("https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js");
+    const db = window._fbDb;
+
+    const userDoc = await getDoc(doc(db, 'usuarios', user.uid));
+    if (!userDoc.exists()) return;
+
+    currentUserData = { uid: user.uid, ...userDoc.data() };
+    const rol = currentUserData.rol;
+
+    if (rol === 'dj') {
+      setupDJDashboard(user, currentUserData);
+      showPage('dj');
+    } else {
+      setupPlayerDashboard(user, currentUserData);
+      showPage('dashboard');
+    }
+  } catch(e) { console.error(e); }
+};
+
+// ---- PLAYER DASHBOARD ----
+async function setupPlayerDashboard(user, userData) {
+  document.getElementById('dash-username').textContent = userData.username || 'Cazador';
+  document.getElementById('dash-avatar').textContent = (userData.username || 'C')[0].toUpperCase();
+
+  await loadPlayerChars(user.uid);
+  await loadPlayerXP(user.uid);
+}
+
+async function loadPlayerChars(uid) {
+  const { collection, query, where, getDocs } = await import("https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js");
+  const db = window._fbDb;
+  const q = query(collection(db, 'personajes'), where('jugadorId', '==', uid));
+  const snap = await getDocs(q);
+  currentChars = [];
+  snap.forEach(d => currentChars.push({ id: d.id, ...d.data() }));
+  renderPlayerChars();
+  populateSpendSelect();
+}
+
+function renderPlayerChars() {
+  const cont = document.getElementById('chars-list');
+  if (!currentChars.length) {
+    cont.innerHTML = '<div class="empty-state">No tienes personajes aún. ¡Crea tu primer cazador!</div>';
+    return;
+  }
+  cont.innerHTML = currentChars.map(c => `
+    <div class="char-card">
+      <div class="char-card-name">${c.nombre || 'Sin nombre'}</div>
+      <div class="char-card-culture">${c.cultura || '—'} · ${c.camino || 'Sin camino'}</div>
+      <div class="char-card-stats">
+        <div class="char-stat">
+          <span class="char-stat-label">Nivel</span>
+          <span class="char-stat-value">${c.nivel || 1} — ${getRango(c.nivel||1)}</span>
+        </div>
+        <div class="char-stat">
+          <span class="char-stat-label">PA</span>
+          <span class="char-stat-value">${(c.atributos?.resistencia||1) + 3}</span>
+        </div>
+        <div class="char-stat">
+          <span class="char-stat-label">Iniciativa</span>
+          <span class="char-stat-value">${(c.atributos?.percepcion||1) + (c.habilidades?.['Alerta']||0)}</span>
+        </div>
+        <div class="char-stat">
+          <span class="char-stat-label">Cultura</span>
+          <span class="char-stat-value">${c.cultura || '—'}</span>
+        </div>
+      </div>
+      <div class="char-card-xp">
+        <span class="char-xp-label">XP Disponible</span>
+        <span class="char-xp-value">${c.xpDisponible || 0} XP</span>
+      </div>
+    </div>
+  `).join('');
+}
+
+async function loadPlayerXP(uid) {
+  const { collection, query, where, getDocs, orderBy } = await import("https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js");
+  const db = window._fbDb;
+
+  let totalXP = 0, spentXP = 0;
+  currentChars.forEach(c => {
+    totalXP += c.xpTotal || 0;
+    spentXP += c.xpGastada || 0;
+  });
+  const available = totalXP - spentXP;
+
+  document.getElementById('exp-total').textContent = totalXP;
+  document.getElementById('exp-available').textContent = available;
+  document.getElementById('exp-spent').textContent = spentXP;
+  document.getElementById('spend-xp-available').textContent = available;
+
+  // Load sessions
+  try {
+    const q = query(collection(db, 'sesiones'), where('jugadorId', '==', uid));
+    const snap = await getDocs(q);
+    const sessions = [];
+    snap.forEach(d => sessions.push({ id: d.id, ...d.data() }));
+    sessions.sort((a,b) => new Date(b.fecha) - new Date(a.fecha));
+
+    const cont = document.getElementById('sessions-list');
+    if (!sessions.length) {
+      cont.innerHTML = '<div class="empty-state">Aún no hay sesiones registradas.</div>';
+      return;
+    }
+    cont.innerHTML = sessions.map(s => `
+      <div class="session-item">
+        <div>
+          <div class="session-item-name">${s.nombre || 'Sesión'}</div>
+          <div class="session-item-date">${formatDate(s.fecha)}</div>
+          <div class="session-item-criteria">${s.criterios?.length || 0} criterios cumplidos${s.entrenamiento ? ' · +Descuento entrenamiento' : ''}</div>
+        </div>
+        <div class="session-item-xp">+${s.xp} XP</div>
+      </div>
+    `).join('');
+  } catch(e) {}
+}
+
+function populateSpendSelect() {
+  const sel = document.getElementById('spend-char-select');
+  sel.innerHTML = '<option value="">— Elige un personaje —</option>';
+  currentChars.forEach(c => {
+    sel.innerHTML += `<option value="${c.id}">${c.nombre || 'Sin nombre'}</option>`;
+  });
+}
+
+window.loadCharForSpend = function() {
+  const id = document.getElementById('spend-char-select').value;
+  if (!id) { document.getElementById('spend-content').style.display = 'none'; return; }
+  selectedSpendChar = currentChars.find(c => c.id === id);
+  if (!selectedSpendChar) return;
+  document.getElementById('spend-content').style.display = 'block';
+  renderSpendContent();
+};
+
+function renderSpendContent() {
+  const c = selectedSpendChar;
+  const level = parseInt(c.nivel) || 1;
+  const limits = LEVEL_LIMITS[Math.min(level, 20)];
+  const xpAvail = (c.xpTotal || 0) - (c.xpGastada || 0);
+
+  document.getElementById('spend-xp-available').textContent = xpAvail;
+
+  document.getElementById('spend-limits').innerHTML = `
+    <div class="spend-limit-item"><span class="spend-limit-label">Rango</span><span class="spend-limit-value">${limits.rango}</span></div>
+    <div class="spend-limit-item"><span class="spend-limit-label">Nivel</span><span class="spend-limit-value">${level}</span></div>
+    <div class="spend-limit-item"><span class="spend-limit-label">Attr. Especializado máx.</span><span class="spend-limit-value">${limits.attrSpec}</span></div>
+    <div class="spend-limit-item"><span class="spend-limit-label">Resto de Atributos máx.</span><span class="spend-limit-value">${limits.attrRest}</span></div>
+    <div class="spend-limit-item"><span class="spend-limit-label">Habilidad Esp. máx.</span><span class="spend-limit-value">${limits.skillSpec}</span></div>
+    <div class="spend-limit-item"><span class="spend-limit-label">Resto de Habilidades máx.</span><span class="spend-limit-value">${limits.skillRest}</span></div>
+  `;
+
+  // Attrs
+  const attrsGrid = document.getElementById('spend-attrs');
+  attrsGrid.innerHTML = ATTRS_LIST.map(key => {
+    const cur = c.atributos?.[key] || 1;
+    const next = cur + 1;
+    const cost = ATTR_COSTS[next] || null;
+    const maxVal = limits.attrRest;
+    const canUp = cost && xpAvail >= cost && next <= maxVal;
+    return `
+      <div class="spend-item">
+        <div class="spend-item-name">${ATTRS_LABELS[key]}</div>
+        <div class="spend-item-current">
+          <div class="spend-dots">${[1,2,3,4,5,6].map(i=>`<div class="spend-dot ${i<=cur?'filled':i<=maxVal?'':'max'}"></div>`).join('')}</div>
+          <span style="font-family:'Cinzel',serif;font-size:0.9rem;color:var(--text);margin-left:0.5rem;">${cur}</span>
+        </div>
+        <button class="spend-btn" onclick="spendOnAttr('${key}')" ${!canUp?'disabled':''}>
+          Subir a ${next}
+        </button>
+        <span class="spend-btn-cost">${cost ? cost+' XP' : 'Máximo'}</span>
+      </div>
+    `;
+  }).join('');
+
+  // Skills
+  const skillsGrid = document.getElementById('spend-skills');
+  skillsGrid.innerHTML = SKILLS_LIST.map(name => {
+    const cur = c.habilidades?.[name] || 0;
+    const next = cur + 1;
+    const cost = SKILL_COSTS[next] || null;
+    const maxVal = limits.skillRest;
+    const canUp = cost && xpAvail >= cost && next <= maxVal;
+    return `
+      <div class="spend-item">
+        <div class="spend-item-name">${name}</div>
+        <div class="spend-item-current">
+          <div class="spend-dots">${[1,2,3,4,5,6].map(i=>`<div class="spend-dot ${i<=cur?'filled':i<=maxVal?'':'max'}"></div>`).join('')}</div>
+          <span style="font-family:'Cinzel',serif;font-size:0.9rem;color:var(--text);margin-left:0.5rem;">${cur}</span>
+        </div>
+        <button class="spend-btn" onclick="spendOnSkill('${name}')" ${!canUp?'disabled':''}>
+          Subir a ${next}
+        </button>
+        <span class="spend-btn-cost">${cost ? cost+' XP' : 'Máximo'}</span>
+      </div>
+    `;
+  }).join('');
+}
+
+window.spendOnAttr = async function(key) {
+  const c = selectedSpendChar;
+  const cur = c.atributos?.[key] || 1;
+  const next = cur + 1;
+  const cost = ATTR_COSTS[next];
+  const xpAvail = (c.xpTotal || 0) - (c.xpGastada || 0);
+  if (!cost || xpAvail < cost) return;
+
+  try {
+    const { doc, updateDoc } = await import("https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js");
+    const db = window._fbDb;
+    const newAttrs = { ...c.atributos, [key]: next };
+    const newGastada = (c.xpGastada || 0) + cost;
+    await updateDoc(doc(db, 'personajes', c.id), {
+      atributos: newAttrs,
+      xpGastada: newGastada
+    });
+    selectedSpendChar.atributos = newAttrs;
+    selectedSpendChar.xpGastada = newGastada;
+    const charIdx = currentChars.findIndex(ch => ch.id === c.id);
+    if (charIdx >= 0) { currentChars[charIdx].atributos = newAttrs; currentChars[charIdx].xpGastada = newGastada; }
+    showNotification(`${ATTRS_LABELS[key]} subido a ${next} (−${cost} XP)`, 'success');
+    renderSpendContent();
+    renderPlayerChars();
+  } catch(e) { showNotification('Error al guardar: ' + e.message, 'error'); }
+};
+
+window.spendOnSkill = async function(name) {
+  const c = selectedSpendChar;
+  const cur = c.habilidades?.[name] || 0;
+  const next = cur + 1;
+  const cost = SKILL_COSTS[next];
+  const xpAvail = (c.xpTotal || 0) - (c.xpGastada || 0);
+  if (!cost || xpAvail < cost) return;
+
+  try {
+    const { doc, updateDoc } = await import("https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js");
+    const db = window._fbDb;
+    const newSkills = { ...c.habilidades, [name]: next };
+    const newGastada = (c.xpGastada || 0) + cost;
+    await updateDoc(doc(db, 'personajes', c.id), {
+      habilidades: newSkills,
+      xpGastada: newGastada
+    });
+    selectedSpendChar.habilidades = newSkills;
+    selectedSpendChar.xpGastada = newGastada;
+    showNotification(`${name} subido a ${next} (−${cost} XP)`, 'success');
+    renderSpendContent();
+  } catch(e) { showNotification('Error: ' + e.message, 'error'); }
+};
+
+// ---- DJ DASHBOARD ----
+async function setupDJDashboard(user, userData) {
+  document.getElementById('dj-username').textContent = userData.username || 'Director';
+  await loadAllChars();
+  await loadDJSessionPlayers();
+}
+
+window.loadAllChars = async function() {
+  const { collection, getDocs } = await import("https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js");
+  const db = window._fbDb;
+  const snap = await getDocs(collection(db, 'personajes'));
+  djChars = [];
+  snap.forEach(d => djChars.push({ id: d.id, ...d.data() }));
+  renderDJChars();
+};
+
+function renderDJChars() {
+  const cont = document.getElementById('dj-chars-list');
+  if (!djChars.length) {
+    cont.innerHTML = '<div class="empty-state">No hay personajes registrados aún.</div>';
+    return;
+  }
+  cont.innerHTML = djChars.map(c => `
+    <div class="dj-char-card">
+      <div class="dj-char-header">
+        <div>
+          <div class="dj-char-name">${c.nombre || 'Sin nombre'}</div>
+          <div class="dj-char-player">Jugador: ${c.jugador || '—'}</div>
+        </div>
+        <div>
+          <div class="dj-char-level">Nivel ${c.nivel || 1}</div>
+          <div class="dj-char-rank">${getRango(c.nivel||1)}</div>
+        </div>
+      </div>
+      <div class="dj-char-attrs">
+        ${['fuerza','destreza','resistencia','percepcion','inteligencia','astucia'].map(k=>`
+          <div class="dj-attr">
+            <span class="dj-attr-name">${ATTRS_LABELS[k].substring(0,4)}</span>
+            <span class="dj-attr-val">${c.atributos?.[k]||1}</span>
+          </div>
+        `).join('')}
+      </div>
+      <div style="margin-bottom:0.75rem;">
+        <span style="font-family:'Rajdhani',sans-serif;font-size:0.72rem;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;color:var(--text-muted);">Cultura:</span>
+        <span style="font-size:0.88rem;color:var(--text);margin-left:0.5rem;">${c.cultura||'—'}</span>
+        <span style="font-family:'Rajdhani',sans-serif;font-size:0.72rem;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;color:var(--text-muted);margin-left:1rem;">Camino:</span>
+        <span style="font-size:0.88rem;color:var(--text);margin-left:0.5rem;">${c.camino||'—'}</span>
+      </div>
+      <div class="dj-char-footer">
+        <div class="dj-char-xp">
+          XP Total: <strong>${c.xpTotal||0}</strong> &nbsp;·&nbsp; Disponible: <strong style="color:#7ad49a">${(c.xpTotal||0)-(c.xpGastada||0)}</strong>
+        </div>
+        <button class="dj-levelup-btn" onclick="levelUpChar('${c.id}', ${c.nivel||1})">▲ Subir Nivel</button>
+      </div>
+    </div>
+  `).join('');
+}
+
+async function loadDJSessionPlayers() {
+  const { collection, getDocs } = await import("https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js");
+  const db = window._fbDb;
+  const snap = await getDocs(collection(db, 'personajes'));
+  sessionPlayers = [];
+  snap.forEach(d => sessionPlayers.push({ id: d.id, ...d.data() }));
+  renderSessionForm();
+}
+
+function renderSessionForm() {
+  const cont = document.getElementById('session-players-list');
+  if (!sessionPlayers.length) {
+    cont.innerHTML = '<div class="empty-state">No hay jugadores registrados.</div>';
+    return;
+  }
+  cont.innerHTML = sessionPlayers.map((p, idx) => `
+    <div class="session-player-block">
+      <div class="session-player-header">
+        <div>
+          <div class="session-player-name">${p.nombre || 'Sin nombre'}</div>
+          <div style="font-family:'Rajdhani',sans-serif;font-size:0.72rem;color:var(--text-muted);letter-spacing:0.1em;text-transform:uppercase;">Jugador: ${p.jugador||'—'} · Nivel ${p.nivel||1}</div>
+        </div>
+        <div class="session-xp-counter" id="xp-counter-${idx}">0 XP</div>
+      </div>
+      <div class="criteria-grid">
+        ${CRITERIA.map((crit, ci) => `
+          <div class="criteria-item" id="crit-${idx}-${ci}" onclick="toggleCriteria(${idx}, ${ci})">
+            <div class="criteria-check" id="check-${idx}-${ci}"></div>
+            <span class="criteria-text">${crit}</span>
+          </div>
+        `).join('')}
+      </div>
+      <div class="training-toggle" id="train-${idx}" onclick="toggleTraining(${idx})">
+        <div class="criteria-check" id="train-check-${idx}"></div>
+        <span class="training-toggle-text">🏋️ Aplicar descuento por entrenamiento (−20%)</span>
+      </div>
+    </div>
+  `).join('');
+
+  // Init state
+  sessionPlayers.forEach((_, idx) => {
+    sessionPlayers[idx]._criteria = new Array(CRITERIA.length).fill(false);
+    sessionPlayers[idx]._training = false;
+  });
+}
+
+window.toggleCriteria = function(playerIdx, critIdx) {
+  sessionPlayers[playerIdx]._criteria[critIdx] = !sessionPlayers[playerIdx]._criteria[critIdx];
+  const item = document.getElementById(`crit-${playerIdx}-${critIdx}`);
+  const check = document.getElementById(`check-${playerIdx}-${critIdx}`);
+  item.classList.toggle('checked');
+  check.textContent = item.classList.contains('checked') ? '✓' : '';
+  updateXPCounter(playerIdx);
+};
+
+window.toggleTraining = function(playerIdx) {
+  sessionPlayers[playerIdx]._training = !sessionPlayers[playerIdx]._training;
+  const toggle = document.getElementById(`train-${playerIdx}`);
+  const check = document.getElementById(`train-check-${playerIdx}`);
+  toggle.classList.toggle('active');
+  check.textContent = toggle.classList.contains('active') ? '✓' : '';
+  updateXPCounter(playerIdx);
+};
+
+function updateXPCounter(playerIdx) {
+  const p = sessionPlayers[playerIdx];
+  const baseXP = p._criteria.filter(Boolean).length;
+  const discount = p._training ? Math.floor(baseXP * TRAINING_DISCOUNT) : 0;
+  const total = Math.min(baseXP, 8);
+  document.getElementById(`xp-counter-${playerIdx}`).textContent = `${total} XP${p._training ? ' +entren.' : ''}`;
+}
+
+window.submitSession = async function() {
+  const sessionName = document.getElementById('session-name').value.trim();
+  if (!sessionName) { showNotification('Escribe el nombre de la sesión.', 'error'); return; }
+
+  const { doc, updateDoc, addDoc, collection } = await import("https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js");
+  const db = window._fbDb;
+
+  let count = 0;
+  for (const p of sessionPlayers) {
+    const xp = Math.min(p._criteria.filter(Boolean).length, 8);
+    if (xp === 0) continue;
+    try {
+      // Update character XP
+      await updateDoc(doc(db, 'personajes', p.id), {
+        xpTotal: (p.xpTotal || 0) + xp
+      });
+      // Log session for player
+      await addDoc(collection(db, 'sesiones'), {
+        jugadorId: p.jugadorId,
+        personajeId: p.id,
+        nombre: sessionName,
+        xp: xp,
+        criterios: p._criteria.map((v,i) => v ? CRITERIA[i] : null).filter(Boolean),
+        entrenamiento: p._training,
+        fecha: new Date().toISOString()
+      });
+      count++;
+    } catch(e) { console.error(e); }
+  }
+
+  showNotification(`XP otorgada a ${count} jugador(es). ¡Sesión registrada!`, 'success');
+  loadAllChars();
+  document.getElementById('session-name').value = '';
+  renderSessionForm();
+};
+
+window.levelUpChar = async function(charId, currentLevel) {
+  const newLevel = Math.min(currentLevel + 1, 20);
+  if (newLevel === currentLevel) { showNotification('Este personaje ya está en el nivel máximo.', 'error'); return; }
+
+  try {
+    const { doc, updateDoc } = await import("https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js");
+    const db = window._fbDb;
+    await updateDoc(doc(db, 'personajes', charId), { nivel: newLevel });
+    showNotification(`¡Personaje subido al Nivel ${newLevel} — ${getRango(newLevel)}!`, 'success');
+    loadAllChars();
+  } catch(e) { showNotification('Error: ' + e.message, 'error'); }
+};
+
+// ---- HELPERS ----
+function getRango(level) {
+  return (LEVEL_LIMITS[Math.min(parseInt(level)||1, 20)] || LEVEL_LIMITS[1]).rango;
+}
+
+function formatDate(iso) {
+  if (!iso) return '';
+  const d = new Date(iso);
+  return d.toLocaleDateString('es-CL', { day:'2-digit', month:'short', year:'numeric' });
+}
+
+window.showDashTab = function(tabId) {
+  document.querySelectorAll('#page-dashboard .dash-tab').forEach(t => t.classList.remove('active'));
+  document.querySelectorAll('#page-dashboard .dash-nav-item').forEach(t => t.classList.remove('active'));
+  document.getElementById(tabId).classList.add('active');
+  event.currentTarget.classList.add('active');
+};
+
+window.showDJTab = function(tabId) {
+  document.querySelectorAll('#page-dj .dash-tab').forEach(t => t.classList.remove('active'));
+  document.querySelectorAll('#page-dj .dash-nav-item').forEach(t => t.classList.remove('active'));
+  document.getElementById(tabId).classList.add('active');
+  event.currentTarget.classList.add('active');
+  if (tabId === 'dj-tab-session') loadDJSessionPlayers();
+};
+
 </script>
 
 </body>
