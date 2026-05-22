@@ -2226,8 +2226,15 @@
         </div>
       </div>
 
+      <div id="player-campaign-field">
+        <div class="form-group">
+          <label>Código de Campaña</label>
+          <input type="text" id="reg-campaign-code" placeholder="Pídelo a tu Director de Juego..." style="text-transform:uppercase;letter-spacing:0.2em;">
+        </div>
+      </div>
+
       <div class="nen-alert">
-        Al registrarte, el Director de Juego tendrá acceso a tus personajes creados.
+        Ingresa el código de campaña que te dio tu Director de Juego para que pueda ver tus personajes.
       </div>
 
       <button class="btn-primary register-submit" onclick="handleRegister()">
@@ -2686,6 +2693,8 @@ function selectRole(role) {
   document.getElementById('role-jugador').classList.toggle('selected', role==='jugador');
   document.getElementById('role-dj').classList.toggle('selected', role==='dj');
   document.getElementById('dj-code').style.display = role==='dj' ? 'block' : 'none';
+  const campField = document.getElementById('player-campaign-field');
+  if(campField) campField.style.display = role==='dj' ? 'none' : 'block';
 }
 
 function handleRegister() {
@@ -3054,6 +3063,11 @@ renderAttrSidebar();
           <span class="dash-role" style="color:var(--accent);">Director de Juego</span>
         </div>
       </div>
+      <div style="background:rgba(192,57,43,0.1);border:1px solid var(--accent-dark);padding:0.75rem 1rem;margin-top:-1rem;">
+        <span style="font-family:'Rajdhani',sans-serif;font-size:0.65rem;font-weight:700;letter-spacing:0.15em;text-transform:uppercase;color:var(--text-muted);display:block;margin-bottom:0.25rem;">Código de Campaña</span>
+        <span style="font-family:'Cinzel',serif;font-size:1.2rem;color:var(--accent-light);letter-spacing:0.2em;" id="dj-campaign-code">—</span>
+        <p style="font-size:0.72rem;color:var(--text-muted);margin-top:0.25rem;font-style:italic;">Comparte este código con tus jugadores</p>
+      </div>
       <nav class="dash-nav">
         <a class="dash-nav-item active" onclick="showDJTab('dj-tab-players')">
           <span>👥</span> Jugadores
@@ -3171,16 +3185,29 @@ renderAttrSidebar();
       const userCredential = await createUserWithEmailAndPassword(auth, email, password);
       const user = userCredential.user;
 
+      // Generar código de campaña para DJ o guardar código ingresado para jugador
+      let campaignCode = '';
+      if (rol === 'dj') {
+        campaignCode = Math.random().toString(36).substring(2,8).toUpperCase();
+      } else {
+        campaignCode = (document.getElementById('reg-campaign-code')?.value || '').toUpperCase().trim();
+      }
+
       // Guardar datos en Firestore
       await setDoc(doc(db, 'usuarios', user.uid), {
         username: username,
         email: email,
         rol: rol,
+        campaignCode: campaignCode,
         createdAt: new Date().toISOString()
       });
 
-      showNotification('¡Registro exitoso! Bienvenido, ' + username, 'success');
-      setTimeout(() => window.showDashboard(userCredential.user), 1500);
+      if (rol === 'dj') {
+        showNotification('¡Registro exitoso! Tu código de campaña es: ' + campaignCode, 'success');
+      } else {
+        showNotification('¡Registro exitoso! Bienvenido, ' + username, 'success');
+      }
+      setTimeout(() => window.showDashboard(userCredential.user), 2500);
 
     } catch (error) {
       let msg = 'Error al registrar.';
@@ -3231,8 +3258,17 @@ renderAttrSidebar();
       return;
     }
 
+    // Get user campaignCode from Firestore
+    let campaignCode = '';
+    try {
+      const { doc: docRef, getDoc: getDocFn } = await import("https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js");
+      const userSnap = await getDocFn(docRef(db, 'usuarios', user.uid));
+      if (userSnap.exists()) campaignCode = userSnap.data().campaignCode || '';
+    } catch(e) {}
+
     const charData = {
       jugadorId: user.uid,
+      campaignCode: campaignCode,
       nombre: state.name || 'Sin nombre',
       jugador: state.player || '',
       edad: state.age || '',
@@ -3244,6 +3280,8 @@ renderAttrSidebar();
       objetivoActual: state.objCurrent || '',
       objetivoVida: state.objLife || '',
       equipo: state.equip || '',
+      xpTotal: 0,
+      xpGastada: 0,
       createdAt: new Date().toISOString()
     };
 
@@ -3595,14 +3633,23 @@ window.spendOnSkill = async function(name) {
 // ---- DJ DASHBOARD ----
 async function setupDJDashboard(user, userData) {
   document.getElementById('dj-username').textContent = userData.username || 'Director';
+  const codeEl = document.getElementById('dj-campaign-code');
+  if(codeEl) codeEl.textContent = userData.campaignCode || '—';
   await loadAllChars();
   await loadDJSessionPlayers();
 }
 
 window.loadAllChars = async function() {
-  const { collection, getDocs } = await import("https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js");
+  const { collection, getDocs, query, where } = await import("https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js");
   const db = window._fbDb;
-  const snap = await getDocs(collection(db, 'personajes'));
+  const djCode = currentUserData?.campaignCode || '';
+  let q;
+  if (djCode) {
+    q = query(collection(db, 'personajes'), where('campaignCode', '==', djCode));
+  } else {
+    q = collection(db, 'personajes');
+  }
+  const snap = await getDocs(q);
   djChars = [];
   snap.forEach(d => djChars.push({ id: d.id, ...d.data() }));
   renderDJChars();
@@ -3728,20 +3775,20 @@ window.submitSession = async function() {
 
   const { doc, updateDoc, addDoc, collection } = await import("https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js");
   const db = window._fbDb;
+  const djCode = currentUserData?.campaignCode || '';
 
   let count = 0;
   for (const p of sessionPlayers) {
     const xp = Math.min(p._criteria.filter(Boolean).length, 8);
     if (xp === 0) continue;
     try {
-      // Update character XP
       await updateDoc(doc(db, 'personajes', p.id), {
         xpTotal: (p.xpTotal || 0) + xp
       });
-      // Log session for player
       await addDoc(collection(db, 'sesiones'), {
         jugadorId: p.jugadorId,
         personajeId: p.id,
+        campaignCode: djCode,
         nombre: sessionName,
         xp: xp,
         criterios: p._criteria.map((v,i) => v ? CRITERIA[i] : null).filter(Boolean),
