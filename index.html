@@ -3063,10 +3063,26 @@ renderAttrSidebar();
           <span class="dash-role" style="color:var(--accent);">Director de Juego</span>
         </div>
       </div>
-      <div style="background:rgba(192,57,43,0.1);border:1px solid var(--accent-dark);padding:0.75rem 1rem;margin-top:-1rem;">
-        <span style="font-family:'Rajdhani',sans-serif;font-size:0.65rem;font-weight:700;letter-spacing:0.15em;text-transform:uppercase;color:var(--text-muted);display:block;margin-bottom:0.25rem;">Código de Campaña</span>
-        <span style="font-family:'Cinzel',serif;font-size:1.2rem;color:var(--accent-light);letter-spacing:0.2em;" id="dj-campaign-code">—</span>
-        <p style="font-size:0.72rem;color:var(--text-muted);margin-top:0.25rem;font-style:italic;">Comparte este código con tus jugadores</p>
+      <!-- CAMPAIGN BLOCK -->
+      <div id="dj-campaign-block" style="background:rgba(192,57,43,0.08);border:1px solid var(--accent-dark);padding:1rem;margin-top:-1rem;">
+        <span style="font-family:'Rajdhani',sans-serif;font-size:0.65rem;font-weight:700;letter-spacing:0.15em;text-transform:uppercase;color:var(--text-muted);display:block;margin-bottom:0.5rem;">Código de Campaña</span>
+
+        <!-- Sin código -->
+        <div id="dj-no-code">
+          <p style="font-size:0.8rem;color:var(--text-muted);font-style:italic;margin-bottom:0.75rem;">Aún no tienes campaña activa.</p>
+          <button onclick="createCampaignCode()" style="width:100%;background:var(--accent);border:none;color:#fff;padding:0.6rem;font-family:'Rajdhani',sans-serif;font-size:0.78rem;font-weight:700;letter-spacing:0.15em;text-transform:uppercase;cursor:pointer;">
+            + Crear Campaña
+          </button>
+        </div>
+
+        <!-- Con código -->
+        <div id="dj-has-code" style="display:none;">
+          <span style="font-family:'Cinzel',serif;font-size:1.4rem;color:var(--accent-light);letter-spacing:0.25em;display:block;margin-bottom:0.4rem;" id="dj-campaign-code">—</span>
+          <p style="font-size:0.72rem;color:var(--text-muted);font-style:italic;margin-bottom:0.75rem;">Comparte este código con tus jugadores</p>
+          <button onclick="copyCampaignCode()" style="width:100%;background:transparent;border:1px solid var(--dark5);color:var(--text-muted);padding:0.5rem;font-family:'Rajdhani',sans-serif;font-size:0.72rem;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;cursor:pointer;transition:all 0.2s;" onmouseover="this.style.borderColor='var(--accent-dark)'" onmouseout="this.style.borderColor='var(--dark5)'">
+            📋 Copiar Código
+          </button>
+        </div>
       </div>
       <nav class="dash-nav">
         <a class="dash-nav-item active" onclick="showDJTab('dj-tab-players')">
@@ -3633,11 +3649,51 @@ window.spendOnSkill = async function(name) {
 // ---- DJ DASHBOARD ----
 async function setupDJDashboard(user, userData) {
   document.getElementById('dj-username').textContent = userData.username || 'Director';
-  const codeEl = document.getElementById('dj-campaign-code');
-  if(codeEl) codeEl.textContent = userData.campaignCode || '—';
+  updateCampaignCodeUI(userData.campaignCode || '');
   await loadAllChars();
   await loadDJSessionPlayers();
 }
+
+function updateCampaignCodeUI(code) {
+  const noCode = document.getElementById('dj-no-code');
+  const hasCode = document.getElementById('dj-has-code');
+  const codeEl = document.getElementById('dj-campaign-code');
+  if (code) {
+    if(noCode) noCode.style.display = 'none';
+    if(hasCode) hasCode.style.display = 'block';
+    if(codeEl) codeEl.textContent = code;
+    if(currentUserData) currentUserData.campaignCode = code;
+  } else {
+    if(noCode) noCode.style.display = 'block';
+    if(hasCode) hasCode.style.display = 'none';
+  }
+}
+
+window.createCampaignCode = async function() {
+  const newCode = Math.random().toString(36).substring(2,8).toUpperCase();
+  try {
+    const { doc, updateDoc } = await import("https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js");
+    const db = window._fbDb;
+    const user = window._fbAuth.currentUser;
+    await updateDoc(doc(db, 'usuarios', user.uid), { campaignCode: newCode });
+    if(currentUserData) currentUserData.campaignCode = newCode;
+    updateCampaignCodeUI(newCode);
+    showNotification('¡Campaña creada! Código: ' + newCode, 'success');
+    await loadAllChars();
+  } catch(e) {
+    showNotification('Error al crear campaña: ' + e.message, 'error');
+  }
+};
+
+window.copyCampaignCode = function() {
+  const code = currentUserData?.campaignCode || '';
+  if (!code) return;
+  navigator.clipboard.writeText(code).then(() => {
+    showNotification('Código ' + code + ' copiado al portapapeles.', 'info');
+  }).catch(() => {
+    showNotification('Código: ' + code + ' (cópialo manualmente)', 'info');
+  });
+};
 
 window.loadAllChars = async function() {
   const { collection, getDocs, query, where } = await import("https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js");
