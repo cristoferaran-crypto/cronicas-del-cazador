@@ -1,0 +1,383 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Selección de Rol | Crónicas del Cazador</title>
+    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700;800&family=Raleway:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/remixicon@3.5.0/fonts/remixicon.css" rel="stylesheet">
+    <style>
+        :root {
+            --rojo:      #c0392b;
+            --rojo-vivo: #e74c3c;
+            --rojo-glow: rgba(192,57,43,0.4);
+            --negro:     #07070a;
+            --borde:     rgba(255,255,255,0.07);
+            --borde-r:   rgba(192,57,43,0.4);
+            --texto:     #e2ddd6;
+            --muted:     #6e6878;
+            --sec:       #a8a2b0;
+            --dorado:    #b8954a;
+        }
+
+        *, *::before, *::after { margin:0; padding:0; box-sizing:border-box; }
+        html, body { height: 100%; overflow: hidden; }
+
+        body {
+            font-family: 'Raleway', sans-serif;
+            background: var(--negro);
+            color: var(--texto);
+        }
+
+        /* ── LOGO CENTRAL ── */
+        .top-bar {
+            position: fixed; top: 0; left: 0; right: 0;
+            z-index: 100;
+            display: flex; align-items: center; justify-content: center;
+            height: 64px;
+            pointer-events: none;
+        }
+
+        .top-logo {
+            pointer-events: all;
+            text-decoration: none;
+        }
+
+        .top-logo img {
+            height: 38px; width: auto;
+            filter: invert(1) brightness(0.85);
+            mix-blend-mode: screen;
+            transition: filter 0.2s;
+        }
+
+        .top-logo:hover img {
+            filter: invert(1) brightness(1) drop-shadow(0 0 8px rgba(192,57,43,0.5));
+        }
+
+        /* ── LOGOUT ── */
+        .btn-logout {
+            position: fixed; top: 16px; right: 24px;
+            z-index: 100;
+            display: flex; align-items: center; gap: 6px;
+            padding: 0 14px; height: 32px;
+            background: transparent;
+            border: 1px solid rgba(192,57,43,0.3);
+            color: rgba(226,221,214,0.45);
+            font-family: 'Raleway', sans-serif;
+            font-size: 10px; font-weight: 600;
+            letter-spacing: 0.12em; text-transform: uppercase;
+            cursor: pointer;
+            transition: border-color 0.2s, color 0.2s, background 0.2s;
+        }
+
+        .btn-logout:hover {
+            border-color: var(--rojo);
+            color: white;
+            background: rgba(192,57,43,0.1);
+        }
+
+        /* ── SEPARADOR ── */
+        .sep-line {
+            position: fixed;
+            top: 0; bottom: 0;
+            left: 50%; transform: translateX(-50%);
+            width: 1px;
+            background: linear-gradient(to bottom,
+                transparent 0%,
+                rgba(192,57,43,0.5) 30%,
+                rgba(192,57,43,0.5) 70%,
+                transparent 100%);
+            z-index: 50;
+            pointer-events: none;
+        }
+
+        /* ── LAYOUT DOS PANELES ── */
+        .panels {
+            display: flex;
+            width: 100%; height: 100%;
+        }
+
+        /* ── PANEL BASE ── */
+        .panel {
+            position: relative;
+            flex: 1;
+            display: flex; flex-direction: column;
+            align-items: center; justify-content: flex-end;
+            padding-bottom: 80px;
+            overflow: hidden;
+            cursor: pointer;
+            text-decoration: none;
+        }
+
+        /* Imagen de fondo — cada panel muestra su mitad */
+        .panel-bg {
+            position: absolute; inset: 0;
+            background-image: url('../imagenes/por_dash.png');
+            background-size: 200% 100%;
+            transition: transform 0.7s cubic-bezier(0.25,0.46,0.45,0.94),
+                        filter 0.5s ease;
+            filter: brightness(0.55) saturate(0.8);
+        }
+
+        .panel-jugador .panel-bg {
+            background-position: left center;
+        }
+
+        .panel-director .panel-bg {
+            background-position: right center;
+        }
+
+        /* Overlay degradado */
+        .panel-overlay {
+            position: absolute; inset: 0;
+            transition: opacity 0.5s;
+        }
+
+        .panel-jugador .panel-overlay {
+            background: linear-gradient(to right,
+                rgba(7,7,10,0.15) 0%,
+                rgba(7,7,10,0.5) 100%);
+        }
+
+        .panel-director .panel-overlay {
+            background: linear-gradient(to left,
+                rgba(7,7,10,0.1) 0%,
+                rgba(7,7,10,0.5) 100%);
+        }
+
+        /* Overlay inferior */
+        .panel::after {
+            content: '';
+            position: absolute; bottom: 0; left: 0; right: 0;
+            height: 55%;
+            background: linear-gradient(to top, rgba(7,7,10,0.85) 0%, transparent 100%);
+            pointer-events: none;
+        }
+
+        /* Hover */
+        .panel:hover .panel-bg {
+            transform: scale(1.04);
+            filter: brightness(0.75) saturate(1.1);
+        }
+
+        .panel:hover .panel-overlay { opacity: 0.5; }
+
+        /* ── CONTENIDO DEL PANEL ── */
+        .panel-content {
+            position: relative; z-index: 10;
+            display: flex; flex-direction: column;
+            align-items: center; gap: 16px;
+            text-align: center;
+            transform: translateY(8px);
+            transition: transform 0.4s ease;
+        }
+
+        .panel:hover .panel-content { transform: translateY(0); }
+
+        .panel-eyebrow {
+            font-size: 9px; font-weight: 600;
+            letter-spacing: 0.35em; text-transform: uppercase;
+            color: var(--rojo);
+            opacity: 0; transform: translateY(6px);
+            transition: opacity 0.35s 0.05s, transform 0.35s 0.05s;
+        }
+
+        .panel:hover .panel-eyebrow {
+            opacity: 1; transform: translateY(0);
+        }
+
+        .panel-icono {
+            font-size: 2.8rem;
+            color: rgba(226,221,214,0.6);
+            transition: color 0.3s, transform 0.3s;
+            line-height: 1;
+        }
+
+        .panel:hover .panel-icono {
+            color: white;
+            transform: scale(1.1);
+        }
+
+        .panel-titulo {
+            font-family: 'Cinzel', serif;
+            font-size: clamp(28px, 4vw, 52px);
+            font-weight: 800;
+            color: white;
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
+            line-height: 1;
+            text-shadow: 0 2px 20px rgba(0,0,0,0.8);
+        }
+
+        .panel-subtitulo {
+            font-size: 12px; font-weight: 500;
+            letter-spacing: 0.1em;
+            color: var(--sec);
+            max-width: 260px; line-height: 1.6;
+            opacity: 0; transform: translateY(6px);
+            transition: opacity 0.35s 0.1s, transform 0.35s 0.1s;
+        }
+
+        .panel:hover .panel-subtitulo {
+            opacity: 1; transform: translateY(0);
+        }
+
+        .panel-btn {
+            display: flex; align-items: center; gap: 8px;
+            padding: 0 28px; height: 46px;
+            background: var(--rojo);
+            border: none; color: white;
+            font-family: 'Cinzel', serif;
+            font-size: 12px; font-weight: 700;
+            letter-spacing: 0.15em; text-transform: uppercase;
+            opacity: 0; transform: translateY(10px);
+            transition: opacity 0.35s 0.15s, transform 0.35s 0.15s,
+                        background 0.2s;
+            box-shadow: 0 8px 24px rgba(192,57,43,0.4);
+            margin-top: 4px;
+        }
+
+        .panel:hover .panel-btn {
+            opacity: 1; transform: translateY(0);
+        }
+
+        .panel-btn:hover { background: var(--rojo-vivo); }
+
+        /* Línea decorativa bajo el título */
+        .panel-line {
+            width: 0; height: 1px;
+            background: linear-gradient(to right, transparent, var(--rojo), transparent);
+            transition: width 0.5s ease;
+        }
+
+        .panel:hover .panel-line { width: 80px; }
+
+        /* ── TEXTO CENTRAL FLOTANTE ── */
+        .center-text {
+            position: fixed;
+            top: 50%; left: 50%;
+            transform: translate(-50%, -50%);
+            z-index: 60;
+            text-align: center;
+            pointer-events: none;
+            transition: opacity 0.4s;
+        }
+
+        .center-text span {
+            font-size: 9px; font-weight: 600;
+            letter-spacing: 0.4em; text-transform: uppercase;
+            color: rgba(226,221,214,0.2);
+            white-space: nowrap;
+        }
+
+        .panels:has(.panel:hover) .center-text { opacity: 0; }
+
+        /* ── NOMBRE USUARIO ── */
+        .user-name {
+            position: fixed; top: 20px; left: 24px;
+            z-index: 100;
+            font-size: 11px; font-weight: 500;
+            letter-spacing: 0.08em;
+            color: rgba(226,221,214,0.35);
+        }
+
+        .user-name span { color: var(--dorado); }
+
+        /* Animación entrada */
+        .panel-content {
+            animation: panelIn 0.8s ease both;
+        }
+
+        .panel-jugador .panel-content  { animation-delay: 0.3s; }
+        .panel-director .panel-content { animation-delay: 0.5s; }
+
+        @keyframes panelIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to   { opacity: 1; transform: translateY(8px); }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Logo central -->
+    <div class="top-bar">
+        <a href="../index.html" class="top-logo">
+            <img src="../imagenes/logo.png" alt="Crónicas del Cazador">
+        </a>
+    </div>
+
+    <!-- Nombre usuario -->
+    <div class="user-name">Cazador <span id="nombre-usuario">—</span></div>
+
+    <!-- Logout -->
+    <button id="btn-logout" class="btn-logout">
+        <i class="ri-logout-box-r-line"></i> Cerrar Sesión
+    </button>
+
+    <!-- Separador central -->
+    <div class="sep-line"></div>
+
+    <!-- Texto central -->
+    <div class="center-text">
+        <span>Elige tu rol</span>
+    </div>
+
+    <!-- Paneles -->
+    <div class="panels">
+
+        <!-- JUGADOR -->
+        <a href="panel-del-jugador/panel-del-jugador.html" class="panel panel-jugador">
+            <div class="panel-bg"></div>
+            <div class="panel-overlay"></div>
+            <div class="panel-content">
+                <p class="panel-eyebrow">Rol</p>
+                <i class="ri-sword-line panel-icono"></i>
+                <h2 class="panel-titulo">Jugador</h2>
+                <div class="panel-line"></div>
+                <p class="panel-subtitulo">Crea tu cazador, elige tu camino y escribe tu historia en el mundo.</p>
+                <div class="panel-btn">
+                    <i class="ri-arrow-right-line"></i> Entrar
+                </div>
+            </div>
+        </a>
+
+        <!-- DIRECTOR -->
+        <a href="panel-del-director/panel-del-director.html" class="panel panel-director">
+            <div class="panel-bg"></div>
+            <div class="panel-overlay"></div>
+            <div class="panel-content">
+                <p class="panel-eyebrow">Rol</p>
+                <i class="ri-eye-line panel-icono"></i>
+                <h2 class="panel-titulo">Director</h2>
+                <div class="panel-line"></div>
+                <p class="panel-subtitulo">Controla la narrativa, gestiona la campaña y guía a los cazadores.</p>
+                <div class="panel-btn">
+                    <i class="ri-arrow-right-line"></i> Entrar
+                </div>
+            </div>
+        </a>
+
+    </div>
+
+    <script type="module">
+        import { app } from "../js/firebase-config.js";
+        import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-auth.js";
+
+        const auth = getAuth(app);
+
+        onAuthStateChanged(auth, (user) => {
+            if (!user) {
+                window.location.href = "login.html";
+            } else {
+                const nombre = user.displayName || user.email.split('@')[0];
+                document.getElementById('nombre-usuario').textContent = nombre;
+            }
+        });
+
+        document.getElementById('btn-logout').addEventListener('click', () => {
+            signOut(auth).then(() => { window.location.href = "login.html"; });
+        });
+    </script>
+
+</body>
+</html>

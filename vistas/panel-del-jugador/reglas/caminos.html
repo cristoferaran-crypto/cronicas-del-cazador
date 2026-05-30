@@ -1,0 +1,1175 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Caminos | Crónicas del Cazador</title>
+    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;800&family=Raleway:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/remixicon@3.5.0/fonts/remixicon.css" rel="stylesheet">
+    <style>
+        :root {
+            --rojo: #c0392b;
+            --rojo-hover: #e74c3c;
+            --rojo-glow: rgba(192, 57, 43, 0.3);
+            --negro: #0a0a0c;
+            --superficie: #111117;
+            --superficie-2: #16161e;
+            --superficie-3: #1e1e28;
+            --borde: rgba(255,255,255,0.07);
+            --borde-rojo: rgba(192, 57, 43, 0.4);
+            --texto: #e8e2d9;
+            --texto-muted: #8a8490;
+            --texto-secundario: #b0aab8;
+            --dorado: #c9a84c;
+            --verde: #2ecc71;
+            --azul: #3498db;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: 'Raleway', sans-serif;
+            background-color: var(--negro);
+            color: var(--texto);
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+
+        body::before {
+            content: '';
+            position: fixed;
+            inset: 0;
+            background:
+                radial-gradient(ellipse 50% 40% at 10% 0%, rgba(192,57,43,0.07) 0%, transparent 70%),
+                radial-gradient(ellipse 40% 50% at 90% 100%, rgba(192,57,43,0.04) 0%, transparent 70%);
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        /* ── NAVBAR ── */
+        .navbar {
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 0 32px;
+            height: 60px;
+            background: rgba(10, 10, 12, 0.92);
+            border-bottom: 1px solid var(--borde);
+            backdrop-filter: blur(12px);
+        }
+
+        .logo {
+            display: flex; align-items: center; gap: 10px;
+            text-decoration: none; margin-right: 16px; flex-shrink: 0;
+        }
+
+        .logo-mark {
+            width: 34px; height: 34px;
+            border: 1.5px solid var(--rojo);
+            display: flex; align-items: center; justify-content: center;
+            position: relative;
+        }
+
+        .logo-mark::before {
+            content: ''; position: absolute; inset: 3px;
+            border: 1px solid rgba(192,57,43,0.3);
+        }
+
+        .logo-text-main {
+            font-family: 'Cinzel', serif;
+            font-size: 13px; font-weight: 800;
+            letter-spacing: 0.12em; color: var(--texto); line-height: 1.1;
+        }
+
+        .logo-text-sub {
+            font-family: 'Cinzel', serif;
+            font-size: 9px; font-weight: 400;
+            letter-spacing: 0.2em; color: var(--rojo);
+        }
+
+        .nav-items {
+            display: flex; align-items: center; gap: 2px; flex: 1;
+        }
+
+        .nav-btn {
+            position: relative;
+            display: flex; align-items: center; gap: 6px;
+            padding: 0 14px; height: 60px;
+            background: transparent; border: none;
+            color: var(--texto-secundario);
+            font-family: 'Raleway', sans-serif;
+            font-size: 12px; font-weight: 600;
+            letter-spacing: 0.1em; text-transform: uppercase;
+            cursor: pointer; transition: color 0.2s;
+            white-space: nowrap; text-decoration: none;
+        }
+
+        .nav-btn:hover { color: var(--texto); }
+        .nav-btn i { font-size: 14px; }
+
+        .nav-dropdown {
+            position: relative; display: flex;
+            align-items: center; height: 60px;
+        }
+
+        .nav-dropdown-trigger {
+            display: flex; align-items: center; gap: 6px;
+            padding: 0 14px; height: 60px;
+            background: transparent; border: none;
+            color: var(--texto-secundario);
+            font-family: 'Raleway', sans-serif;
+            font-size: 12px; font-weight: 600;
+            letter-spacing: 0.1em; text-transform: uppercase;
+            cursor: pointer; transition: color 0.2s;
+            white-space: nowrap; user-select: none;
+        }
+
+        .nav-dropdown-trigger i { font-size: 14px; }
+        .nav-dropdown-trigger .chevron { font-size: 13px; transition: transform 0.22s; margin-left: 2px; }
+        .nav-dropdown:hover .nav-dropdown-trigger { color: var(--texto); }
+        .nav-dropdown:hover .chevron { transform: rotate(180deg); }
+
+        .dropdown-menu {
+            display: none;
+            position: absolute; top: 100%; left: 0;
+            min-width: 210px;
+            background: var(--superficie-2);
+            border: 1px solid rgba(255,255,255,0.09);
+            border-top: 2px solid var(--rojo);
+            padding: 6px 0; z-index: 999;
+            box-shadow: 0 12px 32px rgba(0,0,0,0.5);
+        }
+
+        .nav-dropdown:hover .dropdown-menu { display: block; }
+
+        .dropdown-item {
+            display: flex; align-items: center; gap: 10px;
+            padding: 10px 16px;
+            color: var(--texto-secundario);
+            font-size: 12px; font-weight: 500;
+            letter-spacing: 0.05em; text-transform: uppercase;
+            cursor: pointer; transition: background 0.15s, color 0.15s;
+            border: none; background: transparent;
+            width: 100%; text-align: left;
+            font-family: 'Raleway', sans-serif;
+        }
+
+        .dropdown-item:hover { background: rgba(192,57,43,0.1); color: var(--texto); }
+        .dropdown-item i { font-size: 15px; color: var(--rojo); flex-shrink: 0; }
+        .dropdown-sep { height: 1px; background: var(--borde); margin: 4px 0; }
+
+        .nav-right { display: flex; align-items: center; gap: 12px; margin-left: auto; }
+
+        .nav-user {
+            font-size: 12px; font-weight: 500;
+            color: var(--texto-muted); letter-spacing: 0.05em;
+        }
+
+        .nav-user span { color: var(--dorado); font-weight: 600; }
+
+        .btn-logout {
+            display: flex; align-items: center; gap: 6px;
+            padding: 0 14px; height: 32px;
+            background: transparent;
+            border: 1px solid rgba(192,57,43,0.4);
+            color: var(--rojo);
+            font-family: 'Raleway', sans-serif;
+            font-size: 11px; font-weight: 600;
+            letter-spacing: 0.1em; text-transform: uppercase;
+            cursor: pointer; transition: background 0.2s, color 0.2s;
+        }
+
+        .btn-logout:hover { background: var(--rojo); color: white; }
+
+        /* ── LAYOUT ── */
+        .layout {
+            position: relative; z-index: 1;
+            display: grid;
+            grid-template-columns: 280px 1fr;
+            min-height: calc(100vh - 60px);
+        }
+
+        /* ── SIDEBAR ── */
+        .sidebar {
+            border-right: 1px solid var(--borde);
+            background: var(--superficie);
+            padding: 32px 0;
+            position: sticky;
+            top: 60px;
+            height: calc(100vh - 60px);
+            overflow-y: auto;
+        }
+
+        .sidebar::-webkit-scrollbar { width: 4px; }
+        .sidebar::-webkit-scrollbar-track { background: transparent; }
+        .sidebar::-webkit-scrollbar-thumb { background: var(--borde-rojo); }
+
+        .sidebar-header {
+            padding: 0 24px 24px;
+            border-bottom: 1px solid var(--borde);
+            margin-bottom: 12px;
+        }
+
+        .sidebar-eyebrow {
+            font-size: 10px; font-weight: 600;
+            letter-spacing: 0.25em; text-transform: uppercase;
+            color: var(--rojo); margin-bottom: 6px;
+        }
+
+        .sidebar-titulo {
+            font-family: 'Cinzel', serif;
+            font-size: 18px; font-weight: 800;
+            color: var(--texto); letter-spacing: 0.05em;
+        }
+
+        .sidebar-desc {
+            font-size: 12px; color: var(--texto-muted);
+            line-height: 1.6; margin-top: 8px;
+        }
+
+        /* Categoría en sidebar */
+        .sidebar-categoria {
+            padding: 14px 24px 6px;
+            font-size: 9px; font-weight: 700;
+            letter-spacing: 0.2em; text-transform: uppercase;
+            color: var(--texto-muted);
+            display: flex; align-items: center; gap: 8px;
+        }
+
+        .sidebar-categoria::after {
+            content: ''; flex: 1; height: 1px;
+            background: var(--borde);
+        }
+
+        /* Item especial: Introducción */
+        .camino-item-intro {
+            display: flex; align-items: center; gap: 14px;
+            padding: 12px 24px;
+            cursor: pointer;
+            border-left: 2px solid transparent;
+            transition: background 0.15s, border-color 0.15s;
+            margin-bottom: 4px;
+        }
+
+        .camino-item-intro:hover { background: rgba(255,255,255,0.03); }
+        .camino-item-intro.activo { border-left-color: var(--dorado); background: rgba(201,168,76,0.05); }
+        .camino-item-intro.activo .ci-icono { color: var(--dorado); }
+        .camino-item-intro.activo .ci-nombre { color: var(--texto); }
+
+        /* Items normales */
+        .camino-item {
+            display: flex; align-items: center; gap: 14px;
+            padding: 12px 24px;
+            cursor: pointer;
+            border-left: 2px solid transparent;
+            transition: background 0.15s, border-color 0.15s;
+        }
+
+        .camino-item:hover { background: rgba(255,255,255,0.03); }
+        .camino-item.activo { border-left-color: var(--rojo); background: rgba(192,57,43,0.06); }
+        .camino-item.activo .ci-nombre { color: var(--texto); }
+        .camino-item.activo .ci-icono { color: var(--rojo); }
+
+        .ci-icono {
+            font-size: 18px; color: var(--texto-muted);
+            transition: color 0.15s; flex-shrink: 0;
+            width: 22px; text-align: center;
+        }
+
+        .ci-info { flex: 1; min-width: 0; }
+
+        .ci-nombre {
+            font-family: 'Cinzel', serif;
+            font-size: 12px; font-weight: 600;
+            color: var(--texto-secundario);
+            transition: color 0.15s;
+            white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+        }
+
+        .ci-sub {
+            font-size: 10px; color: var(--texto-muted);
+            margin-top: 2px;
+            white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+        }
+
+        .ci-flecha {
+            font-size: 14px; color: var(--texto-muted);
+            opacity: 0; transition: opacity 0.15s;
+        }
+
+        .camino-item.activo .ci-flecha,
+        .camino-item-intro.activo .ci-flecha { opacity: 1; color: var(--rojo); }
+
+        /* ── PANEL ── */
+        .panel {
+            padding: 48px 56px;
+            overflow-y: auto;
+        }
+
+        /* ── INTRO PANEL ── */
+        .intro-panel { display: none; }
+        .intro-panel.visible { display: block; }
+
+        .intro-eyebrow {
+            font-size: 10px; font-weight: 600;
+            letter-spacing: 0.25em; text-transform: uppercase;
+            color: var(--dorado); margin-bottom: 12px;
+        }
+
+        .intro-titulo {
+            font-family: 'Cinzel', serif;
+            font-size: clamp(26px, 4vw, 40px);
+            font-weight: 800; color: var(--texto);
+            line-height: 1.1; margin-bottom: 28px;
+        }
+
+        .intro-texto {
+            font-size: 15px; color: var(--texto-secundario);
+            line-height: 1.9; margin-bottom: 18px;
+            text-align: justify;
+        }
+
+        .quote-bloque {
+            border-left: 2px solid var(--dorado);
+            padding: 14px 20px; margin: 28px 0;
+            background: rgba(201,168,76,0.04);
+            font-size: 14px; font-style: italic;
+            color: var(--dorado); line-height: 1.7;
+        }
+
+        /* Etapas */
+        .etapas-titulo {
+            font-family: 'Cinzel', serif; font-size: 13px; font-weight: 600;
+            color: var(--texto-muted); letter-spacing: 0.15em; text-transform: uppercase;
+            margin: 36px 0 18px;
+            display: flex; align-items: center; gap: 10px;
+        }
+
+        .etapas-titulo::after { content: ''; flex: 1; height: 1px; background: var(--borde); }
+
+        .etapas-grid {
+            display: flex; flex-direction: column; gap: 10px;
+            margin-bottom: 36px;
+        }
+
+        .etapa-card {
+            display: flex; gap: 18px; align-items: flex-start;
+            background: var(--superficie-2);
+            border: 1px solid var(--borde);
+            padding: 18px 20px;
+            transition: border-color 0.2s;
+        }
+
+        .etapa-card:hover { border-color: var(--borde-rojo); }
+
+        .etapa-num {
+            width: 36px; height: 36px; flex-shrink: 0;
+            background: rgba(192,57,43,0.1);
+            border: 1px solid var(--borde-rojo);
+            display: flex; align-items: center; justify-content: center;
+            font-family: 'Cinzel', serif;
+            font-size: 13px; font-weight: 800; color: var(--rojo);
+        }
+
+        .etapa-info { flex: 1; }
+
+        .etapa-nombre {
+            font-family: 'Cinzel', serif;
+            font-size: 14px; font-weight: 600; color: var(--texto);
+            margin-bottom: 4px;
+        }
+
+        .etapa-nivel {
+            font-size: 10px; font-weight: 600;
+            letter-spacing: 0.15em; text-transform: uppercase;
+            color: var(--rojo); margin-bottom: 8px;
+        }
+
+        .etapa-desc {
+            font-size: 13px; color: var(--texto-secundario); line-height: 1.7;
+        }
+
+        /* Categorías resumen */
+        .cats-titulo {
+            font-family: 'Cinzel', serif; font-size: 13px; font-weight: 600;
+            color: var(--texto-muted); letter-spacing: 0.15em; text-transform: uppercase;
+            margin: 36px 0 18px;
+            display: flex; align-items: center; gap: 10px;
+        }
+
+        .cats-titulo::after { content: ''; flex: 1; height: 1px; background: var(--borde); }
+
+        .cats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 14px; margin-bottom: 36px;
+        }
+
+        .cat-card {
+            background: var(--superficie-2);
+            border: 1px solid var(--borde);
+            padding: 20px;
+            cursor: pointer;
+            transition: border-color 0.2s, background 0.2s;
+        }
+
+        .cat-card:hover { border-color: var(--borde-rojo); background: var(--superficie-3); }
+
+        .cat-card-header {
+            display: flex; align-items: center; gap: 10px;
+            margin-bottom: 10px;
+        }
+
+        .cat-icono {
+            font-size: 20px;
+        }
+
+        .cat-nombre {
+            font-family: 'Cinzel', serif;
+            font-size: 13px; font-weight: 600; color: var(--texto);
+        }
+
+        .cat-lista {
+            font-size: 12px; color: var(--texto-muted); line-height: 1.8;
+        }
+
+        .nota-final {
+            background: rgba(192,57,43,0.04);
+            border: 1px solid var(--borde-rojo);
+            padding: 18px 22px;
+            font-size: 13px; color: var(--texto-secundario);
+            line-height: 1.7; font-style: italic;
+        }
+
+        /* ── CAMINO INDIVIDUAL ── */
+        .camino-contenido { display: none; }
+        .camino-contenido.visible { display: block; }
+
+        .camino-header { margin-bottom: 32px; }
+
+        .camino-tag {
+            font-size: 10px; font-weight: 600;
+            letter-spacing: 0.25em; text-transform: uppercase;
+            color: var(--rojo); margin-bottom: 10px;
+        }
+
+        .camino-titulo {
+            font-family: 'Cinzel', serif;
+            font-size: clamp(26px, 4vw, 40px);
+            font-weight: 800; color: var(--texto);
+            line-height: 1.1; margin-bottom: 8px;
+        }
+
+        .camino-categoria-badge {
+            display: inline-flex; align-items: center; gap: 6px;
+            padding: 4px 12px;
+            background: rgba(192,57,43,0.08);
+            border: 1px solid var(--borde-rojo);
+            font-size: 11px; font-weight: 600;
+            letter-spacing: 0.1em; text-transform: uppercase;
+            color: var(--rojo); margin-top: 10px;
+        }
+
+        .trasfondo-titulo {
+            display: flex; align-items: center; gap: 10px;
+            font-family: 'Cinzel', serif; font-size: 14px; font-weight: 600;
+            color: var(--rojo); letter-spacing: 0.1em; text-transform: uppercase;
+            margin-bottom: 20px; margin-top: 32px;
+        }
+
+        .trasfondo-titulo i { font-size: 18px; }
+
+        .trasfondo-texto {
+            font-size: 15px; color: var(--texto-secundario);
+            line-height: 1.9; margin-bottom: 16px; text-align: justify;
+        }
+
+        /* Etapas del camino individual */
+        .etapas-camino { margin-top: 36px; }
+
+        .etapa-camino-card {
+            background: var(--superficie-2);
+            border: 1px solid var(--borde);
+            border-left: 3px solid transparent;
+            margin-bottom: 12px;
+            overflow: hidden;
+            transition: border-color 0.2s;
+        }
+
+        .etapa-camino-card:nth-child(1) { border-left-color: #8e9aaf; }
+        .etapa-camino-card:nth-child(2) { border-left-color: var(--verde); }
+        .etapa-camino-card:nth-child(3) { border-left-color: var(--azul); }
+        .etapa-camino-card:nth-child(4) { border-left-color: var(--dorado); }
+        .etapa-camino-card:nth-child(5) { border-left-color: var(--rojo); }
+
+        .etapa-camino-header {
+            display: flex; align-items: center; gap: 14px;
+            padding: 14px 20px; cursor: pointer; user-select: none;
+        }
+
+        .etapa-camino-header:hover { background: rgba(255,255,255,0.02); }
+
+        .etapa-badge {
+            padding: 3px 10px;
+            font-size: 10px; font-weight: 700;
+            letter-spacing: 0.1em; text-transform: uppercase;
+            border: 1px solid currentColor;
+            white-space: nowrap;
+        }
+
+        .etapa-camino-card:nth-child(1) .etapa-badge { color: #8e9aaf; }
+        .etapa-camino-card:nth-child(2) .etapa-badge { color: var(--verde); }
+        .etapa-camino-card:nth-child(3) .etapa-badge { color: var(--azul); }
+        .etapa-camino-card:nth-child(4) .etapa-badge { color: var(--dorado); }
+        .etapa-camino-card:nth-child(5) .etapa-badge { color: var(--rojo); }
+
+        .etapa-camino-nombre {
+            font-family: 'Cinzel', serif;
+            font-size: 14px; font-weight: 600; color: var(--texto); flex: 1;
+        }
+
+        .etapa-camino-nivel {
+            font-size: 11px; color: var(--texto-muted);
+            letter-spacing: 0.05em;
+        }
+
+        .etapa-camino-toggle {
+            font-size: 18px; color: var(--texto-muted);
+            transition: transform 0.22s;
+        }
+
+        .etapa-camino-card.abierto .etapa-camino-toggle { transform: rotate(180deg); }
+
+        .etapa-camino-body {
+            display: none;
+            padding: 0 20px 18px 20px;
+            border-top: 1px solid var(--borde);
+        }
+
+        .etapa-camino-card.abierto .etapa-camino-body { display: block; }
+
+        .etapa-camino-desc {
+            font-size: 13px; color: var(--texto-secundario);
+            line-height: 1.75; margin-top: 14px;
+        }
+
+        .etapa-bonus {
+            display: flex; flex-wrap: wrap; gap: 8px; margin-top: 12px;
+        }
+
+        .bonus-badge {
+            padding: 4px 12px;
+            font-size: 11px; font-weight: 600;
+            background: rgba(201,168,76,0.08);
+            border: 1px solid rgba(201,168,76,0.25);
+            color: var(--dorado);
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .layout { grid-template-columns: 1fr; }
+            .sidebar { position: static; height: auto; border-right: none; border-bottom: 1px solid var(--borde); }
+            .panel { padding: 28px 20px; }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- ═══════════════════════ NAVBAR ═══════════════════════ -->
+    <nav class="navbar">
+        <a href="#" class="logo">
+            <div class="logo-mark">
+                <svg width="18" height="18" viewBox="0 0 18 18" fill="none">
+                    <path d="M9 2L16 6.5V11.5L9 16L2 11.5V6.5L9 2Z" stroke="#c0392b" stroke-width="1.2" fill="none"/>
+                    <path d="M9 5L13 7.5V10.5L9 13L5 10.5V7.5L9 5Z" fill="rgba(192,57,43,0.2)" stroke="#c0392b" stroke-width="0.6"/>
+                </svg>
+            </div>
+            <div>
+                <div class="logo-text-main">CRÓNICAS</div>
+                <div class="logo-text-sub">del Cazador</div>
+            </div>
+        </a>
+
+        <div class="nav-items">
+            <div class="nav-dropdown">
+                <div class="nav-dropdown-trigger">
+                    <i class="ri-sword-line"></i> Play CDC
+                    <i class="ri-arrow-down-s-line chevron"></i>
+                </div>
+                <div class="dropdown-menu">
+                    <button class="dropdown-item" onclick="window.location.href='../../creador/creador.html'">
+                        <i class="ri-user-add-line"></i> Crear Personaje
+                    </button>
+                    <button class="dropdown-item" onclick="">
+                        <i class="ri-group-line"></i> Selección de Personaje
+                    </button>
+                </div>
+            </div>
+
+            <div class="nav-dropdown">
+                <div class="nav-dropdown-trigger">
+                    <i class="ri-book-open-line"></i> Reglas
+                    <i class="ri-arrow-down-s-line chevron"></i>
+                </div>
+                <div class="dropdown-menu">
+                    <button class="dropdown-item" onclick="window.location.href='culturas.html'">
+                        <i class="ri-map-line"></i> Culturas
+                    </button>
+                    <button class="dropdown-item" onclick="window.location.href='caminos.html'">
+                        <i class="ri-route-line"></i> Caminos
+                    </button>
+                    <div class="dropdown-sep"></div>
+                    <button class="dropdown-item" onclick="">
+                        <i class="ri-bar-chart-line"></i> Atributos & Stats
+                    </button>
+                    <button class="dropdown-item" onclick="">
+                        <i class="ri-flashlight-line"></i> Habilidades
+                    </button>
+                    <div class="dropdown-sep"></div>
+                    <button class="dropdown-item" onclick="">
+                        <i class="ri-translate-2"></i> Glosario
+                    </button>
+                </div>
+            </div>
+
+            <button class="nav-btn" onclick="window.location.href='../../dashboard.html'">
+                <i class="ri-shield-user-line"></i> Selección de Rol
+            </button>
+        </div>
+
+        <div class="nav-right">
+            <span class="nav-user">Hola, <span id="nombre-nav">Cazador</span></span>
+            <button id="btn-logout" class="btn-logout">
+                <i class="ri-logout-box-r-line"></i> Cerrar Sesión
+            </button>
+        </div>
+    </nav>
+
+    <!-- ═══════════════════════ LAYOUT ═══════════════════════ -->
+    <div class="layout">
+
+        <!-- SIDEBAR -->
+        <aside class="sidebar">
+            <div class="sidebar-header">
+                <p class="sidebar-eyebrow">Caminos</p>
+                <h2 class="sidebar-titulo">Especialización</h2>
+                <p class="sidebar-desc">Elige un camino para explorar sus etapas, habilidades y desarrollo.</p>
+            </div>
+
+            <!-- Intro -->
+            <div class="camino-item-intro activo" id="item-intro" onclick="mostrarIntro()">
+                <i class="ri-compass-discover-line ci-icono" style="color: var(--dorado);"></i>
+                <div class="ci-info">
+                    <div class="ci-nombre" style="color: var(--dorado);">¿Qué son los Caminos?</div>
+                    <div class="ci-sub">Introducción y etapas</div>
+                </div>
+                <i class="ri-arrow-right-s-line ci-flecha"></i>
+            </div>
+
+            <div id="lista-sidebar"></div>
+        </aside>
+
+        <!-- PANEL -->
+        <main class="panel" id="panel-principal">
+
+            <!-- INTRO -->
+            <div class="intro-panel visible" id="panel-intro">
+                <p class="intro-eyebrow">Sistema de Progresión</p>
+                <h1 class="intro-titulo">Los Caminos</h1>
+
+                <p class="intro-texto">
+                    Los caminos en <em>Crónicas del Cazador</em> representan la dirección específica en la que se desarrolla un personaje, reflejando su madurez, decisiones y el oficio o profesión que ha decidido seguir. A diferencia del nivel de personaje, el Nivel de Camino no se mide con números, sino con títulos de experticia que reflejan el dominio técnico y filosófico en una disciplina.
+                </p>
+
+                <p class="intro-texto">
+                    Una vez que se elige un camino, este no puede cambiarse; el personaje solo puede perfeccionarse en esa área con cada avance.
+                </p>
+
+                <div class="quote-bloque">
+                    "Un camino define la evolución técnica, pero no determina la personalidad ni la moral del personaje. Un asesino puede ser cálido con sus aliados, mientras que un médico puede ser frío y apático."
+                </div>
+
+                <p class="etapas-titulo">Las Cinco Etapas de Dominio</p>
+
+                <div class="etapas-grid">
+                    <div class="etapa-card">
+                        <div class="etapa-num">I</div>
+                        <div class="etapa-info">
+                            <div class="etapa-nombre">Iniciado</div>
+                            <div class="etapa-nivel">Nivel 3 mínimo</div>
+                            <div class="etapa-desc">El personaje elige su oficio o estilo de vida, obteniendo una bonificación de 3 puntos (1 a un atributo y 2 a habilidades relacionadas). Este avance requiere una justificación narrativa basada en las experiencias del personaje.</div>
+                        </div>
+                    </div>
+                    <div class="etapa-card">
+                        <div class="etapa-num">II</div>
+                        <div class="etapa-info">
+                            <div class="etapa-nombre">Practicante</div>
+                            <div class="etapa-nivel">Nivel 6 mínimo</div>
+                            <div class="etapa-desc">Refleja un tramo significativo recorrido, permitiendo al personaje adquirir una nueva habilidad propia de su camino.</div>
+                        </div>
+                    </div>
+                    <div class="etapa-card">
+                        <div class="etapa-num">III</div>
+                        <div class="etapa-info">
+                            <div class="etapa-nombre">Despertar</div>
+                            <div class="etapa-nivel">Nivel 10 mínimo</div>
+                            <div class="etapa-desc">Marca el primer contacto con el Nen. El personaje obtiene una habilidad base de su camino y una técnica inicial de Nen (como Ten o Ren).</div>
+                        </div>
+                    </div>
+                    <div class="etapa-card">
+                        <div class="etapa-num">IV</div>
+                        <div class="etapa-info">
+                            <div class="etapa-nombre">Experto</div>
+                            <div class="etapa-nivel">Nivel 14 mínimo</div>
+                            <div class="etapa-desc">Representa el límite humano de la disciplina, permitiendo perfeccionar técnicas existentes y elevar su efectividad significativamente.</div>
+                        </div>
+                    </div>
+                    <div class="etapa-card">
+                        <div class="etapa-num">V</div>
+                        <div class="etapa-info">
+                            <div class="etapa-nombre">Maestro</div>
+                            <div class="etapa-nivel">Nivel 18 mínimo</div>
+                            <div class="etapa-desc">El personaje trasciende los límites, pudiendo fundar escuelas y crear una técnica única e irrepetible que refleja su identidad y dominio del Nen.</div>
+                        </div>
+                    </div>
+                </div>
+
+                <p class="cats-titulo">Categorías de Caminos</p>
+
+                <div class="cats-grid">
+                    <div class="cat-card" onclick="filtrarCategoria('combate')">
+                        <div class="cat-card-header">
+                            <i class="ri-sword-line cat-icono" style="color: var(--rojo);"></i>
+                            <span class="cat-nombre">Combate</span>
+                        </div>
+                        <div class="cat-lista">Asesino · Tirador · Corpulento · Luchador Técnico · Duelista</div>
+                    </div>
+                    <div class="cat-card" onclick="filtrarCategoria('mental')">
+                        <div class="cat-card-header">
+                            <i class="ri-brain-line cat-icono" style="color: var(--azul);"></i>
+                            <span class="cat-nombre">Mental y Profesión</span>
+                        </div>
+                        <div class="cat-lista">Investigador · Médico · Estratega · Embustero · Académico</div>
+                    </div>
+                    <div class="cat-card" onclick="filtrarCategoria('supervivencia')">
+                        <div class="cat-card-header">
+                            <i class="ri-compass-3-line cat-icono" style="color: var(--verde);"></i>
+                            <span class="cat-nombre">Supervivencia y Mundo</span>
+                        </div>
+                        <div class="cat-lista">Infiltrador · Rastreador · Sobreviviente · Escapista · Explorador</div>
+                    </div>
+                </div>
+
+                <div class="nota-final">
+                    <i class="ri-information-line" style="color: var(--dorado); margin-right: 6px;"></i>
+                    Selecciona un camino en el panel lateral para explorar sus etapas, habilidades y desarrollo en detalle.
+                </div>
+            </div>
+
+            <!-- Contenidos dinámicos de caminos -->
+            <div id="contenidos-caminos"></div>
+
+        </main>
+    </div>
+
+
+    <script>
+    const ETAPAS_BASE = [
+        { nombre: 'Iniciado',     nivel: 'Nivel 3 mín.',  romano: 'I'   },
+        { nombre: 'Practicante',  nivel: 'Nivel 6 mín.',  romano: 'II'  },
+        { nombre: 'Despertar',    nivel: 'Nivel 10 mín.', romano: 'III' },
+        { nombre: 'Experto',      nivel: 'Nivel 14 mín.', romano: 'IV'  },
+        { nombre: 'Maestro',      nivel: 'Nivel 18 mín.', romano: 'V'   },
+    ];
+
+    const CAMINOS = [
+        // ── COMBATE ──
+        {
+            id: 'asesino',
+            nombre: 'Asesino',
+            categoria: 'combate',
+            icono: 'ri-spy-line',
+            sub: 'Camino de Combate',
+            trasfondo: [
+                'El Asesino no es simplemente alguien que mata. Es un artesano de la muerte, alguien que ha convertido el acto de eliminar en una disciplina precisa y fría. Su entrenamiento va más allá de la fuerza bruta: cada movimiento es calculado, cada decisión sopesada antes de ejecutarse.',
+                'Quienes recorren este camino aprenden que la paciencia vale más que la velocidad, y que el mejor combate es aquel que el enemigo nunca supo que estaba perdiendo. El sigilo, los venenos y el análisis del entorno son sus herramientas principales.'
+            ],
+            etapas: [
+                { desc: 'El personaje aprende los fundamentos del acecho y la eliminación silenciosa. Obtiene +1 a Destreza,  +1 a Sigilo, +1 armas cuerpo a cuerpo.' },
+                { desc: 'Domina técnicas de ocultamiento y aprende a preparar venenos básicos. Adquiere la habilidad "Sombra Silente": puede moverse sin dejar rastro audible.' },
+                { desc: 'Primer contacto con el Nen. Aprende a suprimir su aura (Ten) para volverse casi imperceptible para otros usuarios de Nen. Técnica inicial: Ten de precisión.' },
+                { desc: 'Perfecciona la técnica del golpe único letal. Sus ataques precisos ignoran penalizadores por cobertura parcial y pueden alcanzar puntos vitales con mayor facilidad.' },
+                { desc: 'Trasciende como el cazador definitivo. Puede crear una técnica de Nen única que combine sigilo y letalidad en una forma que no puede ser replicada por nadie más.' },
+            ]
+        },
+        {
+            id: 'tirador',
+            nombre: 'Tirador',
+            categoria: 'combate',
+            icono: 'ri-focus-3-line',
+            sub: 'Camino de Combate',
+            trasfondo: [
+                'El Tirador convierte la distancia en su mayor ventaja. No necesita estar cerca del peligro para ser letal; su campo de batalla comienza donde termina el de los demás. La precisión, la calma bajo presión y el dominio del entorno son los pilares de su filosofía.',
+                'Un buen Tirador sabe que el momento de disparar es solo el último paso de un proceso que comienza mucho antes: leer el viento, calcular la distancia, anticipar el movimiento del objetivo.'
+            ],
+            etapas: [
+                { desc: 'Aprende los fundamentos del combate a distancia y la lectura del entorno. Obtiene +1 a Percepción y +2 a armas a distancia.' },
+                { desc: 'Domina el tiro en movimiento y bajo presión. Adquiere la habilidad "Pulso Estático": puede ignorar penalizadores menores por movimiento propio al disparar.' },
+                { desc: 'Primer contacto con el Nen. Aprende a canalizar aura en sus proyectiles para aumentar su alcance y penetración. Técnica inicial: Ren concentrado.' },
+                { desc: 'Sus disparos pueden alcanzar objetivos en cobertura total mediante técnicas de rebote o curvatura de aura. Penalizadores por distancia extrema se reducen significativamente.' },
+                { desc: 'Crea una técnica de Nen única ligada a su arma o proyectil, capaz de efectos imposibles para cualquier otro tirador.' },
+            ]
+        },
+        {
+            id: 'corpulento',
+            nombre: 'Corpulento',
+            categoria: 'combate',
+            icono: 'ri-boxing-line',
+            sub: 'Camino de Combate',
+            trasfondo: [
+                'El Corpulento no evade, no esquiva, no se esconde. Su filosofía es simple: resistir todo lo que el mundo pueda lanzarle y seguir de pie. Han convertido su propio cuerpo en un arma y en un escudo al mismo tiempo.',
+                'Estos guerreros entienden que el dolor es una señal, no una orden. Aprenden a ignorarlo, a usarlo como combustible. Su presencia en el campo de batalla cambia la dinámica del grupo: los enemigos deben lidiar con ellos antes de poder alcanzar a cualquier otro.'
+            ],
+            etapas: [
+                { desc: 'Comienza a forjar su cuerpo como arma. Obtiene +1 a Resistencia y +2 a Pelea.' },
+                { desc: 'Aprende a absorber impactos y convertir el daño recibido en ventaja. Adquiere "Piel de Hierro": reduce el daño de golpes directos en 1 punto.' },
+                { desc: 'Primer contacto con el Nen. Aprende a reforzar su cuerpo con aura (Ren corporal), aumentando su resistencia al daño físico y la potencia de sus golpes.' },
+                { desc: 'Sus golpes causan daño estructural al entorno y pueden romper defensas de Nen menos desarrolladas. Su umbral de dolor es prácticamente inexistente.' },
+                { desc: 'Crea una técnica de Nen única que convierte su cuerpo en algo que trasciende los límites humanos de durabilidad o fuerza.' },
+            ]
+        },
+        {
+            id: 'luchador-tecnico',
+            nombre: 'Luchador Técnico',
+            categoria: 'combate',
+            icono: 'ri-yin-yang-line',
+            sub: 'Camino de Combate',
+            trasfondo: [
+                'El Luchador Técnico no gana por fuerza ni por velocidad, sino por comprensión. Cada combate es un problema a resolver: estudia los patrones del enemigo, identifica sus debilidades y responde con la técnica más eficiente posible.',
+                'Su entrenamiento es exhaustivo y disciplinado. No improvisa; ejecuta. Y cuando el caos del combate rompe cualquier plan previo, su comprensión profunda del cuerpo humano le permite adaptarse con una fluidez que parece casi intuitiva.'
+            ],
+            etapas: [
+                { desc: 'Aprende los fundamentos de múltiples estilos de combate. Obtiene +1 a Destreza y +2 a Pelea.' },
+                { desc: 'Puede leer los patrones de combate de sus oponentes. Adquiere "Análisis de Combate": una vez por escena puede identificar una debilidad del enemigo.' },
+                { desc: 'Primer contacto con el Nen. Aprende a usar Gyo para analizar el flujo de aura del oponente y anticipar sus técnicas. Técnica inicial: Gyo de lectura.' },
+                { desc: 'Sus contraataques se vuelven devastadores. Al responder a un ataque anticipado, obtiene ventaja adicional en el daño y puede desequilibrar al oponente.' },
+                { desc: 'Crea una técnica de Nen única que representa la culminación de todos los estilos que ha dominado.' },
+            ]
+        },
+        {
+            id: 'duelista',
+            nombre: 'Duelista',
+            categoria: 'combate',
+            icono: 'ri-sword-fill',
+            sub: 'Camino de Combate',
+            trasfondo: [
+                'El Duelista vive para el enfrentamiento uno a uno. No le interesan las batallas masivas ni las emboscadas; lo que busca es ese momento de verdad entre dos combatientes donde solo puede quedar uno en pie.',
+                'Su código es tan importante como su técnica: un Duelista verdadero no ataca por la espalda ni golpea a un oponente desarmado. Su honor en combate no es debilidad, es lo que lo separa de un simple asesino.'
+            ],
+            etapas: [
+                { desc: 'Desarrolla su estilo personal de combate singular. Obtiene +1 a Destreza y +2 a armas cuerpo a cuerpo.' },
+                { desc: 'En combates uno a uno, sus acciones tienen mayor eficiencia. Adquiere "Enfoque del Duelo": bonificación adicional cuando enfrenta un solo oponente.' },
+                { desc: 'Primer contacto con el Nen. Aprende a concentrar todo su aura en el momento preciso del intercambio. Técnica inicial: Ren de duelo.' },
+                { desc: 'Sus técnicas de duelo se vuelven casi imposibles de contrarrestar por alguien de menor nivel. Puede forzar situaciones de combate limpio.' },
+                { desc: 'Crea una técnica de Nen única que solo puede activarse en combate singular directo, alcanzando un nivel de poder que trasciende lo convencional.' },
+            ]
+        },
+
+        // ── MENTAL ──
+        {
+            id: 'investigador',
+            nombre: 'Investigador',
+            categoria: 'mental',
+            icono: 'ri-search-eye-line',
+            sub: 'Camino Mental y de Profesión',
+            trasfondo: [
+                'El Investigador es alguien que no puede dejar una pregunta sin respuesta. Su mente es su arma principal: observa lo que otros ignoran, conecta puntos que parecen inconexos y llega a conclusiones que a otros les tomaría semanas.',
+                'No todos los Investigadores trabajan para la ley o para el bien. Algunos venden información al mejor postor; otros persiguen la verdad por pura obsesión. Lo que los une es esa incapacidad de mirar hacia otro lado cuando hay algo que no encaja.'
+            ],
+            etapas: [
+                { desc: 'Desarrolla metodología de observación y análisis. Obtiene +1 a Inteligencia y +2 a Investigación.' },
+                { desc: 'Adquiere "Red de Informantes": puede acceder a información de círculos que normalmente estarían cerrados para él.' },
+                { desc: 'Primer contacto con el Nen. Aprende a usar Gyo extendido para percibir rastros de aura en objetos y lugares. Técnica inicial: Gyo de rastreo.' },
+                { desc: 'Su análisis se vuelve casi profético. Puede anticipar patrones de comportamiento y preparar respuestas antes de que ocurran los eventos.' },
+                { desc: 'Crea una técnica de Nen única para la obtención o análisis de información que ningún otro método puede igualar.' },
+            ]
+        },
+        {
+            id: 'medico',
+            nombre: 'Médico',
+            categoria: 'mental',
+            icono: 'ri-heart-pulse-line',
+            sub: 'Camino Mental y de Profesión',
+            trasfondo: [
+                'El Médico comprende el cuerpo humano mejor que nadie. Su conocimiento puede salvar vidas en el campo de batalla o terminarlas con una precisión quirúrgica que ningún arma convencional puede igualar.',
+                'En el mundo de los Cazadores, un Médico de camino es doblemente valioso: puede mantener vivo a un aliado en situaciones donde cualquier otro habría muerto, y conoce exactamente dónde golpear para causar el máximo daño con el mínimo esfuerzo.'
+            ],
+            etapas: [
+                { desc: 'Aprende anatomía y primeros auxilios avanzados. Obtiene +1 a Inteligencia y +2 a Medicina.' },
+                { desc: 'Adquiere "Manos que Curan": puede estabilizar heridas críticas en condiciones adversas sin penalizadores.' },
+                { desc: 'Primer contacto con el Nen. Aprende a canalizar aura para acelerar la recuperación propia o de aliados. Técnica inicial: Ten restaurativo.' },
+                { desc: 'Puede realizar intervenciones que desafían la medicina convencional. Sus tratamientos con Nen pueden revertir condiciones que serían permanentes.' },
+                { desc: 'Crea una técnica de Nen única de curación o intervención médica que trasciende cualquier límite conocido.' },
+            ]
+        },
+        {
+            id: 'estratega',
+            nombre: 'Estratega',
+            categoria: 'mental',
+            icono: 'ri-chess-line',
+            sub: 'Camino Mental y de Profesión',
+            trasfondo: [
+                'El Estratega ve el combate y la vida como un tablero de ajedrez. Cada acción tiene consecuencias, cada posición tiene valor, cada recurso debe ser usado en el momento preciso. Su mayor placer es cuando el plan se ejecuta exactamente como lo concibió.',
+                'Rara vez actúa directamente; prefiere orquestar situaciones donde otros hagan el trabajo mientras él asegura el resultado. No es cobardía; es eficiencia elevada al arte.'
+            ],
+            etapas: [
+                { desc: 'Desarrolla pensamiento táctico y lectura de situaciones. Obtiene +1 a Inteligencia y +2 a Liderazgo.' },
+                { desc: 'Adquiere "Visión de Campo": puede evaluar una situación compleja y dar instrucciones que otorgan bonificaciones a aliados cercanos.' },
+                { desc: 'Primer contacto con el Nen. Aprende a percibir el aura de múltiples individuos simultáneamente. Técnica inicial: Gyo de mando.' },
+                { desc: 'Sus planes tienen una adaptabilidad extraordinaria. Puede reformular una estrategia en tiempo real sin perder eficiencia.' },
+                { desc: 'Crea una técnica de Nen única que le permite coordinar o influir en la situación de combate a un nivel que parece omnisciente.' },
+            ]
+        },
+        {
+            id: 'embustero',
+            nombre: 'Embustero',
+            categoria: 'mental',
+            icono: 'ri-spy-fill',
+            sub: 'Camino Mental y de Profesión',
+            trasfondo: [
+                'El Embustero ha convertido el engaño en una forma de vida. No miente por costumbre; miente por diseño, con capas y capas de verdades a medias que hacen imposible distinguir la realidad de la ficción.',
+                'Su mayor habilidad no es convencer a los tontos, sino engañar a los inteligentes. Sabe que la mejor mentira siempre contiene un núcleo de verdad, y que la confianza, una vez ganada, es más valiosa que cualquier arma.'
+            ],
+            etapas: [
+                { desc: 'Desarrolla técnicas de persuasión, manipulación y creación de identidades falsas. Obtiene +1 a manipulación y +2 a subterfugio.' },
+                { desc: 'Adquiere "Máscara Perfecta": puede mantener una identidad falsa indefinidamente sin penalizadores por estrés o escrutinio.' },
+                { desc: 'Primer contacto con el Nen. Aprende a ocultar su aura para que refleje emociones falsas. Técnica inicial: Ten de engaño.' },
+                { desc: 'Sus mentiras pueden resistir escrutinio de usuarios de Nen experimentados. Puede crear ilusiones menores mediante la manipulación del aura.' },
+                { desc: 'Crea una técnica de Nen única de ilusión o manipulación que no puede ser detectada por métodos convencionales.' },
+            ]
+        },
+        {
+            id: 'academico',
+            nombre: 'Académico',
+            categoria: 'mental',
+            icono: 'ri-book-2-line',
+            sub: 'Camino Mental y de Profesión',
+            trasfondo: [
+                'El Académico acumula conocimiento como otros acumulan riqueza. Para él, la información es poder en su forma más pura. Estudia historia, ciencias, idiomas, sistemas de combate, culturas y cualquier cosa que pueda serle útil algún día.',
+                'No es el más fuerte ni el más rápido, pero en el mundo de los Cazadores, saber lo que nadie más sabe puede ser la diferencia entre la vida y la muerte.'
+            ],
+            etapas: [
+                { desc: 'Desarrolla un área de especialización académica profunda. Obtiene +1 a Inteligencia y +2 a acadecimismo.' },
+                { desc: 'Adquiere "Archivo Viviente": puede recordar y aplicar conocimientos obscuros con precisión perfecta en situaciones críticas.' },
+                { desc: 'Primer contacto con el Nen. Su comprensión teórica del Nen es excepcional. Aprende técnicas de Nen con mayor velocidad. Técnica inicial: Ten contemplativo.' },
+                { desc: 'Su conocimiento enciclopédico le permite identificar técnicas de Nen enemigas y proponer contramedidas en tiempo real.' },
+                { desc: 'Crea una técnica de Nen única basada en un conocimiento tan específico y profundo que nadie más podría haberla concebido.' },
+            ]
+        },
+
+        // ── SUPERVIVENCIA ──
+        {
+            id: 'infiltrador',
+            nombre: 'Infiltrador',
+            categoria: 'supervivencia',
+            icono: 'ri-door-open-line',
+            sub: 'Camino de Supervivencia y Mundo',
+            trasfondo: [
+                'El Infiltrador puede estar en cualquier lugar sin que nadie sepa que estuvo allí. Se mueve entre capas de seguridad, identidades y vigilancia como si fueran obstáculos menores. No porque sea invisible, sino porque sabe exactamente cómo no ser visto.',
+                'Su habilidad principal es la preparación: estudia sus objetivos, planifica rutas de entrada y salida, prepara contingencias. La improvisación es su último recurso, no su método de trabajo.'
+            ],
+            etapas: [
+                { desc: 'Aprende técnicas de infiltración, disfraz y movimiento silencioso. Obtiene +1 a Destreza y +2 a sigilo.' },
+                { desc: 'Adquiere "Fantasma Urbano": puede moverse a través de sistemas de seguridad comunes sin activarlos.' },
+                { desc: 'Primer contacto con el Nen. Aprende a suprimir completamente su presencia de aura. Técnica inicial: Ten de invisibilidad.' },
+                { desc: 'Puede infiltrarse en instalaciones de alta seguridad con planificación adecuada. Detectar su presencia requiere habilidades de Nen avanzadas.' },
+                { desc: 'Crea una técnica de Nen única que hace su presencia literalmente indetectable para casi cualquier método de percepción.' },
+            ]
+        },
+        {
+            id: 'rastreador',
+            nombre: 'Rastreador',
+            categoria: 'supervivencia',
+            icono: 'ri-footprint-line',
+            sub: 'Camino de Supervivencia y Mundo',
+            trasfondo: [
+                'El Rastreador puede leer el mundo como otros leen un libro. Huellas, olores, patrones de vegetación perturbada, cambios en el comportamiento animal: todo es información para alguien que sabe interpretarlo.',
+                'Nadie escapa a un Rastreador dedicado. No importa cuántas precauciones tome el objetivo; siempre hay algo que delata su paso, y el Rastreador siempre lo encontrará.'
+            ],
+            etapas: [
+                { desc: 'Desarrolla habilidades de rastreo en múltiples entornos. Obtiene +1 a Percepción y +2 a Supervivencia.' },
+                { desc: 'Adquiere "Lectura del Entorno": puede reconstruir eventos pasados leyendo el escenario con precisión casi forense.' },
+                { desc: 'Primer contacto con el Nen. Aprende a rastrear rastros de aura residual. Técnica inicial: Gyo de rastreo extendido.' },
+                { desc: 'Puede seguir rastros de aura que otros usuarios han intentado borrar. Su velocidad de seguimiento es excepcional.' },
+                { desc: 'Crea una técnica de Nen única para el rastreo que no puede ser evadida por métodos convencionales ni por la mayoría de las técnicas de ocultamiento.' },
+            ]
+        },
+        {
+            id: 'sobreviviente',
+            nombre: 'Sobreviviente',
+            categoria: 'supervivencia',
+            icono: 'ri-shield-check-line',
+            sub: 'Camino de Supervivencia y Mundo',
+            trasfondo: [
+                'El Sobreviviente ha pasado por situaciones que habrían matado a cualquier otro y salió caminando. No porque tenga suerte; porque aprendió, adapta y persevera cuando todo indica que debería rendirse.',
+                'Su mentalidad es única: no busca la victoria, busca seguir vivo. Y paradójicamente, esa filosofía lo convierte en alguien extraordinariamente difícil de eliminar y, con el tiempo, en un combatiente formidable.'
+            ],
+            etapas: [
+                { desc: 'Desarrolla resiliencia física y mental extrema. Obtiene +1 a Resistencia y +2 a Supervivencia.' },
+                { desc: 'Adquiere "Instinto de Supervivencia": una vez por sesión puede evitar automáticamente una situación que lo dejaría inconsciente.' },
+                { desc: 'Primer contacto con el Nen. Su aura actúa como mecanismo de defensa instintivo. Técnica inicial: Ten reactivo.' },
+                { desc: 'Su umbral de resistencia es legendario. Puede continuar funcionando en condiciones que incapacitarían a cualquier otro.' },
+                { desc: 'Crea una técnica de Nen única que convierte su voluntad de sobrevivir en un poder que trasciende los límites físicos.' },
+            ]
+        },
+        {
+            id: 'escapista',
+            nombre: 'Escapista',
+            categoria: 'supervivencia',
+            icono: 'ri-run-line',
+            sub: 'Camino de Supervivencia y Mundo',
+            trasfondo: [
+                'El Escapista no huye por cobardía; huye porque entiende que un guerrero vivo tiene más valor que un héroe muerto. Ha convertido el arte de la retirada en una disciplina tan sofisticada como cualquier técnica de ataque.',
+                'Conoce cada salida, cada pasillo, cada opción de escape en cualquier entorno que habita. Su presencia en un grupo es invaluable: cuando todo falla, el Escapista es quien asegura que alguien llegue a contar la historia.'
+            ],
+            etapas: [
+                { desc: 'Aprende análisis de entorno, rutas de escape y movimiento evasivo. Obtiene +1 a destreza y +2 a Atletismo.' },
+                { desc: 'Adquiere "Siempre hay una Salida": puede identificar opciones de escape en cualquier situación, por desesperada que parezca.' },
+                { desc: 'Primer contacto con el Nen. Aprende a usar ráfagas de aura para potenciar movimientos de escape. Técnica inicial: Ren de evasión.' },
+                { desc: 'Su velocidad de reacción y movimiento evasivo lo hacen casi imposible de acorralar. Los ataques de oportunidad tienen penalizadores significativos contra él.' },
+                { desc: 'Crea una técnica de Nen única que convierte la evasión en una capacidad que desafía la percepción física.' },
+            ]
+        },
+        {
+            id: 'explorador',
+            nombre: 'Explorador',
+            categoria: 'supervivencia',
+            icono: 'ri-compass-discover-line',
+            sub: 'Camino de Supervivencia y Mundo',
+            trasfondo: [
+                'El Explorador es movido por una curiosidad que no puede ser satisfecha. El mundo es enorme y él quiere verlo todo: los lugares olvidados, los territorios inexplorados, los secretos que la geografía esconde.',
+                'Su conocimiento del mundo es inmenso pero práctico. Sabe cómo moverse en terrenos hostiles, cómo orientarse sin referencias conocidas y cómo encontrar lo que necesita en los lugares más inhóspitos.'
+            ],
+            etapas: [
+                { desc: 'Desarrolla habilidades de navegación, adaptación al entorno y cartografía. Obtiene +1 a Percepción y +2 a conocimiento/Orientación.' },
+                { desc: 'Adquiere "Memoria del Mundo": puede recordar con precisión cualquier lugar que haya visitado y orientarse en entornos desconocidos sin penalizadores.' },
+                { desc: 'Primer contacto con el Nen. Aprende a percibir el aura ambiental de lugares, lo que le permite detectar peligros ocultos. Técnica inicial: Gyo ambiental.' },
+                { desc: 'Su adaptación a cualquier entorno es extraordinaria. Puede operar sin penalizadores en condiciones extremas donde otros serían incapaces.' },
+                { desc: 'Crea una técnica de Nen única ligada a su comprensión del mundo y el espacio que ningún otro camino podría desarrollar.' },
+            ]
+        },
+    ];
+
+    const CATEGORIAS = {
+        combate:      { label: 'Combate',                 color: 'var(--rojo)',  icono: 'ri-sword-line' },
+        mental:       { label: 'Mental y Profesión',      color: 'var(--azul)',  icono: 'ri-brain-line' },
+        supervivencia:{ label: 'Supervivencia y Mundo',   color: 'var(--verde)', icono: 'ri-compass-3-line' },
+    };
+
+    // ── Construir sidebar ──
+    const listaSidebar = document.getElementById('lista-sidebar');
+    ['combate', 'mental', 'supervivencia'].forEach(cat => {
+        const info = CATEGORIAS[cat];
+        const catDiv = document.createElement('div');
+        catDiv.innerHTML = `<div class="sidebar-categoria"><i class="${info.icono}" style="color:${info.color}"></i> ${info.label}</div>`;
+        listaSidebar.appendChild(catDiv);
+
+        CAMINOS.filter(c => c.categoria === cat).forEach(c => {
+            const item = document.createElement('div');
+            item.className = 'camino-item';
+            item.id = `item-${c.id}`;
+            item.innerHTML = `
+                <i class="${c.icono} ci-icono"></i>
+                <div class="ci-info">
+                    <div class="ci-nombre">${c.nombre}</div>
+                    <div class="ci-sub">${c.sub}</div>
+                </div>
+                <i class="ri-arrow-right-s-line ci-flecha"></i>
+            `;
+            item.onclick = () => mostrarCamino(c.id);
+            listaSidebar.appendChild(item);
+        });
+    });
+
+    // ── Construir contenidos ──
+    const contenidos = document.getElementById('contenidos-caminos');
+    contenidos.innerHTML = CAMINOS.map(c => {
+        const cat = CATEGORIAS[c.categoria];
+        const trasfondoHTML = c.trasfondo.map(p => `<p class="trasfondo-texto">${p}</p>`).join('');
+        const etapasHTML = c.etapas.map((e, i) => `
+            <div class="etapa-camino-card" id="etapa-${c.id}-${i}">
+                <div class="etapa-camino-header" onclick="toggleEtapa('${c.id}', ${i})">
+                    <span class="etapa-badge">${ETAPAS_BASE[i].romano}</span>
+                    <span class="etapa-camino-nombre">${ETAPAS_BASE[i].nombre}</span>
+                    <span class="etapa-camino-nivel">${ETAPAS_BASE[i].nivel}</span>
+                    <i class="ri-arrow-down-s-line etapa-camino-toggle"></i>
+                </div>
+                <div class="etapa-camino-body">
+                    <p class="etapa-camino-desc">${e.desc}</p>
+                </div>
+            </div>
+        `).join('');
+
+        return `
+        <div class="camino-contenido" id="camino-${c.id}">
+            <div class="camino-header">
+                <p class="camino-tag">Camino / Especialización</p>
+                <h1 class="camino-titulo">${c.nombre}</h1>
+                <div class="camino-categoria-badge">
+                    <i class="${cat.icono}" style="color:${cat.color}"></i>
+                    ${cat.label}
+                </div>
+            </div>
+
+            <div class="trasfondo-titulo">
+                <i class="${c.icono}"></i> Trasfondo y Filosofía
+            </div>
+            ${trasfondoHTML}
+
+            <div class="etapas-camino">
+                <p class="etapas-titulo">Etapas de Dominio</p>
+                ${etapasHTML}
+            </div>
+        </div>`;
+    }).join('');
+
+    // ── Funciones ──
+    function mostrarIntro() {
+        document.getElementById('panel-intro').classList.add('visible');
+        document.querySelectorAll('.camino-contenido').forEach(el => el.classList.remove('visible'));
+        document.querySelectorAll('.camino-item').forEach(el => el.classList.remove('activo'));
+        document.getElementById('item-intro').classList.add('activo');
+        document.getElementById('panel-principal').scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    function mostrarCamino(id) {
+        document.getElementById('panel-intro').classList.remove('visible');
+        document.querySelectorAll('.camino-contenido').forEach(el => el.classList.remove('visible'));
+        document.getElementById('camino-' + id).classList.add('visible');
+
+        document.querySelectorAll('.camino-item').forEach(el => el.classList.remove('activo'));
+        document.getElementById('item-intro').classList.remove('activo');
+        document.getElementById('item-' + id).classList.add('activo');
+
+        document.getElementById('panel-principal').scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    function filtrarCategoria(cat) {
+        const primerCamino = CAMINOS.find(c => c.categoria === cat);
+        if (primerCamino) mostrarCamino(primerCamino.id);
+    }
+
+    function toggleEtapa(caminoId, index) {
+        document.getElementById(`etapa-${caminoId}-${index}`).classList.toggle('abierto');
+    }
+
+    window.mostrarIntro = mostrarIntro;
+    window.mostrarCamino = mostrarCamino;
+    window.filtrarCategoria = filtrarCategoria;
+    window.toggleEtapa = toggleEtapa;
+    </script>
+</body>
+</html>

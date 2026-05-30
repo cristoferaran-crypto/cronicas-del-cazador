@@ -1,0 +1,631 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Ficha — Crónicas del Cazador</title>
+  <link rel="stylesheet" href="../../../css/style.css">
+  <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;800&family=Barlow+Condensed:wght@300;400;500;600;700&family=Share+Tech+Mono&display=swap" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/remixicon@3.5.0/fonts/remixicon.css" rel="stylesheet">
+  <style>
+    :root {
+      --accent:#ff3333;--accent-dim:rgba(255,51,51,0.12);--accent-glow:rgba(255,51,51,0.3);
+      --accent-border:rgba(255,51,51,0.22);--red:#ff3333;--red-dim:rgba(255,51,51,0.12);
+      --red-glow:rgba(255,51,51,0.3);--red-border:rgba(255,51,51,0.22);
+      --bonus-color:#4ade80;--bonus-dim:rgba(74,222,128,0.12);--bonus-border:rgba(74,222,128,0.28);
+      --gold:#c9a84c;--gold-dim:rgba(201,168,76,0.1);--blue:#7ec8e3;--blue-dim:rgba(126,200,227,0.1);
+      --green:#4ade80;--surface:#080c14;--card:rgba(13,18,30,0.98);--card2:rgba(18,24,38,0.95);
+      --border:rgba(255,255,255,0.06);--border2:rgba(255,255,255,0.1);--text:#dde4f0;--muted:#566070;
+      --mono:'Share Tech Mono',monospace;--cond:'Barlow Condensed',sans-serif;--serif:'Cinzel',serif;
+    }
+    body.theme-parchment{--accent:#8b4513;--accent-dim:rgba(139,69,19,0.12);--accent-glow:rgba(139,69,19,0.3);--accent-border:rgba(139,69,19,0.3);--red:#8b4513;--red-dim:rgba(139,69,19,0.12);--red-glow:rgba(139,69,19,0.3);--red-border:rgba(139,69,19,0.3);--bonus-color:#2d6a2d;--bonus-dim:rgba(45,106,45,0.15);--bonus-border:rgba(45,106,45,0.35);--gold:#8b6914;--gold-dim:rgba(139,105,20,0.15);--blue:#4a6d8c;--blue-dim:rgba(74,109,140,0.15);--surface:#1a1408;--card:rgba(28,22,10,0.98);--card2:rgba(35,28,14,0.95);--border:rgba(201,168,76,0.12);--border2:rgba(201,168,76,0.2);--text:#d4c5a0;--muted:#7a6a4a;}
+    body.theme-selva{--accent:#00ff41;--accent-dim:rgba(0,255,65,0.1);--accent-glow:rgba(0,255,65,0.25);--accent-border:rgba(0,255,65,0.22);--red:#00ff41;--red-dim:rgba(0,255,65,0.1);--red-glow:rgba(0,255,65,0.25);--red-border:rgba(0,255,65,0.22);--bonus-color:#39ff14;--bonus-dim:rgba(57,255,20,0.1);--bonus-border:rgba(57,255,20,0.3);--gold:#00cc33;--gold-dim:rgba(0,204,51,0.12);--blue:#00e5ff;--blue-dim:rgba(0,229,255,0.1);--surface:#000a02;--card:rgba(0,14,4,0.98);--card2:rgba(0,20,6,0.95);--border:rgba(0,255,65,0.08);--border2:rgba(0,255,65,0.15);--text:#a0ffb0;--muted:#3a6644;}
+    *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+    body{background:var(--surface);color:var(--text);font-family:var(--cond);min-height:100vh;overflow-x:hidden;}
+    body::before{content:'';position:fixed;inset:0;z-index:0;pointer-events:none;background:radial-gradient(ellipse 70% 50% at 10% 0%,rgba(255,51,51,0.05) 0%,transparent 55%),radial-gradient(ellipse 50% 60% at 90% 100%,rgba(126,200,227,0.03) 0%,transparent 55%),repeating-linear-gradient(0deg,transparent,transparent 47px,rgba(255,255,255,0.01) 47px,rgba(255,255,255,0.01) 48px),repeating-linear-gradient(90deg,transparent,transparent 47px,rgba(255,255,255,0.01) 47px,rgba(255,255,255,0.01) 48px);}
+    .ficha-nav{position:sticky;top:0;z-index:200;display:flex;align-items:center;gap:10px;padding:0 20px;height:48px;background:rgba(6,9,16,0.96);border-bottom:1px solid var(--red-border);backdrop-filter:blur(24px);}
+    .nav-brand{font-family:var(--serif);font-size:0.62rem;letter-spacing:0.3em;color:var(--red);text-transform:uppercase;margin-right:auto;}
+    .nav-charname{font-family:var(--serif);font-size:0.78rem;color:rgba(255,255,255,0.5);letter-spacing:0.1em;}
+    .nav-sep{width:1px;height:18px;background:var(--border2);}
+    .icon-btn{width:32px;height:32px;background:transparent;border:1px solid var(--border);border-radius:5px;color:var(--muted);cursor:pointer;font-size:0.95rem;display:flex;align-items:center;justify-content:center;transition:all 0.2s;}
+    .icon-btn:hover{border-color:var(--red);color:var(--red);box-shadow:0 0 8px var(--red-glow);}
+    .icon-btn.danger:hover{border-color:#ef4444;color:#ef4444;}
+    .save-ok{font-family:var(--mono);font-size:0.65rem;color:var(--green);opacity:0;transition:opacity 0.3s;}
+    .save-ok.show{opacity:1;}
+    .theme-switcher{display:flex;gap:5px;align-items:center;}
+    .theme-dot{width:16px;height:16px;border-radius:50%;cursor:pointer;border:2px solid transparent;transition:all 0.2s;flex-shrink:0;}
+    .theme-dot:hover{transform:scale(1.2);}
+    .theme-dot.active{border-color:#fff;}
+    .theme-dot.dot-dark{background:radial-gradient(circle,#ff3333 0%,#1a0a0a 100%);}
+    .theme-dot.dot-parchment{background:radial-gradient(circle,#c9a84c 0%,#1a1408 100%);}
+    .theme-dot.dot-selva{background:radial-gradient(circle,#00ff41 0%,#000a02 100%);}
+    .avatar-level-wrap{position:relative;flex-shrink:0;width:110px;}
+    .avatar-box{width:110px;height:138px;}
+    .avatar-level-badge{position:absolute;bottom:-10px;left:50%;transform:translateX(-50%);background:var(--accent);color:#fff;font-family:var(--serif);font-size:1rem;font-weight:800;min-width:32px;height:32px;border-radius:6px;display:flex;align-items:center;justify-content:center;padding:0 6px;box-shadow:0 0 10px var(--accent-glow);border:2px solid rgba(255,255,255,0.15);z-index:2;}
+    .b-chip{font-family:var(--mono);font-size:0.62rem;background:var(--bonus-dim);border:1px solid var(--bonus-border);color:var(--bonus-color);border-radius:3px;padding:1px 6px;}
+    .p-chip{font-family:var(--mono);font-size:0.62rem;background:rgba(255,51,51,0.1);border:1px solid rgba(255,51,51,0.3);color:#ff8080;border-radius:3px;padding:1px 6px;}
+    .tab-bar{position:sticky;top:48px;z-index:190;display:flex;gap:0;background:rgba(6,9,16,0.96);border-bottom:1px solid var(--border);backdrop-filter:blur(24px);padding:0 20px;}
+    .tab-btn{padding:10px 20px;font-family:var(--cond);font-size:0.78rem;font-weight:600;letter-spacing:0.15em;text-transform:uppercase;color:var(--muted);background:transparent;border:none;border-bottom:2px solid transparent;cursor:pointer;transition:all 0.2s;display:flex;align-items:center;gap:7px;margin-bottom:-1px;}
+    .tab-btn:hover{color:var(--text);}
+    .tab-btn.active{color:#fff;border-bottom-color:var(--red);}
+    .tab-btn i{font-size:0.9rem;}
+    .tab-panel{display:none;}
+    .tab-panel.active{display:block;}
+    .ficha-main{position:relative;z-index:1;padding:16px 20px 40px;display:flex;flex-direction:column;gap:12px;max-width:1440px;margin:0 auto;}
+    .row-top{display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;}
+    .fc{background:var(--card);border:1px solid var(--border);border-radius:8px;overflow:hidden;}
+    .fc-header{display:flex;align-items:center;gap:8px;padding:7px 14px;border-bottom:1px solid var(--border);background:rgba(255,51,51,0.03);}
+    .fc-title{font-family:var(--mono);font-size:0.58rem;letter-spacing:0.2em;text-transform:uppercase;color:var(--red);flex:1;}
+    .fc-body{padding:12px 14px;}
+    .identity-grid{display:grid;grid-template-columns:110px 1fr;gap:14px;padding:12px 14px;}
+    .avatar-box{width:110px;height:138px;border:1px solid var(--border2);border-radius:6px;overflow:hidden;cursor:pointer;position:relative;background:rgba(255,255,255,0.02);transition:border-color 0.2s;flex-shrink:0;}
+    .avatar-box:hover{border-color:var(--red);}
+    .avatar-box img{width:100%;height:100%;object-fit:cover;display:block;}
+    .avatar-overlay{position:absolute;inset:0;background:rgba(255,51,51,0.45);display:flex;align-items:center;justify-content:center;opacity:0;transition:opacity 0.2s;font-size:1.3rem;color:#fff;}
+    .avatar-box:hover .avatar-overlay{opacity:1;}
+    .id-stack{display:flex;flex-direction:column;justify-content:center;gap:4px;}
+    .char-bigname{font-family:var(--serif);font-size:1.35rem;font-weight:800;color:#fff;line-height:1.1;margin-bottom:4px;}
+    .char-submeta{font-family:var(--mono);font-size:0.6rem;letter-spacing:0.12em;color:var(--muted);text-transform:uppercase;margin-bottom:6px;}
+    .id-pill{display:inline-flex;align-items:center;gap:5px;background:rgba(255,255,255,0.03);border:1px solid var(--border);border-radius:3px;padding:3px 8px;margin:1px 2px 1px 0;}
+    .id-pill-lbl{font-family:var(--mono);font-size:0.52rem;letter-spacing:0.1em;text-transform:uppercase;color:var(--muted);}
+    .id-pill-val{font-size:0.82rem;font-weight:600;color:var(--text);}
+    .combat-top{display:grid;grid-template-columns:1fr 1fr;gap:8px;padding:12px 14px;border-bottom:1px solid var(--border);}
+    .big-stat{background:rgba(255,255,255,0.02);border:1px solid var(--border);border-radius:6px;padding:10px 8px;text-align:center;}
+    .big-stat.red-stat{border-color:var(--red-border);background:var(--red-dim);}
+    .big-stat-lbl{font-family:var(--mono);font-size:0.52rem;letter-spacing:0.15em;text-transform:uppercase;color:var(--muted);display:block;margin-bottom:3px;}
+    .big-stat-val{font-family:var(--serif);font-size:2rem;font-weight:700;color:#fff;line-height:1;display:block;}
+    .big-stat.red-stat .big-stat-val{color:var(--red);}
+    .combat-bottom{padding:10px 14px;}
+    .patemp-label{font-family:var(--mono);font-size:0.55rem;letter-spacing:0.15em;text-transform:uppercase;color:var(--muted);display:block;margin-bottom:6px;}
+    .counter-row{display:flex;align-items:center;gap:7px;}
+    .ctrl-btn{width:28px;height:28px;flex-shrink:0;background:rgba(255,255,255,0.04);border:1px solid var(--border);border-radius:4px;color:var(--muted);font-size:1rem;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all 0.15s;font-weight:700;}
+    .ctrl-btn:hover{border-color:var(--red);color:var(--red);}
+    .pa-num{flex:1;background:rgba(255,255,255,0.04);border:1px solid var(--border);border-radius:4px;color:#fff;font-family:var(--serif);font-size:1.15rem;text-align:center;padding:3px;}
+    .pa-num::-webkit-inner-spin-button,.pa-num::-webkit-outer-spin-button{-webkit-appearance:none;}
+    .health-states{display:flex;gap:4px;padding:10px 14px;border-bottom:1px solid var(--border);}
+    .hs{flex:1;text-align:center;padding:6px 2px;border:1px solid var(--border);border-radius:4px;font-family:var(--mono);font-size:0.55rem;letter-spacing:0.04em;text-transform:uppercase;color:var(--muted);cursor:pointer;transition:all 0.2s;user-select:none;}
+    .hs.hs-sano{background:rgba(74,222,128,0.1);border-color:rgba(74,222,128,0.45);color:#4ade80;}
+    .hs.hs-herido{background:rgba(250,204,21,0.1);border-color:rgba(250,204,21,0.45);color:#facc15;}
+    .hs.hs-grave{background:rgba(251,146,60,0.1);border-color:rgba(251,146,60,0.45);color:#fb923c;}
+    .hs.hs-critico{background:rgba(239,68,68,0.1);border-color:rgba(239,68,68,0.5);color:#ef4444;}
+    .hs.hs-ko{background:rgba(148,163,184,0.1);border-color:rgba(148,163,184,0.4);color:#94a3b8;}
+    .resources-grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:0;padding:0;}
+    .res-cell{padding:10px 12px;border-right:1px solid var(--border);border-bottom:1px solid var(--border);}
+    .res-cell:last-child{border-right:none;}
+    .res-lbl{font-family:var(--mono);font-size:0.52rem;letter-spacing:0.12em;text-transform:uppercase;color:var(--muted);display:block;margin-bottom:3px;}
+    .res-val{font-family:var(--serif);font-size:1.15rem;font-weight:700;color:#fff;display:block;}
+    .res-input{background:transparent;border:none;font-family:var(--serif);font-size:1.15rem;font-weight:700;color:#fff;width:100%;}
+    .res-input:focus{outline:none;border-bottom:1px solid var(--red);}
+    .res-input::-webkit-inner-spin-button{-webkit-appearance:none;}
+    .bonus-row{display:flex;flex-wrap:wrap;align-items:center;gap:4px;padding:6px 14px 10px;}
+    .bonus-lbl{font-family:var(--mono);font-size:0.52rem;letter-spacing:0.12em;text-transform:uppercase;color:var(--muted);margin-right:2px;}
+    .b-chip{font-family:var(--mono);font-size:0.62rem;background:var(--red-dim);border:1px solid var(--red-border);color:#ffbbbb;border-radius:3px;padding:1px 6px;}
+    .row-attrs{background:var(--card);border:1px solid var(--border);border-radius:8px;padding:10px 14px;}
+    .attrs-inner{display:grid;grid-template-columns:repeat(3,1fr) 2px repeat(3,1fr) 2px repeat(3,1fr);gap:6px;align-items:stretch;}
+    .attr-sep{background:var(--border2);border-radius:1px;align-self:stretch;}
+    .attr-card{background:rgba(255,255,255,0.02);border:1px solid var(--border);border-radius:6px;padding:8px 6px;text-align:center;transition:border-color 0.2s;position:relative;}
+    .attr-card:hover{border-color:rgba(255,51,51,0.25);}
+    .attr-em{font-size:1.1rem;display:block;margin-bottom:2px;}
+    .attr-lbl{font-family:var(--mono);font-size:0.52rem;letter-spacing:0.1em;text-transform:uppercase;color:var(--muted);display:block;margin-bottom:3px;}
+    .attr-num{font-family:var(--serif);font-size:1.5rem;font-weight:700;color:#fff;line-height:1;}
+    .attr-num.boosted{color:var(--red);text-shadow:0 0 8px var(--red-glow);}
+    .attr-base-lbl{font-family:var(--mono);font-size:0.5rem;color:rgba(255,51,51,0.6);margin-top:2px;display:block;}
+    .row-skills{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;}
+    .skill-col{background:var(--card);border:1px solid var(--border);border-radius:8px;overflow:hidden;}
+    .skill-col-header{padding:7px 12px;border-bottom:1px solid var(--border);background:rgba(255,51,51,0.03);font-family:var(--mono);font-size:0.58rem;letter-spacing:0.2em;text-transform:uppercase;color:var(--red);display:flex;align-items:center;gap:6px;}
+    .skill-col-body{padding:6px 8px;}
+    .skill-row{display:flex;align-items:center;gap:6px;padding:4px 6px;border-radius:3px;transition:background 0.15s;}
+    .skill-row:hover{background:rgba(255,255,255,0.03);}
+    .sk-name{flex:1;font-size:0.82rem;font-weight:500;color:#8899aa;}
+    .sk-dots{display:flex;gap:2px;}
+    .dot{width:8px;height:8px;border-radius:1px;border:1px solid rgba(255,255,255,0.08);}
+    .dot.filled{background:var(--red);border-color:var(--red);}
+    .dot.bonus{background:rgba(255,51,51,0.2);border-color:rgba(255,51,51,0.45);}
+    .sk-num{font-family:var(--mono);font-size:0.7rem;color:var(--text);min-width:14px;text-align:right;}
+    .sk-num.boosted{color:var(--red);}
+    .row-ability{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
+    .ability-card{background:var(--card);border:1px solid var(--border);border-radius:8px;overflow:hidden;}
+    .ability-card.gold-card{border-color:rgba(201,168,76,0.2);}
+    .ability-card.red-card{border-color:var(--red-border);}
+    .ability-header{padding:7px 14px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:8px;}
+    .ability-badge-gold{font-family:var(--mono);font-size:0.55rem;letter-spacing:0.15em;text-transform:uppercase;color:var(--gold);background:rgba(201,168,76,0.1);border:1px solid rgba(201,168,76,0.25);padding:1px 7px;border-radius:3px;}
+    .ability-badge-red{font-family:var(--mono);font-size:0.55rem;letter-spacing:0.15em;text-transform:uppercase;color:#ff8080;background:var(--red-dim);border:1px solid var(--red-border);padding:1px 7px;border-radius:3px;}
+    .ability-name{font-family:var(--serif);font-size:0.85rem;color:#fff;}
+    .ability-body{padding:10px 14px;}
+    .ability-desc{font-size:0.82rem;color:#8899aa;line-height:1.6;}
+    .equip-panel{position:relative;z-index:1;max-width:1440px;margin:0 auto;padding:16px 20px 40px;display:flex;flex-direction:column;gap:12px;}
+    .equip-top{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
+    .styled-textarea{width:100%;background:rgba(255,255,255,0.02);border:1px solid var(--border);border-radius:5px;color:var(--text);font-family:var(--cond);font-size:0.88rem;padding:8px 10px;resize:vertical;min-height:60px;transition:border-color 0.2s;line-height:1.5;}
+    .styled-textarea:focus{outline:none;border-color:var(--red-border);}
+    .sec-lbl{font-family:var(--mono);font-size:0.55rem;letter-spacing:0.18em;text-transform:uppercase;color:var(--muted);display:block;margin-bottom:6px;}
+    .inv-table{width:100%;border-collapse:collapse;}
+    .inv-table th{font-family:var(--mono);font-size:0.55rem;letter-spacing:0.15em;text-transform:uppercase;color:var(--muted);padding:6px 10px;border-bottom:1px solid var(--border);text-align:left;background:rgba(255,51,51,0.02);}
+    .inv-table td{padding:6px 10px;border-bottom:1px solid rgba(255,255,255,0.03);font-size:0.83rem;}
+    .inv-table tr:hover td{background:rgba(255,255,255,0.02);}
+    .inv-input{background:transparent;border:none;color:var(--text);font-family:var(--cond);font-size:0.83rem;width:100%;}
+    .inv-input:focus{outline:none;border-bottom:1px solid var(--red-border);}
+    .add-row-btn{margin-top:8px;padding:6px 14px;background:transparent;border:1px dashed rgba(255,51,51,0.25);border-radius:4px;color:var(--muted);font-family:var(--mono);font-size:0.65rem;letter-spacing:0.1em;cursor:pointer;transition:all 0.2s;width:100%;}
+    .add-row-btn:hover{border-color:var(--red);color:var(--red);}
+    .del-btn{background:transparent;border:none;color:var(--muted);cursor:pointer;font-size:0.8rem;padding:0 4px;transition:color 0.15s;}
+    .del-btn:hover{color:#ef4444;}
+    .historia-panel{position:relative;z-index:1;max-width:900px;margin:0 auto;padding:16px 20px 40px;display:flex;flex-direction:column;gap:12px;}
+    .counter{font-family:var(--mono);font-size:0.62rem;color:var(--muted);text-align:right;margin-top:3px;}
+    .nen-panel{position:relative;z-index:1;display:flex;align-items:center;justify-content:center;min-height:calc(100vh - 96px);}
+    .nen-locked{text-align:center;padding:3rem 2rem;max-width:460px;}
+    .nen-aura{width:120px;height:120px;border-radius:50%;margin:0 auto 2rem;background:radial-gradient(circle,rgba(126,200,227,0.15) 0%,transparent 70%);border:1px solid rgba(126,200,227,0.15);display:flex;align-items:center;justify-content:center;font-size:3rem;animation:auraPulse 3s ease-in-out infinite;}
+    @keyframes auraPulse{0%,100%{box-shadow:0 0 20px rgba(126,200,227,0.1);transform:scale(1);}50%{box-shadow:0 0 50px rgba(126,200,227,0.2);transform:scale(1.04);}}
+    .nen-locked-title{font-family:var(--serif);font-size:1.5rem;color:#fff;margin-bottom:0.6rem;letter-spacing:0.05em;}
+    .nen-locked-sub{font-family:var(--mono);font-size:0.72rem;letter-spacing:0.15em;text-transform:uppercase;color:var(--blue);margin-bottom:1rem;display:block;}
+    .nen-locked-desc{font-size:0.88rem;color:var(--muted);line-height:1.7;}
+    .nen-lvl-badge{display:inline-block;margin-top:1.5rem;font-family:var(--mono);font-size:0.68rem;letter-spacing:0.2em;text-transform:uppercase;color:rgba(126,200,227,0.5);border:1px solid rgba(126,200,227,0.15);border-radius:99px;padding:4px 16px;}
+    #toast{position:fixed;bottom:1.5rem;right:1.5rem;z-index:9999;padding:0.75rem 1.25rem;border-radius:5px;font-family:var(--mono);font-size:0.75rem;opacity:0;transition:opacity 0.3s;border-left:3px solid;pointer-events:none;}
+    ::-webkit-scrollbar{width:3px;}
+    ::-webkit-scrollbar-thumb{background:rgba(255,51,51,0.25);border-radius:2px;}
+    .ficha-main,.equip-panel,.historia-panel,.nen-panel{animation:fadeUp 0.35s ease both;}
+    @keyframes fadeUp{from{opacity:0;transform:translateY(8px);}to{opacity:1;transform:translateY(0);}}
+  </style>
+</head>
+<body>
+
+<nav class="ficha-nav">
+  <span class="nav-brand">✦ Crónicas</span>
+  <span class="nav-charname" id="nav-charname">—</span>
+  <span class="save-ok" id="save-ok">✓ guardado</span>
+  <div class="theme-switcher">
+    <div class="theme-dot dot-dark active" onclick="setTheme('dark',this)" title="Oscuro"></div>
+    <div class="theme-dot dot-parchment" onclick="setTheme('parchment',this)" title="Pergamino"></div>
+    <div class="theme-dot dot-selva" onclick="setTheme('selva',this)" title="Selva"></div>
+  </div>
+  <div class="nav-sep"></div>
+  <button class="icon-btn" onclick="history.back()" title="Volver"><i class="ri-arrow-left-line"></i></button>
+  <button class="icon-btn" onclick="guardarCambios()" title="Guardar"><i class="ri-save-line"></i></button>
+  <button class="icon-btn danger" onclick="confirmarEliminar()" title="Eliminar"><i class="ri-delete-bin-line"></i></button>
+</nav>
+
+<div class="tab-bar">
+  <button class="tab-btn active" onclick="switchTab('ficha',this)"><i class="ri-user-3-line"></i> Ficha</button>
+  <button class="tab-btn" onclick="switchTab('equipo',this)"><i class="ri-archive-2-line"></i> Equipo</button>
+  <button class="tab-btn" onclick="switchTab('historia',this)"><i class="ri-quill-pen-line"></i> Historia</button>
+  <button class="tab-btn" onclick="switchTab('nen',this)"><i class="ri-fire-line"></i> Nen</button>
+</div>
+
+<div class="tab-panel active" id="tab-ficha">
+<div class="ficha-main">
+  <div class="row-top">
+    <div class="fc">
+      <div class="fc-header"><i class="ri-user-line" style="color:var(--muted);font-size:0.8rem;"></i><span class="fc-title">Identidad</span></div>
+      <div class="identity-grid">
+        <div class="avatar-level-wrap">
+          <div class="avatar-box" onclick="document.getElementById('avatar-upload').click()">
+            <img id="avatar-img" src="../../../assets/default-avatar.png" alt="Avatar">
+            <div class="avatar-overlay"><i class="ri-camera-line"></i></div>
+            <input type="file" id="avatar-upload" accept="image/*" style="display:none" onchange="previewImage(this)">
+          </div>
+          <div class="avatar-level-badge" id="avatar-nivel">1</div>
+        </div>
+        <div class="id-stack">
+          <div class="char-bigname" id="char-bigname">—</div>
+          <div id="id-cultura" style="font-family:var(--cond);font-size:1rem;font-weight:600;letter-spacing:0.08em;color:var(--accent);margin-bottom:2px;">—</div>
+          <div id="id-camino" style="font-family:var(--mono);font-size:0.65rem;letter-spacing:0.12em;color:var(--blue);margin-bottom:6px;">—</div>
+          <div id="id-pills"></div>
+        </div>
+      </div>
+    </div>
+    <div class="fc">
+      <div class="fc-header"><i class="ri-shield-flash-line" style="color:var(--muted);font-size:0.8rem;"></i><span class="fc-title">Estado</span></div>
+      <div class="combat-top">
+        <div class="big-stat red-stat"><span class="big-stat-lbl">Puntos de Aguante</span><span class="big-stat-val" id="pa-val">0</span></div>
+        <div class="big-stat"><span class="big-stat-lbl">Iniciativa</span><span class="big-stat-val" id="ini-val">0</span></div>
+      </div>
+      <div class="combat-bottom">
+        <span class="patemp-label">PA Temporales</span>
+        <div class="counter-row">
+          <button class="ctrl-btn" onclick="changePA(-1)">−</button>
+          <input type="number" id="pa-temp-input" value="0" class="pa-num">
+          <button class="ctrl-btn" onclick="changePA(1)">+</button>
+        </div>
+      </div>
+    </div>
+    <div class="fc">
+      <div class="fc-header"><i class="ri-heart-pulse-line" style="color:var(--muted);font-size:0.8rem;"></i><span class="fc-title">Salud y Recursos</span></div>
+      <div class="health-states" id="health-states">
+        <div class="hs" data-state="sano" onclick="setHealth('sano')">Sano</div>
+        <div class="hs" data-state="herido" onclick="setHealth('herido')">Herido</div>
+        <div class="hs" data-state="grave" onclick="setHealth('grave')">Grave</div>
+        <div class="hs" data-state="critico" onclick="setHealth('critico')">Crítico</div>
+        <div class="hs" data-state="ko" onclick="setHealth('ko')">KO</div>
+      </div>
+      <div class="resources-grid">
+        <div class="res-cell"><span class="res-lbl">XP Total</span><span class="res-val" id="xp-val">0</span></div>
+        <div class="res-cell"><span class="res-lbl">XP Gastada</span><span class="res-val" id="xpg-val">0</span></div>
+        <div class="res-cell"><span class="res-lbl">💰 Jenny</span><input type="number" class="res-input" id="dinero-input" value="0"></div>
+      </div>
+      <div class="bonus-row">
+        <span class="bonus-lbl" style="color:var(--bonus-color);">Bonos</span>
+        <div id="bonus-chips"></div>
+      </div>
+      <div class="bonus-row" id="penalty-row" style="display:none;">
+        <span class="bonus-lbl" style="color:#ff6060;">Penalizadores</span>
+        <div id="penalty-chips"></div>
+      </div>
+    </div>
+  </div>
+  <div class="row-attrs"><div class="attrs-inner" id="attrs-inner"></div></div>
+  <div class="row-skills" id="row-skills"></div>
+  <div class="row-ability" id="row-ability"></div>
+</div>
+</div>
+
+<div class="tab-panel" id="tab-equipo">
+<div class="equip-panel">
+  <div class="equip-top">
+    <div class="fc">
+      <div class="fc-header"><i class="ri-sword-line" style="color:var(--muted);font-size:0.8rem;"></i><span class="fc-title">Armas</span></div>
+      <div class="fc-body">
+        <table class="inv-table"><thead><tr><th>Nombre</th><th>Tipo</th><th>Daño</th><th>Notas</th><th></th></tr></thead><tbody id="weapons-body"></tbody></table>
+        <button class="add-row-btn" onclick="addWeaponRow()">+ Agregar arma</button>
+      </div>
+    </div>
+    <div class="fc">
+      <div class="fc-header"><i class="ri-first-aid-kit-line" style="color:var(--muted);font-size:0.8rem;"></i><span class="fc-title">Objetos y Consumibles</span></div>
+      <div class="fc-body">
+        <table class="inv-table"><thead><tr><th>Objeto</th><th>Cant.</th><th>Descripción</th><th></th></tr></thead><tbody id="items-body"></tbody></table>
+        <button class="add-row-btn" onclick="addItemRow()">+ Agregar objeto</button>
+      </div>
+    </div>
+  </div>
+  <div class="fc">
+    <div class="fc-header"><i class="ri-archive-2-line" style="color:var(--muted);font-size:0.8rem;"></i><span class="fc-title">Equipo General</span></div>
+    <div class="fc-body">
+      <span class="sec-lbl">Descripción de equipo, ropa, herramientas, etc.</span>
+      <textarea class="styled-textarea" id="equipo-input" style="min-height:80px;" placeholder="Ropa de viaje, cuerda, antorcha..."></textarea>
+    </div>
+  </div>
+</div>
+</div>
+
+<div class="tab-panel" id="tab-historia">
+<div class="historia-panel">
+  <div class="fc">
+    <div class="fc-header"><i class="ri-user-heart-line" style="color:var(--muted);font-size:0.8rem;"></i><span class="fc-title">Apariencia</span></div>
+    <div class="fc-body"><textarea class="styled-textarea" id="apariencia-input" style="min-height:70px;" placeholder="Describe la apariencia física de tu personaje..."></textarea></div>
+  </div>
+  <div class="fc">
+    <div class="fc-header"><i class="ri-focus-3-line" style="color:var(--muted);font-size:0.8rem;"></i><span class="fc-title">Objetivos</span></div>
+    <div class="fc-body" style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
+      <div><span class="sec-lbl">🎯 Objetivo Actual</span><textarea class="styled-textarea" id="obj-input" placeholder="Meta a corto plazo..."></textarea></div>
+      <div><span class="sec-lbl">👑 Objetivo de Vida</span><textarea class="styled-textarea" id="vida-obj-input" placeholder="Tu ambición mayor..."></textarea></div>
+    </div>
+  </div>
+  <div class="fc">
+    <div class="fc-header"><i class="ri-quill-pen-line" style="color:var(--muted);font-size:0.8rem;"></i><span class="fc-title">Historia del Personaje</span></div>
+    <div class="fc-body">
+      <textarea class="styled-textarea" id="historia-input" maxlength="2000" style="min-height:200px;" placeholder="Escribe la historia de tu personaje..."></textarea>
+      <div class="counter" id="char-counter">0 / 2000</div>
+    </div>
+  </div>
+  <div class="fc">
+    <div class="fc-header"><i class="ri-sticky-note-line" style="color:var(--muted);font-size:0.8rem;"></i><span class="fc-title">Notas del Director</span></div>
+    <div class="fc-body"><textarea class="styled-textarea" id="notas-input" style="min-height:80px;" placeholder="Notas privadas del DJ..."></textarea></div>
+  </div>
+</div>
+</div>
+
+<div class="tab-panel" id="tab-nen">
+<div class="nen-panel">
+  <div class="nen-locked">
+    <div class="nen-aura">✦</div>
+    <div class="nen-locked-title">El Nen permanece dormido</div>
+    <span class="nen-locked-sub">Habilidad bloqueada</span>
+    <p class="nen-locked-desc">El Nen no es algo que se aprende en un libro ni se hereda por sangre.<br>Se despierta cuando el cuerpo y la mente han alcanzado su límite...<br>y lo han superado.</p>
+    <div class="nen-lvl-badge">🔒 Alcanza el Nivel 10 para desbloquear esta pestaña</div>
+  </div>
+</div>
+</div>
+
+<div id="toast"></div>
+
+<script type="module">
+import { db, auth } from "../../../js/firebase-config.js";
+import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-auth.js";
+import { doc, getDoc, updateDoc, deleteDoc, serverTimestamp }
+  from "https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore.js";
+
+// ── ID del personaje desde URL ──
+const charId = new URLSearchParams(window.location.search).get('id');
+let p = null;
+
+// ── Helpers ──
+function norm(s) { return String(s).toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'').trim(); }
+function getAttr(obj,key) {
+  if(!obj) return 1;
+  if(obj[key]!==undefined) return Math.max(1,parseInt(obj[key])||1);
+  const nk=norm(key);
+  for(const [k,v] of Object.entries(obj)) if(norm(k)===nk) return Math.max(1,parseInt(v)||1);
+  return 1;
+}
+function getSkill(obj,key) {
+  if(!obj) return 0;
+  if(obj[key]!==undefined) return parseInt(obj[key])||0;
+  const nk=norm(key);
+  for(const [k,v] of Object.entries(obj)) if(norm(k)===nk) return parseInt(v)||0;
+  return 0;
+}
+function getBonusFor(name,type) {
+  return (p.bonusActivos||[]).filter(b=>b.type===type&&norm(b.key)===norm(name)).reduce((s,b)=>s+(b.val||0),0);
+}
+
+// ── Temas ──
+const THEMES=['dark','parchment','selva'];
+window.setTheme = function(name,dotEl) {
+  document.body.className = name==='dark'?'':'theme-'+name;
+  document.querySelectorAll('.theme-dot').forEach(d=>d.classList.remove('active'));
+  if(dotEl) dotEl.classList.add('active');
+  else document.querySelectorAll('.theme-dot')[THEMES.indexOf(name)]?.classList.add('active');
+  localStorage.setItem('cronicas-theme',name);
+};
+(()=>{ setTheme(localStorage.getItem('cronicas-theme')||'dark',null); })();
+
+// ── Tabs ──
+window.switchTab = function(name,btn) {
+  document.querySelectorAll('.tab-panel').forEach(p=>p.classList.remove('active'));
+  document.querySelectorAll('.tab-btn').forEach(b=>b.classList.remove('active'));
+  document.getElementById('tab-'+name).classList.add('active');
+  btn.classList.add('active');
+};
+
+// ── Render ──
+const ATTR_GROUPS=[
+  {label:'Físicos',  attrs:[{k:'fuerza',l:'Fuerza',i:'✊'},{k:'destreza',l:'Destreza',i:'⚡'},{k:'resistencia',l:'Resistencia',i:'🛡️'}]},
+  {label:'Sociales', attrs:[{k:'carisma',l:'Carisma',i:'💛'},{k:'manipulacion',l:'Manipulación',i:'🎭'},{k:'compostura',l:'Compostura',i:'🧘'}]},
+  {label:'Mentales', attrs:[{k:'percepcion',l:'Percepción',i:'👁️'},{k:'inteligencia',l:'Inteligencia',i:'🧠'},{k:'astucia',l:'Astucia',i:'♟️'}]}
+];
+const SKILL_GROUPS=[
+  {label:'Combate',         icon:'ri-sword-line',       skills:['Pelea','Esquivar','Armas Cuerpo a Cuerpo','Armas a Distancia','Armas de Fuego']},
+  {label:'Supervivencia',   icon:'ri-compass-3-line',   skills:['Alerta','Sigilo','Callejeo / Orientación','Supervivencia','Atletismo','Seguridad','Reparación']},
+  {label:'Personalidad',    icon:'ri-emotion-line',     skills:['Empatía','Subterfugio','Liderazgo','Intimidación','Trato con Animales','Interpretación']},
+  {label:'Profesión/Oficio',icon:'ri-briefcase-2-line', skills:['Investigación','Medicina','Academicismo','Informática','Conducir','Política']}
+];
+
+function renderIdentidad() {
+  const cultLabel = p.linaje ? p.cultura+' · '+p.linaje : (p.cultura||'—');
+  document.getElementById('nav-charname').textContent = p.nombre||'—';
+  document.getElementById('char-bigname').textContent = p.nombre||'—';
+  document.getElementById('avatar-nivel').textContent = p.nivel||1;
+  document.getElementById('id-cultura').textContent   = cultLabel;
+  document.getElementById('id-camino').textContent    = p.camino ? '⚔ '+p.camino : (parseInt(p.nivel)||1)<3?'🔒 Camino nivel 3+':'Sin camino';
+  if(p.avatar) document.getElementById('avatar-img').src=p.avatar;
+  document.getElementById('id-pills').innerHTML=[
+    {l:'Jugador',v:p.jugador||'—'},{l:'Edad',v:p.edad?p.edad+' años':'—'}
+  ].map(r=>`<span class="id-pill"><span class="id-pill-lbl">${r.l}</span><span class="id-pill-val">${r.v}</span></span>`).join('');
+}
+
+function renderAttrs(attrsObj) {
+  let html='';
+  ATTR_GROUPS.forEach((g,gi)=>{
+    if(gi>0) html+=`<div class="attr-sep"></div>`;
+    g.attrs.forEach(a=>{
+      const base=getAttr(attrsObj,a.k), bonus=getBonusFor(a.k,'attr'), eff=base+bonus;
+      html+=`<div class="attr-card"><span class="attr-em">${a.i}</span><span class="attr-lbl">${a.l}</span><span class="attr-num ${bonus>0?'boosted':''}">${eff}</span>${bonus>0?`<span class="attr-base-lbl">base ${base}</span>`:''}</div>`;
+    });
+  });
+  document.getElementById('attrs-inner').innerHTML=html;
+}
+
+function renderSkills(skillsObj) {
+  document.getElementById('row-skills').innerHTML=SKILL_GROUPS.map(g=>`
+    <div class="skill-col">
+      <div class="skill-col-header"><i class="${g.icon}"></i>${g.label}</div>
+      <div class="skill-col-body">
+        ${g.skills.map(s=>{
+          const base=getSkill(skillsObj,s),bonus=getBonusFor(s,'skill'),eff=base+bonus;
+          const dots=[1,2,3,4,5].map(d=>`<div class="dot ${base>=d?'filled':''} ${(!base>=d&&eff>=d)?'bonus':''}"></div>`).join('');
+          return `<div class="skill-row"><span class="sk-name">${s}</span><div class="sk-dots">${dots}</div><span class="sk-num ${bonus>0?'boosted':''}">${eff}</span></div>`;
+        }).join('')}
+      </div>
+    </div>`).join('');
+}
+
+function renderAbility() {
+  const ab=p.habilidadCultura;
+  if(!ab||!ab.name){document.getElementById('row-ability').innerHTML='';return;}
+  document.getElementById('row-ability').innerHTML=`
+    <div class="ability-card gold-card"><div class="ability-header"><span class="ability-badge-gold">✦ Habilidad Única</span><span class="ability-name">${ab.name}</span></div><div class="ability-body"><div class="ability-desc">${ab.desc}</div></div></div>
+    <div class="ability-card red-card"><div class="ability-header"><span class="ability-badge-red">⚠ Debilidad</span></div><div class="ability-body"><div class="ability-desc">${ab.weakness}</div></div></div>`;
+}
+
+function renderCombate(attrsObj,skillsObj) {
+  const res=getAttr(attrsObj,'resistencia')+getBonusFor('resistencia','attr');
+  const per=getAttr(attrsObj,'percepcion')+getBonusFor('percepcion','attr');
+  const alerta=getSkill(skillsObj,'Alerta')+getBonusFor('Alerta','skill');
+  document.getElementById('pa-val').textContent  = res+3;
+  document.getElementById('ini-val').textContent = per+alerta;
+}
+
+function renderHealth() {
+  const est=p.estadoSalud||'sano';
+  document.querySelectorAll('.hs').forEach(el=>{
+    el.className='hs';
+    if(el.dataset.state===est) el.classList.add('hs-'+est);
+  });
+}
+
+function renderRecursos() {
+  document.getElementById('xp-val').textContent  = p.xpTotal  ||0;
+  document.getElementById('xpg-val').textContent = p.xpGastada||0;
+  document.getElementById('dinero-input').value  = p.dinero   ||0;
+  document.getElementById('pa-temp-input').value = p.paTemporal||0;
+}
+
+function renderBonuses() {
+  const ALBL={fuerza:'Fuerza',destreza:'Destreza',resistencia:'Resistencia',carisma:'Carisma',manipulacion:'Manipulación',compostura:'Compostura',percepcion:'Percepción',inteligencia:'Inteligencia',astucia:'Astucia'};
+  const bs=p.bonusActivos||[];
+  document.getElementById('bonus-chips').innerHTML=bs.length
+    ?bs.map(b=>`<span class="b-chip">${b.type==='attr'?(ALBL[b.key]||b.key):b.key} <strong>+${b.val}</strong></span>`).join('')
+    :'<span style="font-size:0.72rem;color:var(--muted);">—</span>';
+}
+
+function renderPenalties() {
+  const PENALTIES={sano:null,herido:-1,grave:-2,critico:-3,ko:'INCAPACITADO'};
+  const penalty=PENALTIES[p.estadoSalud||'sano'];
+  const row=document.getElementById('penalty-row');
+  if(!penalty){row.style.display='none';return;}
+  row.style.display='flex';
+  document.getElementById('penalty-chips').innerHTML = penalty==='INCAPACITADO'
+    ?`<span class="p-chip" style="font-weight:700;">⚠ INCAPACITADO</span>`
+    :`<span class="p-chip">Atributos <strong>${penalty}</strong></span><span class="p-chip">Habilidades <strong>${penalty}</strong></span>`;
+}
+
+// ── Inventario ──
+window.addWeaponRow = function(data={}) {
+  const tb=document.getElementById('weapons-body'), tr=document.createElement('tr');
+  tr.innerHTML=`<td><input class="inv-input" placeholder="Nombre" value="${data.nombre||''}"></td><td><input class="inv-input" placeholder="Tipo" value="${data.tipo||''}"></td><td><input class="inv-input" placeholder="—" value="${data.dano||''}" style="width:50px;"></td><td><input class="inv-input" placeholder="Notas" value="${data.notas||''}"></td><td><button class="del-btn" onclick="this.closest('tr').remove();saveInventory()">✕</button></td>`;
+  tr.querySelectorAll('input').forEach(i=>i.addEventListener('change',saveInventory));
+  tb.appendChild(tr);
+};
+
+window.addItemRow = function(data={}) {
+  const tb=document.getElementById('items-body'), tr=document.createElement('tr');
+  tr.innerHTML=`<td><input class="inv-input" placeholder="Objeto" value="${data.nombre||''}"></td><td><input class="inv-input" placeholder="1" value="${data.cant||''}" style="width:40px;"></td><td><input class="inv-input" placeholder="Descripción" value="${data.desc||''}"></td><td><button class="del-btn" onclick="this.closest('tr').remove();saveInventory()">✕</button></td>`;
+  tr.querySelectorAll('input').forEach(i=>i.addEventListener('change',saveInventory));
+  tb.appendChild(tr);
+};
+
+function saveInventory() {
+  p.armas   = [...document.querySelectorAll('#weapons-body tr')].map(tr=>{const i=tr.querySelectorAll('input');return{nombre:i[0]?.value,tipo:i[1]?.value,dano:i[2]?.value,notas:i[3]?.value};});
+  p.objetos = [...document.querySelectorAll('#items-body tr')].map(tr=>{const i=tr.querySelectorAll('input');return{nombre:i[0]?.value,cant:i[1]?.value,desc:i[2]?.value};});
+  autoSave();
+}
+
+function loadInventory() {
+  (p.armas  ||[]).forEach(w=>addWeaponRow(w));
+  (p.objetos||[]).forEach(i=>addItemRow(i));
+  document.getElementById('equipo-input').value=p.equipo||'';
+}
+
+// ── Save a Firestore ──
+function recopilarCambios() {
+  return {
+    objCurrent:  document.getElementById('obj-input')?.value        ||'',
+    objLife:     document.getElementById('vida-obj-input')?.value   ||'',
+    historia:    document.getElementById('historia-input')?.value   ||'',
+    apariencia:  document.getElementById('apariencia-input')?.value ||'',
+    notasDJ:     document.getElementById('notas-input')?.value      ||'',
+    dinero:      parseInt(document.getElementById('dinero-input')?.value)||0,
+    equipo:      document.getElementById('equipo-input')?.value     ||'',
+    paTemporal:  parseInt(document.getElementById('pa-temp-input')?.value)||0,
+    armas:       p.armas   || [],
+    objetos:     p.objetos || [],
+    estadoSalud: p.estadoSalud || 'sano',
+    avatar:      p.avatar  || null,
+  };
+}
+
+async function autoSave() {
+  const cambios = recopilarCambios();
+  Object.assign(p, cambios);
+  try {
+    await updateDoc(doc(db,'personajes',charId), {...cambios, updatedAt: serverTimestamp()});
+  } catch(e) { console.error('autoSave error:', e); }
+}
+
+window.guardarCambios = async function() {
+  await autoSave();
+  const fb=document.getElementById('save-ok');
+  fb.classList.add('show');
+  setTimeout(()=>fb.classList.remove('show'),2000);
+  showToast('Cambios guardados.','success');
+};
+
+window.confirmarEliminar = async function() {
+  if(confirm(`¿Eliminar a "${p.nombre}"? Esta acción no se puede deshacer.`)) {
+    try {
+      await deleteDoc(doc(db,'personajes',charId));
+      history.back();
+    } catch(e) { showToast('Error al eliminar.','error'); }
+  }
+};
+
+// ── Misc ──
+window.setHealth = function(est) { p.estadoSalud=est; renderHealth(); renderPenalties(); autoSave(); };
+window.changePA  = function(d) {
+  const el=document.getElementById('pa-temp-input');
+  el.value=Math.max(0,(parseInt(el.value)||0)+d);
+  p.paTemporal=parseInt(el.value); autoSave();
+};
+
+window.previewImage = function(input) {
+  if(!input.files||!input.files[0]) return;
+  const reader=new FileReader();
+  reader.onload=e=>{
+    const img=new Image();
+    img.onload=()=>{
+      const c=document.createElement('canvas'); c.width=110; c.height=138;
+      c.getContext('2d').drawImage(img,0,0,110,138);
+      const url=c.toDataURL('image/jpeg',0.8);
+      document.getElementById('avatar-img').src=url;
+      p.avatar=url; autoSave();
+    };
+    img.src=e.target.result;
+  };
+  reader.readAsDataURL(input.files[0]);
+};
+
+function showToast(msg,type) {
+  const t=document.getElementById('toast');
+  const c={success:{bg:'rgba(26,74,46,0.95)',b:'#2d7a4a',c:'#7ad49a'},error:{bg:'rgba(80,19,19,0.95)',b:'#ff3333',c:'#ff8080'}}[type]||{bg:'rgba(20,26,40)',b:'#475569',c:'#e2e8f0'};
+  Object.assign(t.style,{background:c.bg,borderColor:c.b,color:c.c,opacity:'1'});
+  t.textContent=msg; clearTimeout(t._t);
+  t._t=setTimeout(()=>t.style.opacity='0',2800);
+}
+
+// ── Boot: cargar desde Firestore ──
+onAuthStateChanged(auth, async (user) => {
+  if(!user) { window.location.href='../../login.html'; return; }
+  if(!charId) { showToast('ID de personaje no encontrado.','error'); return; }
+
+  try {
+    const snap = await getDoc(doc(db,'personajes',charId));
+    if(!snap.exists()) { showToast('Personaje no encontrado.','error'); return; }
+
+    p = { id: snap.id, ...snap.data() };
+
+    const attrs  = p.atributosEfectivos  || p.atributos  || {};
+    const skills = p.habilidadesEfectivas || p.habilidades || {};
+
+    renderIdentidad();
+    renderAttrs(attrs);
+    renderSkills(skills);
+    renderAbility();
+    renderCombate(attrs, skills);
+    renderHealth();
+    renderRecursos();
+    renderBonuses();
+    renderPenalties();
+    loadInventory();
+
+    document.getElementById('obj-input').value        = p.objCurrent||p.objetivoActual||'';
+    document.getElementById('vida-obj-input').value   = p.objLife||p.objetivoVida||'';
+    document.getElementById('historia-input').value   = p.historia||'';
+    document.getElementById('apariencia-input').value = p.apariencia||'';
+    document.getElementById('notas-input').value      = p.notasDJ||'';
+    document.getElementById('char-counter').textContent = `${(p.historia||'').length} / 2000`;
+
+    ['obj-input','vida-obj-input','historia-input','apariencia-input','notas-input','dinero-input','equipo-input'].forEach(id=>{
+      const el=document.getElementById(id);
+      if(!el) return;
+      el.addEventListener('input',()=>{
+        if(id==='historia-input') document.getElementById('char-counter').textContent=`${el.value.length} / 2000`;
+        autoSave();
+      });
+    });
+    document.getElementById('pa-temp-input').addEventListener('change', autoSave);
+
+  } catch(e) {
+    console.error(e);
+    showToast('Error al cargar el personaje.','error');
+  }
+});
+</script>
+</body>
+</html>

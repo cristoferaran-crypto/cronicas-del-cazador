@@ -1,0 +1,642 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Unirse a Campaña | Crónicas del Cazador</title>
+  <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700;800&family=Raleway:wght@300;400;500;600&display=swap" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/remixicon@3.5.0/fonts/remixicon.css" rel="stylesheet">
+  <style>
+    :root {
+      --rojo: #c0392b; --rojo-hover: #e74c3c; --rojo-glow: rgba(192,57,43,0.35);
+      --negro: #0a0a0c; --sup: #111117; --sup2: #16161e; --sup3: #1e1e28;
+      --borde: rgba(255,255,255,0.07); --borde-r: rgba(192,57,43,0.4);
+      --texto: #e8e2d9; --muted: #8a8490; --sec: #b0aab8;
+      --dorado: #c9a84c; --verde: #2ecc71;
+    }
+    *, *::before, *::after { margin:0; padding:0; box-sizing:border-box; }
+    html { scroll-behavior: smooth; }
+    body { font-family:'Raleway',sans-serif; background:var(--negro); color:var(--texto); min-height:100vh; overflow-x:hidden; }
+
+    /* ══ NAVBAR ══ */
+    .navbar {
+      position: fixed; top:0; left:0; right:0; z-index:100;
+      display: flex; align-items:center;
+      padding: 0 32px; height:60px;
+      background: transparent; border-bottom:1px solid transparent;
+      transition: background 0.4s, border-color 0.4s, backdrop-filter 0.4s;
+    }
+    .navbar.scrolled {
+      background: rgba(10,10,12,0.96);
+      border-bottom-color: var(--borde);
+      backdrop-filter: blur(16px);
+    }
+    .logo { display:flex; align-items:center; text-decoration:none; margin-right:auto; }
+    .logo img { height:34px; filter:invert(1) brightness(0.85); mix-blend-mode:screen; transition:filter 0.2s; }
+    .logo:hover img { filter:invert(1) brightness(1) drop-shadow(0 0 8px rgba(192,57,43,0.5)); }
+
+    .nav-back {
+      display:flex; align-items:center; gap:7px;
+      padding:0 16px; height:34px;
+      background:transparent; border:1px solid rgba(255,255,255,0.12);
+      color:var(--sec); font-family:'Raleway',sans-serif;
+      font-size:11px; font-weight:600; letter-spacing:0.1em;
+      text-transform:uppercase; cursor:pointer; text-decoration:none;
+      transition: border-color 0.2s, color 0.2s;
+    }
+    .nav-back:hover { border-color:var(--borde-r); color:var(--texto); }
+
+    /* ══ HERO ══ */
+    .hero {
+      position:relative; height:55vh; min-height:360px;
+      display:flex; align-items:flex-end; overflow:hidden;
+    }
+    .hero-bg {
+      position:absolute; inset:0;
+      background-image: url('../../imagenes/por_uni.png');
+      background-size:cover; background-position:center 30%;
+      transform:scale(1.04); transition:transform 8s ease;
+    }
+    .hero:hover .hero-bg { transform:scale(1); }
+    .hero-overlay {
+      position:absolute; inset:0;
+      background:
+        linear-gradient(to top, rgba(10,10,12,1) 0%, rgba(10,10,12,0.5) 45%, rgba(10,10,12,0.1) 100%),
+        linear-gradient(to right, rgba(10,10,12,0.5) 0%, transparent 60%);
+    }
+    .hero-content {
+      position:relative; z-index:2;
+      padding:0 64px 44px; max-width:640px;
+    }
+    .hero-eyebrow {
+      display:flex; align-items:center; gap:10px; margin-bottom:10px;
+    }
+    .hero-eyebrow-line { width:24px; height:1px; background:var(--rojo); }
+    .hero-eyebrow span {
+      font-size:10px; font-weight:700;
+      letter-spacing:0.3em; text-transform:uppercase; color:var(--rojo);
+    }
+    .hero-titulo {
+      font-family:'Cinzel',serif;
+      font-size:clamp(26px,4vw,48px);
+      font-weight:800; color:var(--texto); line-height:1.05; margin-bottom:10px;
+    }
+    .hero-titulo em { font-style:normal; color:var(--rojo); }
+    .hero-desc { font-size:14px; color:var(--sec); line-height:1.6; }
+
+    /* ══ CONTENIDO ══ */
+    .contenido {
+      position:relative; z-index:1;
+      max-width:860px; margin:0 auto;
+      padding:52px 32px 80px;
+    }
+
+    /* Separador dorado */
+    .contenido::before {
+      content:'';
+      position:absolute; top:0; left:32px; right:32px; height:1px;
+      background:linear-gradient(to right, transparent, var(--rojo), transparent);
+      opacity:0.2;
+    }
+
+    .layout {
+      display:grid; grid-template-columns:1fr 1fr;
+      gap:24px; align-items:start;
+    }
+
+    /* ══ CARD CÓDIGO ══ */
+    .card {
+      background:var(--sup2); border:1px solid var(--borde);
+      border-top:2px solid var(--borde-r);
+    }
+    .card-header {
+      padding:16px 22px; border-bottom:1px solid var(--borde);
+      background:rgba(192,57,43,0.04);
+    }
+    .card-titulo {
+      font-family:'Cinzel',serif; font-size:15px;
+      font-weight:700; color:var(--texto); margin-bottom:3px;
+    }
+    .card-desc { font-size:12px; color:var(--muted); line-height:1.5; }
+    .card-body { padding:22px; }
+
+    /* Input código */
+    .codigo-wrap {
+      display:flex; gap:0; margin-bottom:16px;
+    }
+    .codigo-prefix {
+      height:48px; padding:0 14px;
+      background:rgba(192,57,43,0.08);
+      border:1px solid var(--borde-r); border-right:none;
+      display:flex; align-items:center;
+      font-family:'Cinzel',serif; font-size:15px;
+      font-weight:700; color:var(--rojo); flex-shrink:0;
+    }
+    .codigo-input {
+      flex:1; height:48px; padding:0 14px;
+      background:rgba(255,255,255,0.03);
+      border:1px solid var(--borde);
+      color:var(--texto); font-family:'Cinzel',serif;
+      font-size:18px; font-weight:800;
+      letter-spacing:0.2em; text-transform:uppercase;
+      outline:none; transition:border-color 0.2s, background 0.2s;
+    }
+    .codigo-input::placeholder {
+      color:rgba(138,132,144,0.3); font-size:14px;
+      letter-spacing:0.1em; font-weight:400;
+    }
+    .codigo-input:focus { border-color:var(--borde-r); background:rgba(192,57,43,0.04); }
+
+    /* Preview campaña */
+    .campana-preview {
+      background:rgba(46,204,113,0.05);
+      border:1px solid rgba(46,204,113,0.25);
+      padding:14px 16px; margin-bottom:16px;
+      display:none; animation:fadeIn 0.3s ease;
+    }
+    .campana-preview.visible { display:block; }
+    @keyframes fadeIn { from{opacity:0;transform:translateY(-4px)} to{opacity:1;transform:translateY(0)} }
+
+    .campana-preview-label {
+      font-size:10px; font-weight:700;
+      letter-spacing:0.15em; text-transform:uppercase;
+      color:var(--verde); display:block; margin-bottom:6px;
+    }
+    .campana-preview-nombre {
+      font-family:'Cinzel',serif; font-size:18px;
+      font-weight:700; color:var(--texto);
+    }
+    .campana-preview-director {
+      font-size:12px; color:var(--muted); margin-top:3px;
+    }
+
+    .error-preview {
+      background:rgba(192,57,43,0.06);
+      border:1px solid var(--borde-r);
+      padding:10px 14px; margin-bottom:16px;
+      font-size:13px; color:#ff8080;
+      display:none;
+    }
+    .error-preview.visible { display:block; }
+
+    /* Selector personaje */
+    .personaje-selector {
+      display:none; flex-direction:column; gap:8px;
+      margin-bottom:16px;
+    }
+    .personaje-selector.visible { display:flex; }
+
+    .personaje-card {
+      display:flex; align-items:center; gap:12px;
+      padding:12px 14px;
+      background:var(--sup3); border:1px solid var(--borde);
+      cursor:pointer; transition:border-color 0.2s, background 0.2s;
+      position:relative;
+    }
+    .personaje-card:hover { border-color:var(--borde-r); }
+    .personaje-card.selected {
+      border-color:var(--rojo); background:rgba(192,57,43,0.06);
+    }
+    .personaje-card.selected::after {
+      content:'✓';
+      position:absolute; top:8px; right:10px;
+      width:18px; height:18px; border-radius:50%;
+      background:var(--rojo); color:white;
+      font-size:10px; font-weight:700;
+      display:flex; align-items:center; justify-content:center;
+    }
+    .personaje-avatar {
+      width:38px; height:38px; border-radius:50%;
+      background:rgba(192,57,43,0.1); border:1px solid var(--borde-r);
+      display:flex; align-items:center; justify-content:center;
+      font-family:'Cinzel',serif; font-size:15px;
+      font-weight:700; color:var(--rojo); flex-shrink:0;
+    }
+    .personaje-info { flex:1; }
+    .personaje-nombre {
+      font-family:'Cinzel',serif; font-size:13px;
+      font-weight:700; color:var(--texto); margin-bottom:2px;
+    }
+    .personaje-sub { font-size:11px; color:var(--muted); }
+
+    .empty-personajes {
+      text-align:center; padding:24px;
+      background:var(--sup3); border:1px solid var(--borde);
+      font-size:13px; color:var(--muted);
+    }
+    .empty-personajes i { font-size:24px; display:block; margin-bottom:8px; opacity:0.4; }
+
+    /* Botón unirse */
+    .btn-unirse {
+      width:100%; height:46px;
+      background:var(--rojo); border:none;
+      color:white; font-family:'Cinzel',serif;
+      font-size:13px; font-weight:700;
+      letter-spacing:0.15em; text-transform:uppercase;
+      cursor:pointer; transition:background 0.2s, transform 0.15s;
+      box-shadow:0 4px 16px var(--rojo-glow);
+      display:flex; align-items:center; justify-content:center; gap:8px;
+    }
+    .btn-unirse:hover:not(:disabled) { background:var(--rojo-hover); transform:translateY(-1px); }
+    .btn-unirse:disabled { opacity:0.4; cursor:not-allowed; transform:none; box-shadow:none; }
+
+    /* ══ CARD INFO ══ */
+    .info-card {
+      background:var(--sup2); border:1px solid var(--borde);
+      padding:22px;
+    }
+    .info-titulo {
+      font-family:'Cinzel',serif; font-size:14px;
+      font-weight:700; color:var(--texto); margin-bottom:14px;
+      padding-bottom:10px; border-bottom:1px solid var(--borde);
+      display:flex; align-items:center; gap:8px;
+    }
+    .info-titulo i { color:var(--rojo); font-size:16px; }
+    .info-item {
+      display:flex; align-items:flex-start; gap:10px;
+      padding:8px 0; border-bottom:1px solid rgba(255,255,255,0.03);
+      font-size:13px; color:var(--sec); line-height:1.5;
+    }
+    .info-item:last-child { border-bottom:none; }
+    .info-item i { color:var(--rojo); font-size:14px; margin-top:1px; flex-shrink:0; }
+
+    /* Mis campañas activas */
+    .campanas-activas { margin-top:20px; }
+    .campanas-activas-titulo {
+      font-size:10px; font-weight:700;
+      letter-spacing:0.2em; text-transform:uppercase;
+      color:var(--muted); margin-bottom:10px;
+    }
+    .campana-activa-pill {
+      display:flex; align-items:center; gap:10px;
+      padding:10px 12px; background:var(--sup3);
+      border:1px solid var(--borde); margin-bottom:6px;
+      text-decoration:none; transition:border-color 0.2s;
+    }
+    .campana-activa-pill:hover { border-color:var(--borde-r); }
+    .cap-dot {
+      width:8px; height:8px; border-radius:50%;
+      background:var(--verde); flex-shrink:0;
+      box-shadow:0 0 6px var(--verde); animation:pulse 2s infinite;
+    }
+    @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.4} }
+    .cap-info { flex:1; }
+    .cap-nombre { font-family:'Cinzel',serif; font-size:13px; font-weight:600; color:var(--texto); }
+    .cap-personaje { font-size:11px; color:var(--muted); }
+    .cap-vtt {
+      font-size:10px; font-weight:700; letter-spacing:0.08em;
+      text-transform:uppercase; color:var(--rojo);
+      display:flex; align-items:center; gap:4px;
+    }
+
+    /* Toast */
+    #toast {
+      position:fixed; bottom:24px; right:24px; z-index:9999;
+      padding:12px 20px; border-left:3px solid;
+      font-family:'Raleway',sans-serif; font-size:13px; font-weight:600;
+      opacity:0; transition:opacity 0.3s; pointer-events:none;
+    }
+
+    @media (max-width:768px) {
+      .hero-content { padding:0 24px 36px; }
+      .contenido { padding:40px 16px 60px; }
+      .layout { grid-template-columns:1fr; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- NAVBAR -->
+<nav class="navbar" id="navbar">
+  <a href="../../index.html" class="logo">
+    <img src="../../imagenes/logo.png" alt="CDC">
+  </a>
+  <a href="panel-del-jugador.html" class="nav-back">
+    <i class="ri-arrow-left-line"></i> Menú del Cazador
+  </a>
+</nav>
+
+<!-- HERO -->
+<section class="hero">
+  <div class="hero-bg"></div>
+  <div class="hero-overlay"></div>
+  <div class="hero-content">
+    <div class="hero-eyebrow">
+      <div class="hero-eyebrow-line"></div>
+      <span>Panel del Jugador</span>
+    </div>
+    <h1 class="hero-titulo">Únete a la <em>Aventura</em></h1>
+    <p class="hero-desc">Ingresa el código CDC que te dio tu Director de Juego y elige el personaje con el que quieres participar en la campaña.</p>
+  </div>
+</section>
+
+<!-- CONTENIDO -->
+<div class="contenido">
+  <div class="layout">
+
+    <!-- COLUMNA IZQUIERDA: Formulario -->
+    <div>
+      <div class="card">
+        <div class="card-header">
+          <div class="card-titulo">Ingresar Código de Campaña</div>
+          <div class="card-desc">El Director de Juego te compartió un código CDC único para esta campaña.</div>
+        </div>
+        <div class="card-body">
+
+          <!-- Input código -->
+          <div class="codigo-wrap">
+            <div class="codigo-prefix">CDC-</div>
+            <input class="codigo-input" type="text" id="codigo-input"
+                   placeholder="DQF4888" maxlength="7"
+                   oninput="onCodigoInput(this)">
+          </div>
+          <p style="font-size:11px;color:var(--muted);margin-top:-10px;margin-bottom:14px;">
+            Escribe solo los 7 caracteres después del guión. Ej: <strong style="color:var(--texto);">DQF4888</strong>
+          </p>
+
+          <!-- Preview campaña encontrada -->
+          <div class="campana-preview" id="campana-preview">
+            <span class="campana-preview-label">✓ Campaña encontrada</span>
+            <div class="campana-preview-nombre" id="preview-nombre">—</div>
+            <div class="campana-preview-director" id="preview-director">—</div>
+          </div>
+
+          <!-- Error -->
+          <div class="error-preview" id="error-preview"></div>
+
+          <!-- Selector de personaje -->
+          <div class="personaje-selector" id="personaje-selector">
+            <label style="font-size:11px;font-weight:700;letter-spacing:0.12em;text-transform:uppercase;color:var(--muted);margin-bottom:2px;">
+              ¿Con qué personaje te unes?
+            </label>
+            <div id="lista-personajes"></div>
+          </div>
+
+          <!-- Botón -->
+          <button class="btn-unirse" id="btn-unirse" disabled onclick="unirseACampana()">
+            <i class="ri-login-circle-line"></i> Unirme a la Campaña
+          </button>
+
+        </div>
+      </div>
+    </div>
+
+    <!-- COLUMNA DERECHA: Info + campañas activas -->
+    <div style="display:flex;flex-direction:column;gap:16px;">
+
+      <div class="info-card">
+        <div class="info-titulo">
+          <i class="ri-information-line"></i> ¿Cómo funciona?
+        </div>
+        <div class="info-item"><i class="ri-key-line"></i> Pide el código CDC a tu Director de Juego — tiene el formato CDC-XXXXXXX</div>
+        <div class="info-item"><i class="ri-user-line"></i> Elige con qué personaje quieres participar en la campaña</div>
+        <div class="info-item"><i class="ri-game-line"></i> Una vez unido, podrás acceder al VTT de la campaña desde Mis Campañas</div>
+        <div class="info-item"><i class="ri-alert-line"></i> Un personaje solo puede estar en una campaña a la vez</div>
+        <div class="info-item"><i class="ri-star-line"></i> La XP que ganes en sesión se aplicará a ese personaje</div>
+      </div>
+
+      <!-- Mis campañas activas -->
+      <div class="info-card" id="campanas-activas-wrap" style="display:none;">
+        <div class="info-titulo">
+          <i class="ri-map-pin-line"></i> Mis Campañas Activas
+        </div>
+        <div class="campanas-activas">
+          <div id="lista-campanas-activas"></div>
+        </div>
+      </div>
+
+    </div>
+
+  </div>
+</div>
+
+<div id="toast"></div>
+
+<script type="module">
+  import { auth, db } from "../../js/firebase-config.js";
+  import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-auth.js";
+  import {
+    collection, query, where, getDocs, getDoc,
+    doc, updateDoc, limit
+  } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore.js";
+
+  let ME = null;
+  let misPersonajes = [];
+  let campanaEncontrada = null;
+  let personajeSeleccionado = null;
+  let buscarTimeout = null;
+
+  // Navbar scroll
+  window.addEventListener('scroll', () => {
+    document.getElementById('navbar').classList.toggle('scrolled', window.scrollY > 40);
+  });
+
+  // Auth
+  onAuthStateChanged(auth, async (user) => {
+    if (!user) { window.location.href = '../../vistas/login.html'; return; }
+    ME = user;
+    await cargarMisPersonajes();
+    await cargarCampanasActivas();
+  });
+
+  // ── CARGAR MIS PERSONAJES ──
+  async function cargarMisPersonajes() {
+    const q = query(
+      collection(db,'personajes'),
+      where('userId','==',ME.uid)
+    );
+    const snap = await getDocs(q);
+    misPersonajes = snap.docs.map(d => ({ id:d.id, ...d.data() }));
+  }
+
+  // ── CARGAR CAMPAÑAS ACTIVAS ──
+  async function cargarCampanasActivas() {
+    // Personajes que ya están en una campaña
+    const enCampana = misPersonajes.filter(p => p.campanaId);
+    if (!enCampana.length) return;
+
+    const wrap = document.getElementById('campanas-activas-wrap');
+    const lista = document.getElementById('lista-campanas-activas');
+    wrap.style.display = 'block';
+
+    const items = await Promise.all(enCampana.map(async p => {
+      try {
+        const cSnap = await getDoc(doc(db,'campanas',p.campanaId));
+        if (!cSnap.exists()) return null;
+        const c = cSnap.data();
+        return { campana:c, campanaId:p.campanaId, personaje:p };
+      } catch { return null; }
+    }));
+
+    lista.innerHTML = items.filter(Boolean).map(item => `
+      <a class="campana-activa-pill" href="../vtt.html?campana=${item.campanaId}">
+        <div class="cap-dot"></div>
+        <div class="cap-info">
+          <div class="cap-nombre">${item.campana.nombre||'Campaña'}</div>
+          <div class="cap-personaje">${item.personaje.nombre} · Nv.${item.personaje.nivel}</div>
+        </div>
+        <div class="cap-vtt"><i class="ri-game-line"></i> Entrar</div>
+      </a>`
+    ).join('') || '<p style="font-size:12px;color:var(--muted);">No hay campañas activas.</p>';
+  }
+
+  // ── BUSCAR CAMPAÑA POR CÓDIGO ──
+  window.onCodigoInput = function(input) {
+    // Limpiar: solo letras y números, sin CDC ni guiones
+    let raw = input.value.toUpperCase()
+      .replace(/CDC-?/g, '')   // eliminar si pegaron CDC-
+      .replace(/[^A-Z0-9]/g,''); // solo alfanumérico
+    
+    // Limitar a 7 caracteres
+    raw = raw.slice(0, 7);
+    input.value = raw;
+
+    // Reset estado
+    campanaEncontrada = null;
+    personajeSeleccionado = null;
+    document.getElementById('campana-preview').classList.remove('visible');
+    document.getElementById('error-preview').classList.remove('visible');
+    document.getElementById('personaje-selector').classList.remove('visible');
+    document.getElementById('btn-unirse').disabled = true;
+
+    if (raw.length < 7) return;
+
+    clearTimeout(buscarTimeout);
+    buscarTimeout = setTimeout(() => buscarCampana('CDC-' + raw), 400);
+  };
+
+  async function buscarCampana(codigoCompleto) {
+    try {
+      const q = query(
+        collection(db,'campanas'),
+        where('codigo','==',codigoCompleto),
+        limit(1)
+      );
+      const snap = await getDocs(q);
+
+      if (snap.empty) {
+        mostrarError('Código no encontrado. Verifica con tu Director de Juego.');
+        return;
+      }
+
+      campanaEncontrada = { id:snap.docs[0].id, ...snap.docs[0].data() };
+
+      // Mostrar preview
+      document.getElementById('preview-nombre').textContent = campanaEncontrada.nombre;
+      document.getElementById('preview-director').textContent = 'Director ID: ' + campanaEncontrada.directorId.slice(0,8) + '...';
+      document.getElementById('campana-preview').classList.add('visible');
+      document.getElementById('error-preview').classList.remove('visible');
+
+      // Mostrar selector de personajes
+      mostrarSelectorPersonajes();
+
+    } catch(err) {
+      mostrarError('Error al buscar: ' + err.message);
+    }
+  }
+
+  function mostrarSelectorPersonajes() {
+    const wrap  = document.getElementById('personaje-selector');
+    const lista = document.getElementById('lista-personajes');
+    wrap.classList.add('visible');
+
+    // Filtrar personajes disponibles (sin campaña o en esta misma)
+    const disponibles = misPersonajes.filter(p =>
+      !p.campanaId || p.campanaId === campanaEncontrada.id
+    );
+
+    if (disponibles.length === 0) {
+      lista.innerHTML = `
+        <div class="empty-personajes">
+          <i class="ri-user-x-line"></i>
+          Todos tus personajes ya están en una campaña.<br>
+          <a href="../creador/creador.html" style="color:var(--rojo);font-size:12px;margin-top:6px;display:inline-block;">Crear nuevo personaje →</a>
+        </div>`;
+      return;
+    }
+
+    lista.innerHTML = disponibles.map(p => {
+      const cultLabel = p.linaje ? `${p.cultura} · ${p.linaje}` : (p.cultura||'—');
+      const yaEnEsta  = p.campanaId === campanaEncontrada.id;
+      return `
+        <div class="personaje-card ${yaEnEsta?'selected':''}"
+             id="pcard-${p.id}"
+             onclick="seleccionarPersonaje('${p.id}')">
+          <div class="personaje-avatar">${(p.nombre||'?').charAt(0).toUpperCase()}</div>
+          <div class="personaje-info">
+            <div class="personaje-nombre">${p.nombre||'Sin nombre'} ${yaEnEsta?'<span style="font-size:10px;color:var(--verde);">· Ya unido</span>':''}</div>
+            <div class="personaje-sub">Nv.${p.nivel||1} · ${cultLabel} · ${p.camino||'Sin camino'}</div>
+          </div>
+        </div>`;
+    }).join('');
+
+    // Si ya hay uno unido a esta campaña, pre-seleccionarlo
+    const yaUnido = disponibles.find(p => p.campanaId === campanaEncontrada.id);
+    if (yaUnido) seleccionarPersonaje(yaUnido.id);
+  }
+
+  window.seleccionarPersonaje = function(id) {
+    personajeSeleccionado = id;
+    document.querySelectorAll('.personaje-card').forEach(c => c.classList.remove('selected'));
+    const card = document.getElementById('pcard-'+id);
+    if (card) card.classList.add('selected');
+    document.getElementById('btn-unirse').disabled = !campanaEncontrada;
+  };
+
+  // ── UNIRSE ──
+  window.unirseACampana = async function() {
+    if (!campanaEncontrada || !personajeSeleccionado) return;
+    const btn = document.getElementById('btn-unirse');
+    btn.disabled = true;
+    btn.innerHTML = '<i class="ri-loader-4-line"></i> Uniéndose...';
+
+    try {
+      // Actualizar personaje con campanaId
+      await updateDoc(doc(db,'personajes',personajeSeleccionado), {
+        campanaId: campanaEncontrada.id
+      });
+
+      // Actualizar contador de jugadores en la campaña
+      const pSnap = await getDocs(query(
+        collection(db,'personajes'),
+        where('campanaId','==',campanaEncontrada.id)
+      ));
+      await updateDoc(doc(db,'campanas',campanaEncontrada.id), {
+        jugadoresCount: pSnap.size
+      });
+
+      toast('¡Te uniste a ' + campanaEncontrada.nombre + '!', 'success');
+
+      setTimeout(() => {
+        window.location.href = `../vtt.html?campana=${campanaEncontrada.id}&rol=jugador`;
+      }, 1200);
+
+    } catch(err) {
+      toast('Error: ' + err.message, 'error');
+      btn.disabled = false;
+      btn.innerHTML = '<i class="ri-login-circle-line"></i> Unirme a la Campaña';
+    }
+  };
+
+  function mostrarError(msg) {
+    const el = document.getElementById('error-preview');
+    el.textContent = msg;
+    el.classList.add('visible');
+    document.getElementById('campana-preview').classList.remove('visible');
+    document.getElementById('personaje-selector').classList.remove('visible');
+  }
+
+  function toast(msg, tipo) {
+    const t = document.getElementById('toast');
+    const cfg = {
+      success:{ bg:'rgba(26,74,46,0.95)', border:'#2d7a4a', color:'#7ad49a' },
+      error:  { bg:'rgba(80,19,19,0.95)', border:'#e74c3c', color:'#ff8080' }
+    }[tipo]||{};
+    Object.assign(t.style,{background:cfg.bg,borderColor:cfg.border,color:cfg.color,opacity:'1'});
+    t.textContent = msg;
+    clearTimeout(t._t);
+    t._t = setTimeout(()=>{t.style.opacity='0';},3500);
+  }
+</script>
+</body>
+</html>
