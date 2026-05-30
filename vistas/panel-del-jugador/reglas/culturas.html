@@ -1,0 +1,972 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Culturas | Crónicas del Cazador</title>
+    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;800&family=Raleway:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/remixicon@3.5.0/fonts/remixicon.css" rel="stylesheet">
+    <style>
+        :root {
+            --rojo: #c0392b;
+            --rojo-hover: #e74c3c;
+            --rojo-glow: rgba(192, 57, 43, 0.3);
+            --negro: #0a0a0c;
+            --superficie: #111117;
+            --superficie-2: #16161e;
+            --superficie-3: #1e1e28;
+            --borde: rgba(255,255,255,0.07);
+            --borde-rojo: rgba(192, 57, 43, 0.4);
+            --texto: #e8e2d9;
+            --texto-muted: #8a8490;
+            --texto-secundario: #b0aab8;
+            --dorado: #c9a84c;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: 'Raleway', sans-serif;
+            background-color: var(--negro);
+            color: var(--texto);
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+
+        body::before {
+            content: '';
+            position: fixed;
+            inset: 0;
+            background:
+                radial-gradient(ellipse 50% 40% at 10% 0%, rgba(192,57,43,0.07) 0%, transparent 70%),
+                radial-gradient(ellipse 40% 50% at 90% 100%, rgba(192,57,43,0.04) 0%, transparent 70%);
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        /* ── NAVBAR ── */
+        .navbar {
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 0 32px;
+            height: 60px;
+            background: rgba(10, 10, 12, 0.92);
+            border-bottom: 1px solid var(--borde);
+            backdrop-filter: blur(12px);
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            text-decoration: none;
+            margin-right: 16px;
+            flex-shrink: 0;
+        }
+
+        .logo-mark {
+            width: 34px; height: 34px;
+            border: 1.5px solid var(--rojo);
+            display: flex; align-items: center; justify-content: center;
+            position: relative;
+        }
+
+        .logo-mark::before {
+            content: '';
+            position: absolute;
+            inset: 3px;
+            border: 1px solid rgba(192,57,43,0.3);
+        }
+
+        .logo-text-main {
+            font-family: 'Cinzel', serif;
+            font-size: 13px; font-weight: 800;
+            letter-spacing: 0.12em; color: var(--texto); line-height: 1.1;
+        }
+
+        .logo-text-sub {
+            font-family: 'Cinzel', serif;
+            font-size: 9px; font-weight: 400;
+            letter-spacing: 0.2em; color: var(--rojo);
+        }
+
+        /* Nav items */
+        .nav-items {
+            display: flex;
+            align-items: center;
+            gap: 2px;
+            flex: 1;
+        }
+
+        .nav-btn {
+            position: relative;
+            display: flex; align-items: center; gap: 6px;
+            padding: 0 14px; height: 60px;
+            background: transparent; border: none;
+            color: var(--texto-secundario);
+            font-family: 'Raleway', sans-serif;
+            font-size: 12px; font-weight: 600;
+            letter-spacing: 0.1em; text-transform: uppercase;
+            cursor: pointer; transition: color 0.2s;
+            white-space: nowrap; text-decoration: none;
+        }
+
+        .nav-btn:hover { color: var(--texto); }
+        .nav-btn i { font-size: 14px; }
+
+        .nav-dropdown {
+            position: relative;
+            display: flex; align-items: center;
+            height: 60px;
+        }
+
+        .nav-dropdown-trigger {
+            display: flex; align-items: center; gap: 6px;
+            padding: 0 14px; height: 60px;
+            background: transparent; border: none;
+            color: var(--texto-secundario);
+            font-family: 'Raleway', sans-serif;
+            font-size: 12px; font-weight: 600;
+            letter-spacing: 0.1em; text-transform: uppercase;
+            cursor: pointer; transition: color 0.2s;
+            white-space: nowrap; user-select: none;
+        }
+
+        .nav-dropdown-trigger i { font-size: 14px; }
+
+        .nav-dropdown-trigger .chevron {
+            font-size: 13px; transition: transform 0.22s; margin-left: 2px;
+        }
+
+        .nav-dropdown:hover .nav-dropdown-trigger,
+        .nav-dropdown.open .nav-dropdown-trigger { color: var(--texto); }
+
+        .nav-dropdown:hover .chevron,
+        .nav-dropdown.open .chevron { transform: rotate(180deg); }
+
+        .dropdown-menu {
+            display: none;
+            position: absolute; top: 100%; left: 0;
+            min-width: 210px;
+            background: var(--superficie-2);
+            border: 1px solid rgba(255,255,255,0.09);
+            border-top: 2px solid var(--rojo);
+            padding: 6px 0; z-index: 999;
+            box-shadow: 0 12px 32px rgba(0,0,0,0.5);
+        }
+
+        .nav-dropdown:hover .dropdown-menu,
+        .nav-dropdown.open .dropdown-menu { display: block; }
+
+        .dropdown-item {
+            display: flex; align-items: center; gap: 10px;
+            padding: 10px 16px;
+            color: var(--texto-secundario);
+            font-size: 12px; font-weight: 500;
+            letter-spacing: 0.05em; text-transform: uppercase;
+            cursor: pointer; transition: background 0.15s, color 0.15s;
+            border: none; background: transparent;
+            width: 100%; text-align: left;
+            font-family: 'Raleway', sans-serif;
+        }
+
+        .dropdown-item:hover { background: rgba(192,57,43,0.1); color: var(--texto); }
+        .dropdown-item i { font-size: 15px; color: var(--rojo); flex-shrink: 0; }
+
+        .dropdown-sep { height: 1px; background: var(--borde); margin: 4px 0; }
+
+        .nav-right {
+            display: flex; align-items: center; gap: 12px; margin-left: auto;
+        }
+
+        .nav-user {
+            font-size: 12px; font-weight: 500;
+            color: var(--texto-muted); letter-spacing: 0.05em;
+        }
+
+        .nav-user span { color: var(--dorado); font-weight: 600; }
+
+        .btn-logout {
+            display: flex; align-items: center; gap: 6px;
+            padding: 0 14px; height: 32px;
+            background: transparent;
+            border: 1px solid rgba(192,57,43,0.4);
+            color: var(--rojo);
+            font-family: 'Raleway', sans-serif;
+            font-size: 11px; font-weight: 600;
+            letter-spacing: 0.1em; text-transform: uppercase;
+            cursor: pointer; transition: background 0.2s, color 0.2s;
+        }
+
+        .btn-logout:hover { background: var(--rojo); color: white; }
+
+        /* ── LAYOUT PRINCIPAL ── */
+        .layout {
+            position: relative;
+            z-index: 1;
+            display: grid;
+            grid-template-columns: 280px 1fr;
+            min-height: calc(100vh - 60px);
+        }
+
+        /* ── SIDEBAR ── */
+        .sidebar {
+            border-right: 1px solid var(--borde);
+            background: var(--superficie);
+            padding: 32px 0;
+            position: sticky;
+            top: 60px;
+            height: calc(100vh - 60px);
+            overflow-y: auto;
+        }
+
+        .sidebar::-webkit-scrollbar { width: 4px; }
+        .sidebar::-webkit-scrollbar-track { background: transparent; }
+        .sidebar::-webkit-scrollbar-thumb { background: var(--borde-rojo); }
+
+        .sidebar-header {
+            padding: 0 24px 24px;
+            border-bottom: 1px solid var(--borde);
+            margin-bottom: 12px;
+        }
+
+        .sidebar-eyebrow {
+            font-size: 10px; font-weight: 600;
+            letter-spacing: 0.25em; text-transform: uppercase;
+            color: var(--rojo); margin-bottom: 6px;
+        }
+
+        .sidebar-titulo {
+            font-family: 'Cinzel', serif;
+            font-size: 18px; font-weight: 800;
+            color: var(--texto); letter-spacing: 0.05em;
+        }
+
+        .sidebar-desc {
+            font-size: 12px; color: var(--texto-muted);
+            line-height: 1.6; margin-top: 8px;
+        }
+
+        /* Items del sidebar */
+        .cultura-item {
+            display: flex; align-items: center; gap: 14px;
+            padding: 14px 24px;
+            cursor: pointer;
+            border-left: 2px solid transparent;
+            transition: background 0.15s, border-color 0.15s;
+            position: relative;
+        }
+
+        .cultura-item:hover {
+            background: rgba(255,255,255,0.03);
+        }
+
+        .cultura-item.activa {
+            border-left-color: var(--rojo);
+            background: rgba(192,57,43,0.06);
+        }
+
+        .cultura-item.activa .ci-nombre { color: var(--texto); }
+        .cultura-item.activa .ci-icono { color: var(--rojo); }
+
+        .ci-icono {
+            font-size: 20px; color: var(--texto-muted);
+            transition: color 0.15s; flex-shrink: 0;
+            width: 24px; text-align: center;
+        }
+
+        .ci-info { flex: 1; min-width: 0; }
+
+        .ci-nombre {
+            font-family: 'Cinzel', serif;
+            font-size: 13px; font-weight: 600;
+            color: var(--texto-secundario);
+            transition: color 0.15s;
+            white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+        }
+
+        .ci-habilidad {
+            font-size: 10px; color: var(--texto-muted);
+            letter-spacing: 0.05em; margin-top: 2px;
+            white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+        }
+
+        .ci-flecha {
+            font-size: 14px; color: var(--texto-muted);
+            opacity: 0; transition: opacity 0.15s;
+        }
+
+        .cultura-item.activa .ci-flecha { opacity: 1; color: var(--rojo); }
+
+        /* ── PANEL DE CONTENIDO ── */
+        .panel {
+            padding: 48px 56px;
+            overflow-y: auto;
+        }
+
+        /* Pantalla de bienvenida */
+        .bienvenida-panel {
+            display: flex; flex-direction: column;
+            align-items: center; justify-content: center;
+            min-height: 60vh; text-align: center;
+        }
+
+        .bienvenida-panel i {
+            font-size: 48px; color: var(--borde-rojo);
+            margin-bottom: 20px;
+        }
+
+        .bienvenida-panel h2 {
+            font-family: 'Cinzel', serif;
+            font-size: 22px; color: var(--texto);
+            margin-bottom: 12px;
+        }
+
+        .bienvenida-panel p {
+            font-size: 14px; color: var(--texto-muted);
+            max-width: 340px; line-height: 1.7;
+        }
+
+        /* Contenido de cultura */
+        .cultura-contenido { display: none; }
+        .cultura-contenido.visible { display: block; }
+
+        /* Encabezado */
+        .cultura-header { margin-bottom: 32px; }
+
+        .cultura-tag {
+            font-size: 10px; font-weight: 600;
+            letter-spacing: 0.25em; text-transform: uppercase;
+            color: var(--rojo); margin-bottom: 10px;
+        }
+
+        .cultura-titulo {
+            font-family: 'Cinzel', serif;
+            font-size: clamp(26px, 4vw, 40px);
+            font-weight: 800; color: var(--texto);
+            line-height: 1.1; margin-bottom: 8px;
+        }
+
+        /* Hero imagen */
+        .hero-img {
+            width: 100%; height: 280px;
+            border: 1px solid var(--borde);
+            overflow: hidden; margin-bottom: 36px;
+            position: relative; background: var(--superficie-2);
+            display: flex; align-items: center; justify-content: center;
+        }
+
+        .hero-img img {
+            width: 100%; height: 100%;
+            object-fit: cover; object-position: center;
+            opacity: 0.85;
+        }
+
+        .hero-img-placeholder {
+            font-size: 80px; color: rgba(192,57,43,0.15);
+        }
+
+        /* Trasfondo */
+        .trasfondo-titulo {
+            display: flex; align-items: center; gap: 10px;
+            font-family: 'Cinzel', serif; font-size: 14px; font-weight: 600;
+            color: var(--rojo); letter-spacing: 0.1em; text-transform: uppercase;
+            margin-bottom: 20px;
+        }
+
+        .trasfondo-titulo i { font-size: 18px; }
+
+        .trasfondo-texto {
+            font-size: 15px; color: var(--texto-secundario);
+            line-height: 1.9; margin-bottom: 16px;
+            text-align: justify;
+        }
+
+        /* Quote */
+        .quote-bloque {
+            border-left: 2px solid var(--rojo);
+            padding: 14px 20px;
+            margin: 28px 0;
+            background: rgba(192,57,43,0.04);
+            font-size: 14px; font-style: italic;
+            color: var(--dorado); line-height: 1.7;
+        }
+
+        /* Grid mecánicas */
+        .mecanicas-titulo {
+            font-family: 'Cinzel', serif; font-size: 13px; font-weight: 600;
+            color: var(--texto-muted); letter-spacing: 0.15em; text-transform: uppercase;
+            margin-bottom: 16px; margin-top: 36px;
+            display: flex; align-items: center; gap: 10px;
+        }
+
+        .mecanicas-titulo::after {
+            content: ''; flex: 1; height: 1px; background: var(--borde);
+        }
+
+        .grid-mecanicas {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+            gap: 14px;
+        }
+
+        .caja-mecanica {
+            background: var(--superficie-2);
+            border: 1px solid var(--borde);
+            padding: 22px;
+            transition: border-color 0.2s;
+        }
+
+        .caja-mecanica:hover { border-color: var(--borde-rojo); }
+
+        .caja-mecanica.habilidad { border-top: 2px solid #2ecc71; }
+        .caja-mecanica.debilidad { border-top: 2px solid var(--rojo); }
+        .caja-mecanica.rasgos    { border-top: 2px solid var(--dorado); }
+
+        .caja-mecanica h4 {
+            display: flex; align-items: center; gap: 8px;
+            font-size: 11px; font-weight: 600;
+            letter-spacing: 0.12em; text-transform: uppercase;
+            color: var(--texto); margin-bottom: 12px;
+            padding-bottom: 10px; border-bottom: 1px solid var(--borde);
+        }
+
+        .caja-mecanica h4 i { font-size: 16px; }
+        .caja-mecanica.habilidad h4 i { color: #2ecc71; }
+        .caja-mecanica.debilidad h4 i { color: var(--rojo); }
+        .caja-mecanica.rasgos    h4 i { color: var(--dorado); }
+
+        .caja-mecanica p {
+            font-size: 13px; color: var(--texto-secundario);
+            line-height: 1.7; margin-bottom: 8px;
+        }
+
+        .caja-mecanica p:last-child { margin-bottom: 0; }
+
+        .rasgo-item {
+            display: flex; align-items: center; gap: 8px;
+            font-size: 13px; color: var(--texto-secundario);
+            margin-bottom: 7px;
+        }
+
+        .rasgo-item::before {
+            content: '+';
+            color: var(--dorado); font-weight: 700; font-size: 14px;
+        }
+
+        /* ── LINAJES (especial para Herederos) ── */
+        .linajes-grid { display: flex; flex-direction: column; gap: 16px; margin-top: 8px; }
+
+        .linaje-card {
+            background: var(--superficie-2);
+            border: 1px solid var(--borde);
+            overflow: hidden;
+            transition: border-color 0.2s;
+        }
+
+        .linaje-card:hover { border-color: var(--borde-rojo); }
+
+        .linaje-header {
+            display: flex; align-items: center; justify-content: space-between;
+            padding: 16px 20px;
+            cursor: pointer;
+            user-select: none;
+        }
+
+        .linaje-header-left {
+            display: flex; align-items: center; gap: 14px;
+        }
+
+        .linaje-icono {
+            font-size: 22px; color: var(--rojo);
+            width: 36px; height: 36px;
+            background: rgba(192,57,43,0.1);
+            display: flex; align-items: center; justify-content: center;
+        }
+
+        .linaje-nombre {
+            font-family: 'Cinzel', serif;
+            font-size: 15px; font-weight: 600; color: var(--texto);
+        }
+
+        .linaje-subtitulo {
+            font-size: 11px; color: var(--texto-muted); margin-top: 2px;
+        }
+
+        .linaje-toggle {
+            font-size: 18px; color: var(--texto-muted);
+            transition: transform 0.25s;
+        }
+
+        .linaje-card.abierto .linaje-toggle { transform: rotate(180deg); }
+
+        .linaje-body {
+            display: none;
+            padding: 0 20px 20px;
+            border-top: 1px solid var(--borde);
+        }
+
+        .linaje-card.abierto .linaje-body { display: block; }
+
+        .linaje-rasgo {
+            margin-top: 14px;
+        }
+
+        .linaje-rasgo-titulo {
+            font-size: 11px; font-weight: 600;
+            letter-spacing: 0.1em; text-transform: uppercase;
+            color: var(--rojo); margin-bottom: 6px;
+        }
+
+        .linaje-rasgo p {
+            font-size: 13px; color: var(--texto-secundario); line-height: 1.7;
+        }
+
+        .linaje-rasgos-lista {
+            display: flex; gap: 10px; flex-wrap: wrap; margin-top: 14px;
+        }
+
+        .rasgo-badge {
+            padding: 4px 12px;
+            background: rgba(201,168,76,0.1);
+            border: 1px solid rgba(201,168,76,0.3);
+            font-size: 12px; color: var(--dorado);
+            font-weight: 600;
+        }
+
+        /* Habilidad única (Herederos) */
+        .habilidad-unica {
+            background: rgba(192,57,43,0.05);
+            border: 1px solid var(--borde-rojo);
+            padding: 20px 22px;
+            margin: 28px 0;
+        }
+
+        .habilidad-unica h4 {
+            display: flex; align-items: center; gap: 8px;
+            font-family: 'Cinzel', serif;
+            font-size: 14px; font-weight: 600;
+            color: var(--texto); margin-bottom: 10px;
+        }
+
+        .habilidad-unica h4 i { color: var(--rojo); font-size: 18px; }
+
+        .habilidad-unica p {
+            font-size: 13px; color: var(--texto-secundario); line-height: 1.7;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .layout { grid-template-columns: 1fr; }
+            .sidebar {
+                position: static; height: auto;
+                border-right: none; border-bottom: 1px solid var(--borde);
+            }
+            .panel { padding: 28px 20px; }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- NAVBAR -->
+    <nav class="navbar">
+
+        <!-- Logo -->
+        <a href="#" class="logo">
+            <div class="logo-mark">
+                <svg width="18" height="18" viewBox="0 0 18 18" fill="none">
+                    <path d="M9 2L16 6.5V11.5L9 16L2 11.5V6.5L9 2Z" stroke="#c0392b" stroke-width="1.2" fill="none"/>
+                    <path d="M9 5L13 7.5V10.5L9 13L5 10.5V7.5L9 5Z" fill="rgba(192,57,43,0.2)" stroke="#c0392b" stroke-width="0.6"/>
+                </svg>
+            </div>
+            <div>
+                <div class="logo-text-main">CRÓNICAS</div>
+                <div class="logo-text-sub">del Cazador</div>
+            </div>
+        </a>
+
+        <!-- Nav items -->
+        <div class="nav-items">
+
+            <!-- Play CDC (con dropdown) -->
+            <div class="nav-dropdown">
+                <div class="nav-dropdown-trigger">
+                    <i class="ri-sword-line"></i>
+                    Play CDC
+                    <i class="ri-arrow-down-s-line chevron"></i>
+                </div>
+                <div class="dropdown-menu">
+                    <button class="dropdown-item" onclick="window.location.href='../../creador/creador.html'">
+                        <i class="ri-user-add-line"></i> Crear Personaje
+                    </button>
+                    <button class="dropdown-item" onclick="window.location.href='../ficha/mis-personajes.html'">
+                        <i class="ri-group-line"></i> Selección de Personaje
+                    </button>
+                </div>
+            </div>
+
+            <!-- Reglas (con dropdown) -->
+            <div class="nav-dropdown">
+                <div class="nav-dropdown-trigger">
+                    <i class="ri-book-open-line"></i>
+                    Reglas
+                    <i class="ri-arrow-down-s-line chevron"></i>
+                </div>
+                <div class="dropdown-menu">
+                    <button class="dropdown-item" onclick="window.location.href='culturas.html'">
+                        <i class="ri-map-line"></i> Culturas
+                    </button>
+                    <button class="dropdown-item" onclick="window.location.href='caminos.html'
+                    ">
+                        <i class="ri-route-line"></i> Caminos
+                    </button>
+                    <div class="dropdown-sep"></div>
+                    <button class="dropdown-item" onclick="">
+                        <i class="ri-bar-chart-line"></i> Atributos & Stats
+                    </button>
+                    <button class="dropdown-item" onclick="">
+                        <i class="ri-flashlight-line"></i> Habilidades
+                    </button>
+                    <div class="dropdown-sep"></div>
+                    <button class="dropdown-item" onclick="">
+                        <i class="ri-translate-2"></i> Glosario
+                    </button>
+                </div>
+            </div>
+
+            <!-- Selección de Rol -->
+            <button class="nav-btn" onclick="window.location.href='../../dashboard.html'">
+                <i class="ri-shield-user-line"></i>
+                Selección de Rol
+            </button>
+
+        </div>
+
+        <!-- Derecha: usuario + logout -->
+        <div class="nav-right">
+            <span class="nav-user">Hola, <span id="nombre-nav">Cazador</span></span>
+            <button id="btn-logout" class="btn-logout">
+                <i class="ri-logout-box-r-line"></i>
+                Cerrar Sesión
+            </button>
+        </div>
+    </nav>
+
+    <!-- LAYOUT -->
+    <div class="layout">
+
+        <!-- SIDEBAR -->
+        <aside class="sidebar">
+            <div class="sidebar-header">
+                <p class="sidebar-eyebrow">Culturas</p>
+                <h2 class="sidebar-titulo">Orígenes del Mundo</h2>
+                <p class="sidebar-desc">Selecciona una cultura para explorar su lore, mecánicas y rasgos de origen.</p>
+            </div>
+
+            <div id="lista-sidebar"></div>
+        </aside>
+
+        <!-- PANEL DERECHO -->
+        <main class="panel" id="panel-principal">
+
+            <!-- Bienvenida -->
+            <div class="bienvenida-panel" id="bienvenida">
+                <i class="ri-compass-discover-line"></i>
+                <h2>Elige tu Origen</h2>
+                <p>Cada cultura define quién eres antes de ser Cazador. Selecciona una en el panel lateral para descubrir su historia y sus rasgos.</p>
+            </div>
+
+            <!-- Contenidos dinámicos -->
+            <div id="contenidos-culturas"></div>
+
+        </main>
+    </div>
+
+
+    <script>
+    const CULTURAS = [
+        {
+            id: 'estrellas',
+            nombre: 'Habitantes de las Estrellas',
+            icono: 'ri-sparkling-fill',
+            habilidadCorta: 'Los Invisibles',
+            tag: 'Cultura / Origen',
+            imagen: 'imagenes/estrellas.png',
+            trasfondo: [
+                'Los Habitantes de las Estrellas son una cultura forjada en el abandono. Nacidos y criados en los márgenes del mundo, muchos de ellos han encontrado refugio entre los restos olvidados de Meteor City, donde lo desechado por la sociedad adquiere un nuevo propósito.',
+                'Su existencia está marcada por la precariedad: pocos alcanzan la vejez, y cada día es una lucha silenciosa por sobrevivir. Esta realidad ha moldeado individuos duros, resilientes y profundamente desconfiados. Para ellos, cualquier extraño es una amenaza potencial, y la confianza no se concede, se gana… y rara vez se pierde.',
+                'A pesar de su frialdad exterior, los lazos que forman son inquebrantables. Dentro de su núcleo cercano, la lealtad es absoluta, casi sagrada. Traicionar a uno de los suyos no solo es imperdonable: es impensable.',
+                'Acostumbrados a vivir fuera de las reglas del mundo "visible", los Habitantes de las Estrellas no temen ensuciarse las manos. Aceptan cualquier trabajo necesario para sobrevivir, sin importar su naturaleza o moralidad. No buscan aprobación ni reconocimiento; saben que, para el resto del mundo, son invisibles.',
+                'Muchos adoptan con orgullo los nombres que otros usan para despreciarlos: los rechazados, los inexistentes, los olvidados. Porque entienden una verdad que pocos comprenden: que el mundo puede ignorarlos… pero eso no los hace menos reales.'
+            ],
+            quote: '"No rechazamos nada de lo que nos dejan, pero nadie nos puede arrebatar lo que somos."',
+            habilidad: { nombre: 'Los Invisibles', desc: 'Dificultad extrema para ser rastreado mediante métodos burocráticos o legales. Obtiene ventajas automáticas en tiradas de Sigilo urbanas.' },
+            debilidad: { nombre: 'Paranoia', desc: 'La profunda desconfianza hacia extraños penaliza gravemente las interacciones sociales o diplomáticas con autoridades oficiales.' },
+            rasgos: ['+2 Sigilo', '+1 Voluntad', '+1 Alerta'],
+            tipo: 'estandar'
+        },
+        {
+            id: 'foraneos',
+            nombre: 'Foráneos',
+            icono: 'ri-walk-line',
+            habilidadCorta: 'Siempre en Ruta',
+            tag: 'Cultura / Origen',
+            imagen: 'imagenes/foraneos.png',
+            trasfondo: [
+                'Los Foráneos son hijos del camino. No pertenecen a ningún lugar, no por elección, sino por destino. Su vida transcurre entre rutas, ciudades y territorios cambiantes, siempre en movimiento por trabajo, curiosidad o necesidad. Cazadores, mensajeros, exploradores o buscadores de lo desconocido, su existencia está marcada por la transición.',
+                'A diferencia de otras culturas, los Foráneos no echan raíces fácilmente. Aunque muchos anhelan un lugar al que llamar hogar, algo en su naturaleza —o en su historia— les impide quedarse demasiado tiempo. No todos nacen como Foráneos; muchos se convierten en uno huyendo de un pasado que los persigue o impulsados por una búsqueda personal de libertad.',
+                'Son sociables, adaptables y saben moverse entre distintos entornos. Esa misma inquietud los traiciona: tarde o temprano, el aburrimiento o la necesidad de avanzar los empuja a seguir su camino.'
+            ],
+            quote: '"Para un Foráneo, el mundo no es un lugar donde vivir... es algo que recorrer."',
+            habilidad: { nombre: 'Siempre en Ruta', desc: 'El mundo es su mapa y cada paso una lección. Obtienen bonificación al adaptarse a nuevos entornos, encontrar caminos y desenvolverse con rapidez en lugares desconocidos.' },
+            debilidad: { nombre: 'Desarraigo', desc: 'Sufren penalización al permanecer demasiado tiempo en un mismo lugar y tienen dificultades para mantener compromisos o relaciones a largo plazo.' },
+            rasgos: ['+2 Atletismo', '+1 Carisma o +1 Manipulación', '+1 Astucia'],
+            tipo: 'estandar'
+        },
+        {
+            id: 'linaje',
+            nombre: 'Herederos del Linaje',
+            icono: 'ri-heart-pulse-line',
+            habilidadCorta: 'Sangre Despierta',
+            tag: 'Cultura / Origen',
+            imagen: 'imagenes/linaje.png',
+            trasfondo: [
+                'Hay quienes son moldeados por el lugar donde nacen… y otros que están marcados desde antes de dar su primer paso. Los Herederos del Linaje no pertenecen a una cultura en el sentido tradicional. No los define la tierra que pisan ni la comunidad que los cría, sino la sangre que corre por sus venas.',
+                'Algunos crecieron bajo la sombra de esos apellidos, entrenados para continuar un legado. Otros viven ajenos a él… hasta que el mundo se encarga de recordárselos. Porque la sangre no se esconde. Y rara vez es un regalo.',
+                'Con ella vienen expectativas, responsabilidades y enemigos que no eligieron. En un mundo donde los nombres poderosos resuenan incluso en la distancia, ser heredero significa cargar con una historia que nunca comenzó contigo.'
+            ],
+            quote: '"La sangre no se esconde. Y rara vez es un regalo."',
+            habilidadUnica: { nombre: 'Sangre Despierta', desc: 'Una vez por escena, pueden invocar los poderes latentes de su linaje para obtener una ventaja decisiva en situaciones críticas.' },
+            tipo: 'linaje',
+            linajes: [
+                {
+                    nombre: 'Linaje Zoldyck',
+                    subtitulo: 'Los asesinos más letales del mundo',
+                    icono: 'ri-spy-fill',
+                    rasgo: { titulo: 'Crianza en las Sombras', desc: 'Mente fría, pulso firme, emociones bajo llave para una eficiencia letal.' },
+                    habilidad: { titulo: 'Instinto Asesino', desc: 'Bonificación al moverse en silencio, utilizar venenos y ejecutar ataques precisos bajo presión.' },
+                    rasgos: ['+2 Sigilo', '+1 Destreza', '+1 Astucia']
+                },
+                {
+                    nombre: 'Sangre Escarlata',
+                    subtitulo: 'Descendientes Kurta',
+                    icono: 'ri-eye-2-line',
+                    rasgo: { titulo: 'Eco de los Ojos Escarlata', desc: 'Un legado incompleto que despierta bajo presión, imposible de ignorar.' },
+                    habilidad: { titulo: 'Eco Carmesí', desc: 'Obtienen bonificación en percepción y poder en momentos de intensidad emocional. La presencia se impone, pero el control se debilita.' },
+                    rasgos: ['+2 Intimidación', '+1 Percepción', '+1 Destreza']
+                },
+                {
+                    nombre: 'Linaje Netero',
+                    subtitulo: 'Voluntad inquebrantable',
+                    icono: 'ri-heart-pulse-fill',
+                    rasgo: { titulo: 'Disciplina Absoluta', desc: 'El poder se forja con un entrenamiento incesante de cuerpo y mente, siguiendo la repetición.' },
+                    habilidad: { titulo: 'Voluntad Inquebrantable', desc: 'Bonificación en resistencia mental y combate disciplinado, manteniendo el control incluso en situaciones extremas.' },
+                    rasgos: ['+2 Pelea', '+1 Destreza', '+1 Resistencia']
+                }
+            ]
+        },
+        {
+            id: 'bajomundo',
+            nombre: 'Casas del Bajo Mundo',
+            icono: 'ri-spy-line',
+            habilidadCorta: 'Red de la Familia',
+            tag: 'Cultura / Origen',
+            imagen: 'imagenes/mafia.png',
+            trasfondo: [
+                'Los miembros de las Casas del Bajo Mundo nacen, crecen o son reclutados dentro de organizaciones donde el poder, la tradición y la jerarquía lo son todo. Cada familia opera como un reino en las sombras, con territorios definidos, negocios propios y reglas inquebrantables.',
+                'Formar parte de una Casa no es solo una afiliación: es un juramento de vida. Todo integrante asume dos verdades absolutas: la lealtad incondicional a la Familia y el respeto al código que rige su existencia.',
+                'La familia protege, guía y provee. A cambio, exige lealtad absoluta. Quien pertenece a una Casa nunca está solo… pero tampoco es libre. Las decisiones individuales siempre están subordinadas al bien del grupo. Cada Casa tiene su propio código de conducta; violentarlo es un acto de traición que conlleva consecuencias graves.'
+            ],
+            quote: '"La ley del código se escribe con sangre. Quien traiciona a la Familia, no tiene un lugar donde esconderse."',
+            habilidad: { nombre: 'Red de la Familia', desc: 'Siempre pueden acceder a contactos, información o recursos básicos dentro de su territorio o red criminal.' },
+            debilidad: { nombre: 'Juramento de Sangre', desc: 'No pueden traicionar ni rechazar órdenes directas de su familia. La desobediencia tiene consecuencias graves e inmediatas.' },
+            rasgos: ['+2 Intimidación', '+1 Carisma', '+1 Astucia'],
+            tipo: 'estandar'
+        },
+        {
+            id: 'mar',
+            nombre: 'Hombres del Mar',
+            icono: 'ri-anchor-line',
+            habilidadCorta: 'Cuerpo del Navegante',
+            tag: 'Cultura / Origen',
+            imagen: 'imagenes/Hombres del mar.png',
+            trasfondo: [
+                'Para los Hombres del Mar, la tierra firme es apenas un descanso temporal entre travesías. Nacidos en comunidades portuarias o a bordo de grandes flotas, han aprendido que la única autoridad real es la fuerza de las corrientes y la impredecibilidad de las tormentas.',
+                'Su cultura valora la autonomía individual por encima de todo. En el mar, un error no solo cuesta dinero, cuesta vidas; por ello, desarrollan un sentido de la disciplina pragmática y un instinto de supervivencia superior. No se rigen por las leyes de los reinos terrestres, sino por sus propios códigos de navegación y el respeto sagrado al capitán.',
+                'Aunque son vistos con recelo en tierra firme, su conocimiento de las rutas, el contrabando marítimo y la cartografía es inigualable. Para ellos, el horizonte no es un límite, es una invitación constante.'
+            ],
+            quote: '"Un Hombre del Mar puede pisar tierra firme... pero nunca deja de pertenecer al océano."',
+            habilidad: { nombre: 'Cuerpo del Navegante', desc: 'Obtienen bonificación al mantener el equilibrio y actuar en superficies inestables. Ignoran penalizadores por movimiento en condiciones adversas como tormentas, viento, lluvia o desplazamientos bruscos, tanto en mar como en tierra.' },
+            debilidad: { nombre: 'Espíritu Indomable', desc: 'La rutina los consume y las estructuras rígidas los asfixian. Sufren penalización al actuar bajo órdenes rígidas y enfrentan dificultades en entornos estáticos o altamente estructurados.' },
+            rasgos: ['+2 Atletismo', '+1 Destreza', '+1 Compostura'],
+            tipo: 'estandar'
+        },
+        {
+            id: 'ngl',
+            nombre: 'Aislados de NGL',
+            icono: 'ri-leaf-line',
+            habilidadCorta: 'Instinto Natural',
+            tag: 'Cultura / Origen',
+            imagen: 'imagenes/ngl.png',
+            trasfondo: [
+                'Los Aislados de NGL viven al margen del tiempo moderno, en una burbuja donde el avance tecnológico no tiene lugar. Lejos de las grandes ciudades y de la influencia del mundo "civilizado", han construido una vida basada en la tierra, el trabajo comunitario y el equilibrio con la naturaleza.',
+                'Su cultura es profundamente rural. Cada individuo cumple un rol esencial dentro de la comunidad: agricultores, molineros, recolectores, sanadores. Nadie es prescindible, porque entienden que la supervivencia no depende del individuo, sino del conjunto.',
+                'Este estilo de vida ha generado un fuerte sentido de unidad. La comunidad no es solo un lugar donde vivir, es una extensión de uno mismo. Protegerla no es una elección, es un deber natural. El mundo exterior les resulta ajeno, incomprensible e incluso peligroso.'
+            ],
+            quote: '"La vida no necesita cables para florecer. La fuerza está en el suelo que pisamos."',
+            habilidad: { nombre: 'Instinto Natural', desc: 'La naturaleza no es un obstáculo, es su hogar. Obtienen bonificación al rastrear, recolectar y orientarse en entornos naturales, y pueden encontrar recursos básicos sin dificultad incluso en condiciones difíciles.' },
+            debilidad: { nombre: 'Rechazo Tecnológico', desc: 'El mundo moderno no les pertenece. La tecnología les resulta ajena e incomprensible. Sufren -2 de penalización al utilizar tecnología avanzada y en entornos urbanos o altamente artificiales.' },
+            rasgos: ['+2 Supervivencia', '+1 Resistencia', '+1 Percepción'],
+            tipo: 'estandar'
+        }
+    ];
+
+    // Construir sidebar
+    const listaSidebar = document.getElementById('lista-sidebar');
+    listaSidebar.innerHTML = CULTURAS.map(c => `
+        <div class="cultura-item" id="item-${c.id}" onclick="mostrarCultura('${c.id}')">
+            <i class="${c.icono} ci-icono"></i>
+            <div class="ci-info">
+                <div class="ci-nombre">${c.nombre}</div>
+                <div class="ci-habilidad">${c.habilidadCorta}</div>
+            </div>
+            <i class="ri-arrow-right-s-line ci-flecha"></i>
+        </div>
+    `).join('');
+
+    // Construir todos los contenidos (ocultos)
+    const contenidos = document.getElementById('contenidos-culturas');
+    contenidos.innerHTML = CULTURAS.map(c => construirCultura(c)).join('');
+
+    function construirCultura(c) {
+        const trasfondoHTML = c.trasfondo.map(p => `<p class="trasfondo-texto">${p}</p>`).join('');
+
+        if (c.tipo === 'estandar') {
+            return `
+            <div class="cultura-contenido" id="cultura-${c.id}">
+                <div class="cultura-header">
+                    <p class="cultura-tag">${c.tag}</p>
+                    <h1 class="cultura-titulo">${c.nombre}</h1>
+                </div>
+
+                <div class="hero-img">
+                    <img src="${c.imagen}" alt="${c.nombre}" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex'">
+                    <div class="hero-img-placeholder" style="display:none"><i class="${c.icono}"></i></div>
+                </div>
+
+                <div class="trasfondo-titulo">
+                    <i class="${c.icono}"></i> Trasfondo y Filosofía
+                </div>
+                ${trasfondoHTML}
+
+                <div class="quote-bloque">${c.quote}</div>
+
+                <p class="mecanicas-titulo">Mecánicas de Origen</p>
+                <div class="grid-mecanicas">
+                    <div class="caja-mecanica habilidad">
+                        <h4><i class="ri-flashlight-line"></i> Habilidad: ${c.habilidad.nombre}</h4>
+                        <p>${c.habilidad.desc}</p>
+                    </div>
+                    <div class="caja-mecanica debilidad">
+                        <h4><i class="ri-error-warning-line"></i> Debilidad: ${c.debilidad.nombre}</h4>
+                        <p>${c.debilidad.desc}</p>
+                    </div>
+                    <div class="caja-mecanica rasgos">
+                        <h4><i class="ri-shield-flash-line"></i> Rasgos de Origen</h4>
+                        ${c.rasgos.map(r => `<div class="rasgo-item">${r}</div>`).join('')}
+                    </div>
+                </div>
+            </div>`;
+        }
+
+        if (c.tipo === 'linaje') {
+            const linajesHTML = c.linajes.map((l, i) => `
+                <div class="linaje-card" id="linaje-${c.id}-${i}">
+                    <div class="linaje-header" onclick="toggleLinaje('${c.id}', ${i})">
+                        <div class="linaje-header-left">
+                            <div class="linaje-icono"><i class="${l.icono}"></i></div>
+                            <div>
+                                <div class="linaje-nombre">${l.nombre}</div>
+                                <div class="linaje-subtitulo">${l.subtitulo}</div>
+                            </div>
+                        </div>
+                        <i class="ri-arrow-down-s-line linaje-toggle"></i>
+                    </div>
+                    <div class="linaje-body">
+                        <div class="linaje-rasgo">
+                            <div class="linaje-rasgo-titulo">Rasgo</div>
+                            <p><strong style="color:var(--texto)">${l.rasgo.titulo}:</strong> ${l.rasgo.desc}</p>
+                        </div>
+                        <div class="linaje-rasgo">
+                            <div class="linaje-rasgo-titulo">Habilidad</div>
+                            <p><strong style="color:var(--texto)">${l.habilidad.titulo}:</strong> ${l.habilidad.desc}</p>
+                        </div>
+                        <div class="linaje-rasgos-lista">
+                            ${l.rasgos.map(r => `<span class="rasgo-badge">${r}</span>`).join('')}
+                        </div>
+                    </div>
+                </div>
+            `).join('');
+
+            return `
+            <div class="cultura-contenido" id="cultura-${c.id}">
+                <div class="cultura-header">
+                    <p class="cultura-tag">${c.tag}</p>
+                    <h1 class="cultura-titulo">${c.nombre}</h1>
+                </div>
+
+                <div class="hero-img">
+                    <img src="${c.imagen}" alt="${c.nombre}" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex'">
+                    <div class="hero-img-placeholder" style="display:none"><i class="${c.icono}"></i></div>
+                </div>
+
+                <div class="trasfondo-titulo">
+                    <i class="${c.icono}"></i> Trasfondo y Filosofía
+                </div>
+                ${trasfondoHTML}
+
+                <div class="quote-bloque">${c.quote}</div>
+
+                <div class="habilidad-unica">
+                    <h4><i class="ri-sparkling-2-line"></i> Habilidad Única: ${c.habilidadUnica.nombre}</h4>
+                    <p>${c.habilidadUnica.desc}</p>
+                </div>
+
+                <p class="mecanicas-titulo">Linajes Disponibles</p>
+                <div class="linajes-grid">${linajesHTML}</div>
+            </div>`;
+        }
+
+        return '';
+    }
+
+    function mostrarCultura(id) {
+        // Ocultar bienvenida
+        document.getElementById('bienvenida').style.display = 'none';
+
+        // Desactivar todos los items
+        document.querySelectorAll('.cultura-item').forEach(el => el.classList.remove('activa'));
+        document.getElementById('item-' + id).classList.add('activa');
+
+        // Ocultar todos los contenidos
+        document.querySelectorAll('.cultura-contenido').forEach(el => el.classList.remove('visible'));
+        document.getElementById('cultura-' + id).classList.add('visible');
+
+        // Scroll al top del panel
+        document.getElementById('panel-principal').scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    function toggleLinaje(culturaId, index) {
+        const card = document.getElementById(`linaje-${culturaId}-${index}`);
+        card.classList.toggle('abierto');
+    }
+
+    window.mostrarCultura = mostrarCultura;
+    window.toggleLinaje = toggleLinaje;
+    </script>
+</body>
+</html>

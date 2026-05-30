@@ -1,0 +1,628 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Panel del Director | Crónicas del Cazador</title>
+  <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700;800&family=Raleway:wght@300;400;500;600&display=swap" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/remixicon@3.5.0/fonts/remixicon.css" rel="stylesheet">
+  <style>
+    :root {
+      --rojo: #c0392b;
+      --dorado: #c9a84c;
+      --dorado-hover: #e2be6a;
+      --dorado-glow: rgba(201,168,76,0.3);
+      --negro: #0a0a0c;
+      --sup: #111117;
+      --sup2: #16161e;
+      --sup3: #1e1e28;
+      --borde: rgba(255,255,255,0.07);
+      --borde-d: rgba(201,168,76,0.35);
+      --texto: #e8e2d9;
+      --muted: #8a8490;
+      --sec: #b0aab8;
+    }
+
+    *, *::before, *::after { margin:0; padding:0; box-sizing:border-box; }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      font-family: 'Raleway', sans-serif;
+      background: var(--negro);
+      color: var(--texto);
+      overflow-x: hidden;
+    }
+
+    /* ══════════════════════════
+       NAVBAR
+    ══════════════════════════ */
+    .navbar {
+      position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+      display: flex; align-items: center;
+      padding: 0 40px; height: 64px;
+      background: transparent;
+      border-bottom: 1px solid transparent;
+      transition: background 0.4s, border-color 0.4s, backdrop-filter 0.4s;
+    }
+
+    .navbar.scrolled {
+      background: rgba(10,10,12,0.96);
+      border-bottom-color: var(--borde);
+      backdrop-filter: blur(16px);
+    }
+
+    .logo {
+      display: flex; align-items: center;
+      text-decoration: none; margin-right: auto;
+    }
+
+    .logo img {
+      height: 36px; width: auto;
+      filter: invert(1) brightness(0.85);
+      mix-blend-mode: screen;
+      transition: filter 0.2s;
+    }
+
+    .logo:hover img {
+      filter: invert(1) brightness(1) drop-shadow(0 0 8px rgba(201,168,76,0.5));
+    }
+
+    .nav-links {
+      display: flex; align-items: center; gap: 6px;
+    }
+
+    .nav-btn {
+      display: flex; align-items: center; gap: 7px;
+      padding: 0 16px; height: 36px;
+      background: transparent; border: 1px solid rgba(255,255,255,0.12);
+      color: var(--sec);
+      font-family: 'Raleway', sans-serif;
+      font-size: 11px; font-weight: 600;
+      letter-spacing: 0.1em; text-transform: uppercase;
+      cursor: pointer; text-decoration: none;
+      transition: border-color 0.2s, color 0.2s, background 0.2s;
+    }
+
+    .nav-btn:hover { border-color: var(--borde-d); color: var(--dorado); }
+
+    .nav-btn.primary {
+      background: var(--dorado); border-color: var(--dorado);
+      color: var(--negro); font-weight: 700;
+    }
+
+    .nav-btn.primary:hover {
+      background: var(--dorado-hover); border-color: var(--dorado-hover); color: var(--negro);
+    }
+
+    .nav-sep { width: 1px; height: 20px; background: var(--borde); margin: 0 4px; }
+
+    .nav-usuario {
+      display: flex; align-items: center; gap: 8px;
+      padding: 0 14px; height: 36px;
+      border: 1px solid var(--borde-d);
+      cursor: pointer; position: relative;
+      transition: border-color 0.2s;
+    }
+
+    .nav-usuario:hover { border-color: var(--dorado); }
+
+    .nav-avatar {
+      width: 24px; height: 24px; border-radius: 50%;
+      background: rgba(201,168,76,0.15);
+      border: 1px solid var(--borde-d);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 11px; color: var(--dorado); font-weight: 700;
+      flex-shrink: 0;
+    }
+
+    .nav-nombre {
+      font-size: 12px; font-weight: 600;
+      color: var(--texto); letter-spacing: 0.04em;
+    }
+
+    .nav-dropdown {
+      position: absolute; top: calc(100% + 8px); right: 0;
+      background: var(--sup2); border: 1px solid var(--borde-d);
+      min-width: 180px; z-index: 200;
+      opacity: 0; pointer-events: none;
+      transform: translateY(-6px); transition: all 0.2s;
+    }
+
+    .nav-usuario:hover .nav-dropdown,
+    .nav-usuario.open .nav-dropdown {
+      opacity: 1; pointer-events: all; transform: translateY(0);
+    }
+
+    .dropdown-item {
+      display: flex; align-items: center; gap: 10px;
+      padding: 10px 16px; font-size: 13px;
+      color: var(--sec); text-decoration: none;
+      border-bottom: 1px solid var(--borde);
+      transition: background 0.15s, color 0.15s; cursor: pointer;
+    }
+
+    .dropdown-item:last-child { border-bottom: none; }
+    .dropdown-item:hover { background: rgba(201,168,76,0.05); color: var(--texto); }
+    .dropdown-item i { font-size: 15px; color: var(--dorado); }
+    .dropdown-item.danger { color: #e74c3c; }
+    .dropdown-item.danger i { color: #e74c3c; }
+    .dropdown-item.danger:hover { background: rgba(231,76,60,0.06); }
+
+    /* ══════════════════════════
+       HERO
+    ══════════════════════════ */
+    .hero {
+      position: relative; height: 100vh; min-height: 600px;
+      display: flex; align-items: flex-end;
+      overflow: hidden;
+    }
+
+    .hero-bg {
+      position: absolute; inset: 0;
+      background-image: url('../../imagenes/por_dir.png');
+      background-size: cover; background-position: center top;
+      transform: scale(1.04);
+      transition: transform 8s ease;
+    }
+
+    .hero:hover .hero-bg { transform: scale(1); }
+
+    .hero-overlay {
+      position: absolute; inset: 0;
+      background:
+        linear-gradient(to top, rgba(10,10,12,1) 0%, rgba(10,10,12,0.6) 40%, rgba(10,10,12,0.1) 100%),
+        linear-gradient(to right, rgba(10,10,12,0.5) 0%, transparent 60%);
+    }
+
+    /* Acento dorado sutil */
+    .hero-overlay::after {
+      content: '';
+      position: absolute; inset: 0;
+      background: radial-gradient(ellipse 50% 40% at 20% 80%, rgba(201,168,76,0.08) 0%, transparent 60%);
+    }
+
+    .hero-content {
+      position: relative; z-index: 2;
+      padding: 0 64px 72px;
+      max-width: 700px;
+    }
+
+    .hero-eyebrow {
+      display: flex; align-items: center; gap: 12px;
+      margin-bottom: 16px;
+    }
+
+    .hero-eyebrow-line {
+      width: 32px; height: 1px; background: var(--dorado);
+    }
+
+    .hero-eyebrow span {
+      font-size: 11px; font-weight: 700;
+      letter-spacing: 0.3em; text-transform: uppercase;
+      color: var(--dorado);
+    }
+
+    .hero-titulo {
+      font-family: 'Cinzel', serif;
+      font-size: clamp(36px, 5.5vw, 64px);
+      font-weight: 800; line-height: 1.05;
+      color: var(--texto); margin-bottom: 16px;
+    }
+
+    .hero-titulo em {
+      font-style: normal; color: var(--dorado);
+    }
+
+    .hero-desc {
+      font-size: 15px; color: var(--sec);
+      line-height: 1.7; margin-bottom: 36px;
+      max-width: 480px;
+    }
+
+    .hero-acciones {
+      display: flex; gap: 12px; flex-wrap: wrap;
+    }
+
+    .btn-hero-primary {
+      display: flex; align-items: center; gap: 10px;
+      padding: 0 28px; height: 48px;
+      background: var(--dorado); border: none;
+      color: var(--negro); font-family: 'Cinzel', serif;
+      font-size: 13px; font-weight: 700;
+      letter-spacing: 0.15em; text-transform: uppercase;
+      cursor: pointer; text-decoration: none;
+      transition: background 0.2s, transform 0.15s;
+      box-shadow: 0 4px 20px var(--dorado-glow);
+    }
+
+    .btn-hero-primary:hover { background: var(--dorado-hover); transform: translateY(-2px); }
+
+    .btn-hero-secondary {
+      display: flex; align-items: center; gap: 10px;
+      padding: 0 24px; height: 48px;
+      background: transparent;
+      border: 1px solid rgba(255,255,255,0.2);
+      color: var(--texto); font-family: 'Raleway', sans-serif;
+      font-size: 12px; font-weight: 600;
+      letter-spacing: 0.1em; text-transform: uppercase;
+      cursor: pointer; text-decoration: none;
+      transition: border-color 0.2s, color 0.2s;
+    }
+
+    .btn-hero-secondary:hover { border-color: var(--borde-d); color: var(--dorado); }
+
+    /* Scroll indicator */
+    .scroll-indicator {
+      position: absolute; bottom: 28px; left: 50%;
+      transform: translateX(-50%); z-index: 2;
+      display: flex; flex-direction: column; align-items: center;
+      gap: 6px; opacity: 0.5;
+      animation: bounce 2s infinite;
+    }
+
+    .scroll-indicator span {
+      font-size: 9px; font-weight: 700;
+      letter-spacing: 0.2em; text-transform: uppercase;
+      color: var(--dorado);
+    }
+
+    .scroll-indicator i { font-size: 18px; color: var(--dorado); }
+
+    @keyframes bounce {
+      0%, 100% { transform: translateX(-50%) translateY(0); }
+      50%       { transform: translateX(-50%) translateY(6px); }
+    }
+
+    /* ══════════════════════════
+       SECCIÓN ACCESOS
+    ══════════════════════════ */
+    .seccion-accesos {
+      position: relative; z-index: 1;
+      padding: 80px 64px;
+      background: var(--negro);
+    }
+
+    /* Línea decorativa dorada */
+    .seccion-accesos::before {
+      content: '';
+      position: absolute; top: 0; left: 64px; right: 64px;
+      height: 1px;
+      background: linear-gradient(to right, transparent, var(--dorado), transparent);
+      opacity: 0.3;
+    }
+
+    .seccion-label {
+      font-size: 10px; font-weight: 700;
+      letter-spacing: 0.3em; text-transform: uppercase;
+      color: var(--dorado); margin-bottom: 40px;
+      display: flex; align-items: center; gap: 12px;
+    }
+
+    .seccion-label::after {
+      content: ''; flex: 1; height: 1px;
+      background: linear-gradient(to right, var(--borde-d), transparent);
+    }
+
+    .accesos-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+      gap: 16px;
+    }
+
+    .acceso-card {
+      background: var(--sup2); border: 1px solid var(--borde);
+      border-top: 2px solid transparent;
+      padding: 28px 24px;
+      text-decoration: none; cursor: pointer;
+      transition: border-color 0.25s, background 0.25s, transform 0.2s;
+      display: flex; flex-direction: column; gap: 12px;
+      position: relative; overflow: hidden;
+    }
+
+    .acceso-card::before {
+      content: '';
+      position: absolute; bottom: 0; right: 0;
+      width: 80px; height: 80px;
+      background: radial-gradient(circle, rgba(201,168,76,0.06) 0%, transparent 70%);
+      transition: opacity 0.3s;
+    }
+
+    .acceso-card:hover {
+      border-color: var(--borde-d);
+      border-top-color: var(--dorado);
+      background: var(--sup3);
+      transform: translateY(-3px);
+    }
+
+    .acceso-card:hover::before { opacity: 2; }
+
+    .acceso-icon {
+      width: 44px; height: 44px;
+      background: rgba(201,168,76,0.08);
+      border: 1px solid var(--borde-d);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 20px; color: var(--dorado);
+      flex-shrink: 0;
+    }
+
+    .acceso-titulo {
+      font-family: 'Cinzel', serif; font-size: 16px;
+      font-weight: 700; color: var(--texto);
+    }
+
+    .acceso-desc {
+      font-size: 13px; color: var(--muted);
+      line-height: 1.6; flex: 1;
+    }
+
+    .acceso-flecha {
+      display: flex; align-items: center; gap: 6px;
+      font-size: 11px; font-weight: 700;
+      letter-spacing: 0.1em; text-transform: uppercase;
+      color: var(--dorado); margin-top: 4px;
+      transition: gap 0.2s;
+    }
+
+    .acceso-card:hover .acceso-flecha { gap: 10px; }
+
+    /* ══════════════════════════
+       SECCIÓN ROL
+    ══════════════════════════ */
+    .seccion-rol {
+      padding: 0 64px 80px;
+      display: grid; grid-template-columns: 1fr 1fr;
+      gap: 16px;
+    }
+
+    .rol-box {
+      background: var(--sup2); border: 1px solid var(--borde);
+      padding: 28px;
+    }
+
+    .rol-box h3 {
+      font-family: 'Cinzel', serif; font-size: 16px;
+      font-weight: 700; color: var(--texto);
+      margin-bottom: 16px; padding-bottom: 12px;
+      border-bottom: 1px solid var(--borde);
+      display: flex; align-items: center; gap: 10px;
+    }
+
+    .rol-box h3 i { color: var(--dorado); font-size: 18px; }
+
+    .rol-item {
+      display: flex; align-items: flex-start; gap: 12px;
+      padding: 8px 0; border-bottom: 1px solid rgba(255,255,255,0.03);
+      font-size: 13px; color: var(--sec); line-height: 1.5;
+    }
+
+    .rol-item:last-child { border-bottom: none; }
+
+    .rol-item i {
+      font-size: 15px; color: var(--dorado);
+      margin-top: 1px; flex-shrink: 0;
+    }
+
+    /* ══════════════════════════
+       FOOTER
+    ══════════════════════════ */
+    .footer {
+      padding: 24px 64px;
+      border-top: 1px solid var(--borde);
+      display: flex; justify-content: space-between; align-items: center;
+    }
+
+    .footer-logo {
+      font-family: 'Cinzel', serif; font-size: 12px;
+      font-weight: 700; color: var(--muted);
+      letter-spacing: 0.1em;
+    }
+
+    .footer-logo span { color: var(--dorado); }
+
+    .footer-link {
+      font-size: 11px; color: var(--muted);
+      text-decoration: none; letter-spacing: 0.05em;
+      transition: color 0.2s;
+    }
+
+    .footer-link:hover { color: var(--dorado); }
+
+    @media (max-width: 768px) {
+      .navbar { padding: 0 20px; }
+      .hero-content { padding: 0 24px 60px; }
+      .seccion-accesos { padding: 60px 24px; }
+      .seccion-rol { padding: 0 24px 60px; grid-template-columns: 1fr; }
+      .footer { padding: 20px 24px; flex-direction: column; gap: 8px; }
+      .nav-links .nav-btn span { display: none; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- NAVBAR -->
+<nav class="navbar" id="navbar">
+  <a href="../../index.html" class="logo">
+    <img src="../../imagenes/logo.png" alt="CDC">
+  </a>
+  <div class="nav-links">
+    <a href="mis-campanas.html" class="nav-btn">
+      <i class="ri-map-pin-line"></i>
+      <span>Mis Campañas</span>
+    </a>
+    <a href="mis-campanas.html" class="nav-btn primary">
+      <i class="ri-add-circle-line"></i>
+      <span>Nueva Campaña</span>
+    </a>
+    <div class="nav-sep"></div>
+    <div class="nav-usuario" id="nav-usuario">
+      <div class="nav-avatar" id="nav-avatar">?</div>
+      <span class="nav-nombre" id="nav-nombre">Director</span>
+      <i class="ri-arrow-down-s-line" style="font-size:14px;color:var(--muted);"></i>
+      <div class="nav-dropdown">
+        <a href="../../vistas/panel-del-jugador/mi-cuenta.html" class="dropdown-item">
+          <i class="ri-user-line"></i> Mi Cuenta
+        </a>
+        <a href="../../vistas/dashboard.html" class="dropdown-item">
+          <i class="ri-layout-line"></i> Cambiar Rol
+        </a>
+        <div class="dropdown-item danger" id="btn-logout">
+          <i class="ri-logout-box-line"></i> Cerrar Sesión
+        </div>
+      </div>
+    </div>
+  </div>
+</nav>
+
+<!-- HERO -->
+<section class="hero">
+  <div class="hero-bg" id="hero-bg"></div>
+  <div class="hero-overlay"></div>
+
+  <div class="hero-content">
+    <div class="hero-eyebrow">
+      <div class="hero-eyebrow-line"></div>
+      <span>Panel del Director</span>
+    </div>
+    <h1 class="hero-titulo">
+      El mundo obedece<br>a quien lo <em>diseña.</em>
+    </h1>
+    <p class="hero-desc">
+      Tú eres la voz del mundo. Crea campañas, guía cazadores y da vida 
+      a cada sesión. El destino de la historia está en tus manos.
+    </p>
+    <div class="hero-acciones">
+      <a href="mis-campanas.html" class="btn-hero-primary">
+        <i class="ri-map-pin-line"></i> Mis Campañas
+      </a>
+      <a href="mis-campanas.html?nueva=true" class="btn-hero-secondary">
+        <i class="ri-add-line"></i> Crear Campaña
+      </a>
+    </div>
+  </div>
+
+  <div class="scroll-indicator">
+    <span>Ver más</span>
+    <i class="ri-arrow-down-line"></i>
+  </div>
+</section>
+
+<!-- ACCESOS RÁPIDOS -->
+<section class="seccion-accesos">
+  <div class="seccion-label">Herramientas del Director</div>
+  <div class="accesos-grid">
+
+    <a href="mis-campanas.html" class="acceso-card">
+      <div class="acceso-icon"><i class="ri-map-pin-line"></i></div>
+      <div class="acceso-titulo">Mis Campañas</div>
+      <div class="acceso-desc">
+        Gestiona todas tus campañas activas. Ve qué jugadores se unieron, 
+        su estado y accede a la sala VTT de cada una.
+      </div>
+      <div class="acceso-flecha">
+        Ver campañas <i class="ri-arrow-right-line"></i>
+      </div>
+    </a>
+
+    <a href="mis-campanas.html?nueva=true" class="acceso-card">
+      <div class="acceso-icon"><i class="ri-add-circle-line"></i></div>
+      <div class="acceso-titulo">Crear Campaña</div>
+      <div class="acceso-desc">
+        Inicia una nueva aventura. Ponle nombre, genera el código CDC 
+        para que tus jugadores puedan unirse con su personaje.
+      </div>
+      <div class="acceso-flecha">
+        Nueva campaña <i class="ri-arrow-right-line"></i>
+      </div>
+    </a>
+
+    <a href="../panel-del-jugador/mi-cuenta.html" class="acceso-card">
+      <div class="acceso-icon"><i class="ri-user-settings-line"></i></div>
+      <div class="acceso-titulo">Mi Cuenta</div>
+      <div class="acceso-desc">
+        Administra tu perfil, cambia tu nombre de Director y 
+        gestiona la seguridad de tu cuenta.
+      </div>
+      <div class="acceso-flecha">
+        Mi cuenta <i class="ri-arrow-right-line"></i>
+      </div>
+    </a>
+
+    <a href="../dashboard.html" class="acceso-card">
+      <div class="acceso-icon"><i class="ri-swap-line"></i></div>
+      <div class="acceso-titulo">Cambiar a Jugador</div>
+      <div class="acceso-desc">
+        Cambia de rol y accede al panel del jugador para gestionar 
+        tus personajes y unirte a campañas.
+      </div>
+      <div class="acceso-flecha">
+        Panel jugador <i class="ri-arrow-right-line"></i>
+      </div>
+    </a>
+
+  </div>
+</section>
+
+<!-- SECCIÓN ROL DEL DIRECTOR -->
+<section class="seccion-rol">
+  <div class="rol-box">
+    <h3><i class="ri-shield-star-line"></i> Como Director puedes</h3>
+    <div class="rol-item"><i class="ri-checkbox-circle-line"></i> Crear y gestionar campañas con código único CDC</div>
+    <div class="rol-item"><i class="ri-checkbox-circle-line"></i> Ver las fichas completas de todos tus jugadores</div>
+    <div class="rol-item"><i class="ri-checkbox-circle-line"></i> Otorgar puntos de experiencia a personajes específicos</div>
+    <div class="rol-item"><i class="ri-checkbox-circle-line"></i> Entregar ítems y objetos a través del VTT</div>
+    <div class="rol-item"><i class="ri-checkbox-circle-line"></i> Gestionar el estado de salud de los personajes</div>
+    <div class="rol-item"><i class="ri-checkbox-circle-line"></i> Controlar el chat y los dados en tiempo real</div>
+    <div class="rol-item"><i class="ri-checkbox-circle-line"></i> Tomar notas privadas de sesión</div>
+  </div>
+  <div class="rol-box">
+    <h3><i class="ri-information-line"></i> Recuerda</h3>
+    <div class="rol-item"><i class="ri-alert-line"></i> El Director no puede modificar las fichas de los jugadores directamente</div>
+    <div class="rol-item"><i class="ri-alert-line"></i> La XP se entrega al personaje, no al usuario</div>
+    <div class="rol-item"><i class="ri-alert-line"></i> Cada campaña tiene un código único que no puede cambiarse</div>
+    <div class="rol-item"><i class="ri-alert-line"></i> El jugador decide cómo gastar la XP en su ficha</div>
+    <div class="rol-item"><i class="ri-star-line"></i> Máximo recomendado de XP por sesión: <strong style="color:var(--dorado)">8 puntos</strong></div>
+    <div class="rol-item"><i class="ri-star-line"></i> Usa los 8 criterios del sistema para repartir XP con justicia</div>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer class="footer">
+  <div class="footer-logo">Crónicas del <span>Cazador</span></div>
+  <a href="../../index.html" class="footer-link">← Volver al inicio</a>
+</footer>
+
+<script type="module">
+  import { auth } from "../../js/firebase-config.js";
+  import { onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-auth.js";
+
+  // Navbar scroll
+  const navbar = document.getElementById('navbar');
+  window.addEventListener('scroll', () => {
+    navbar.classList.toggle('scrolled', window.scrollY > 40);
+  });
+
+  // Auth
+  onAuthStateChanged(auth, (user) => {
+    if (!user) { window.location.href = '../../vistas/login.html'; return; }
+
+    const nombre = user.displayName || user.email.split('@')[0];
+    document.getElementById('nav-nombre').textContent = nombre;
+    document.getElementById('nav-avatar').textContent = nombre.charAt(0).toUpperCase();
+  });
+
+  // Logout
+  document.getElementById('btn-logout').addEventListener('click', async () => {
+    await signOut(auth);
+    window.location.href = '../../vistas/login.html';
+  });
+
+  // Detectar ?nueva=true para scroll automático (cuando venga de crear campaña)
+  const params = new URLSearchParams(window.location.search);
+  if (params.get('nueva') === 'true') {
+    window.location.href = 'mis-campanas.html?nueva=true';
+  }
+</script>
+
+</body>
+</html>

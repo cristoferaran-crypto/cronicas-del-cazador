@@ -1,0 +1,728 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Crónicas del Cazador — Edición Génesis</title>
+    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700;800&family=Raleway:wght@300;400;500;600&family=Cinzel+Decorative:wght@400;700&display=swap" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/remixicon@3.5.0/fonts/remixicon.css" rel="stylesheet">
+    <style>
+        :root {
+            --rojo:      #c0392b;
+            --rojo-vivo: #e74c3c;
+            --rojo-glow: rgba(192, 57, 43, 0.4);
+            --negro:     #07070a;
+            --sup:       #0f0f14;
+            --sup2:      #15151c;
+            --sup3:      #1c1c26;
+            --borde:     rgba(255,255,255,0.07);
+            --borde-r:   rgba(192,57,43,0.35);
+            --texto:     #e2ddd6;
+            --muted:     #6e6878;
+            --sec:       #a8a2b0;
+            --dorado:    #b8954a;
+            --dorado-dim:rgba(184,149,74,0.15);
+        }
+
+        *, *::before, *::after { margin:0; padding:0; box-sizing:border-box; }
+
+        html { scroll-behavior: smooth; }
+
+        body {
+            font-family: 'Raleway', sans-serif;
+            background: var(--negro);
+            color: var(--texto);
+            overflow-x: hidden;
+        }
+
+        /* ════════════════════════════════
+           NAVBAR
+        ════════════════════════════════ */
+        .navbar {
+            position: fixed; top: 0; left: 0; right: 0;
+            z-index: 200;
+            display: flex; align-items: center;
+            padding: 0 48px; height: 68px;
+            transition: background 0.4s, border-color 0.4s, backdrop-filter 0.4s;
+        }
+
+        .navbar.scrolled {
+            background: rgba(7,7,10,0.95);
+            border-bottom: 1px solid var(--borde);
+            backdrop-filter: blur(16px);
+        }
+
+        /* Logo */
+        .nav-logo {
+            display: flex; align-items: center;
+            text-decoration: none; flex-shrink: 0;
+            margin-right: auto;
+        }
+
+        .nav-logo img {
+            height: 44px; width: auto;
+            filter: invert(1) brightness(0.9);
+            transition: filter 0.2s;
+        }
+
+        .nav-logo:hover img { filter: invert(1) brightness(1) drop-shadow(0 0 8px rgba(192,57,43,0.6)); }
+
+        /* Links centrales */
+        .nav-links {
+            display: flex; align-items: center; gap: 4px;
+            position: absolute; left: 50%; transform: translateX(-50%);
+        }
+
+        .nav-link {
+            padding: 0 16px; height: 68px;
+            display: flex; align-items: center;
+            font-size: 11px; font-weight: 600;
+            letter-spacing: 0.15em; text-transform: uppercase;
+            color: rgba(226,221,214,0.55);
+            text-decoration: none;
+            transition: color 0.2s;
+            position: relative;
+        }
+
+        .nav-link::after {
+            content: '';
+            position: absolute; bottom: 0; left: 16px; right: 16px;
+            height: 2px; background: var(--rojo);
+            transform: scaleX(0); transition: transform 0.2s;
+        }
+
+        .nav-link:hover { color: var(--texto); }
+        .nav-link:hover::after { transform: scaleX(1); }
+
+        /* Botones derecha */
+        .nav-actions { display: flex; align-items: center; gap: 10px; }
+
+        .btn-login {
+            padding: 0 18px; height: 36px;
+            background: transparent;
+            border: 1px solid rgba(255,255,255,0.15);
+            color: var(--sec);
+            font-family: 'Raleway', sans-serif;
+            font-size: 11px; font-weight: 600;
+            letter-spacing: 0.12em; text-transform: uppercase;
+            text-decoration: none;
+            display: flex; align-items: center; gap: 7px;
+            transition: border-color 0.2s, color 0.2s;
+        }
+
+        .btn-login:hover { border-color: rgba(255,255,255,0.35); color: var(--texto); }
+
+        .btn-register {
+            padding: 0 18px; height: 36px;
+            background: var(--rojo);
+            border: none;
+            color: white;
+            font-family: 'Raleway', sans-serif;
+            font-size: 11px; font-weight: 700;
+            letter-spacing: 0.12em; text-transform: uppercase;
+            text-decoration: none;
+            display: flex; align-items: center; gap: 7px;
+            transition: background 0.2s;
+            box-shadow: 0 4px 16px rgba(192,57,43,0.3);
+        }
+
+        .btn-register:hover { background: var(--rojo-vivo); }
+
+        /* ════════════════════════════════
+           HERO — PORTADA PANTALLA COMPLETA
+        ════════════════════════════════ */
+        .hero {
+            position: relative;
+            width: 100%; height: 100vh;
+            min-height: 600px;
+            display: flex; align-items: center; justify-content: center;
+            overflow: hidden;
+        }
+
+        .hero-bg {
+            position: absolute; inset: 0;
+            background-image: url('imagenes/portada.png');
+            background-size: cover;
+            background-position: center 30%;
+            transform: scale(1.05);
+            animation: heroZoom 20s ease-in-out infinite alternate;
+        }
+
+        @keyframes heroZoom {
+            from { transform: scale(1.05); }
+            to   { transform: scale(1.12); }
+        }
+
+        /* Gradientes sobre la imagen */
+        .hero-overlay {
+            position: absolute; inset: 0;
+            background:
+                linear-gradient(to bottom,
+                    rgba(7,7,10,0.3) 0%,
+                    rgba(7,7,10,0.1) 40%,
+                    rgba(7,7,10,0.6) 75%,
+                    rgba(7,7,10,1)   100%),
+                radial-gradient(ellipse 80% 60% at 50% 50%, transparent 40%, rgba(7,7,10,0.5) 100%);
+        }
+
+        /* Contenido hero */
+        .hero-content {
+            position: relative; z-index: 2;
+            text-align: center;
+            display: flex; flex-direction: column;
+            align-items: center; gap: 0;
+        }
+
+        .hero-eyebrow {
+            font-size: 10px; font-weight: 600;
+            letter-spacing: 0.4em; text-transform: uppercase;
+            color: var(--rojo); margin-bottom: 28px;
+            opacity: 0; animation: fadeUp 0.8s 0.3s forwards;
+        }
+
+        .hero-logo {
+            width: clamp(320px, 45vw, 580px);
+            height: auto;
+            filter: invert(1) drop-shadow(0 0 40px rgba(192,57,43,0.25));
+            opacity: 0; animation: fadeUp 1s 0.5s forwards;
+            margin-bottom: 32px;
+        }
+
+        .hero-divider {
+            width: 1px; height: 48px;
+            background: linear-gradient(to bottom, transparent, rgba(192,57,43,0.6), transparent);
+            margin-bottom: 28px;
+            opacity: 0; animation: fadeUp 0.8s 0.9s forwards;
+        }
+
+        .hero-tagline {
+            font-size: clamp(13px, 1.5vw, 16px);
+            font-weight: 400; color: var(--sec);
+            letter-spacing: 0.06em; line-height: 1.8;
+            max-width: 520px;
+            opacity: 0; animation: fadeUp 0.8s 1.1s forwards;
+            margin-bottom: 40px;
+        }
+
+        .hero-tagline em { font-style: normal; color: var(--dorado); }
+
+        .hero-ctas {
+            display: flex; gap: 14px;
+            opacity: 0; animation: fadeUp 0.8s 1.3s forwards;
+        }
+
+        .cta-primary {
+            display: flex; align-items: center; gap: 9px;
+            padding: 0 28px; height: 48px;
+            background: var(--rojo);
+            border: none; color: white;
+            font-family: 'Cinzel', serif;
+            font-size: 12px; font-weight: 700;
+            letter-spacing: 0.15em; text-transform: uppercase;
+            text-decoration: none; cursor: pointer;
+            transition: background 0.2s, transform 0.15s;
+            box-shadow: 0 8px 24px rgba(192,57,43,0.4);
+        }
+
+        .cta-primary:hover { background: var(--rojo-vivo); transform: translateY(-2px); }
+
+        .cta-secondary {
+            display: flex; align-items: center; gap: 9px;
+            padding: 0 28px; height: 48px;
+            background: transparent;
+            border: 1px solid rgba(255,255,255,0.2);
+            color: var(--texto);
+            font-family: 'Cinzel', serif;
+            font-size: 12px; font-weight: 600;
+            letter-spacing: 0.15em; text-transform: uppercase;
+            text-decoration: none; cursor: pointer;
+            transition: border-color 0.2s, background 0.2s;
+        }
+
+        .cta-secondary:hover { border-color: rgba(255,255,255,0.4); background: rgba(255,255,255,0.04); }
+
+        /* Scroll indicator */
+        .scroll-hint {
+            position: absolute; bottom: 32px; left: 50%;
+            transform: translateX(-50%);
+            display: flex; flex-direction: column; align-items: center; gap: 8px;
+            opacity: 0; animation: fadeIn 1s 2s forwards;
+            z-index: 2;
+        }
+
+        .scroll-hint span {
+            font-size: 9px; letter-spacing: 0.3em;
+            text-transform: uppercase; color: var(--muted);
+        }
+
+        .scroll-arrow {
+            width: 1px; height: 36px;
+            background: linear-gradient(to bottom, rgba(192,57,43,0.6), transparent);
+            animation: scrollPulse 2s ease-in-out infinite;
+        }
+
+        @keyframes scrollPulse {
+            0%, 100% { opacity: 0.4; transform: scaleY(1); }
+            50%       { opacity: 1;   transform: scaleY(1.2); }
+        }
+
+        /* Animaciones */
+        @keyframes fadeUp {
+            from { opacity: 0; transform: translateY(20px); }
+            to   { opacity: 1; transform: translateY(0); }
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to   { opacity: 1; }
+        }
+
+        /* ════════════════════════════════
+           SECCIONES
+        ════════════════════════════════ */
+        .contenido { max-width: 900px; margin: 0 auto; padding: 0 32px; }
+
+        .seccion {
+            padding: 80px 0;
+            border-bottom: 1px solid var(--borde);
+        }
+
+        .seccion:last-of-type { border-bottom: none; }
+
+        .sec-eyebrow {
+            font-size: 10px; font-weight: 600;
+            letter-spacing: 0.3em; text-transform: uppercase;
+            color: var(--rojo); margin-bottom: 14px;
+        }
+
+        .sec-titulo {
+            font-family: 'Cinzel', serif;
+            font-size: clamp(22px, 3.5vw, 34px);
+            font-weight: 700; color: var(--texto);
+            line-height: 1.15; margin-bottom: 20px;
+        }
+
+        .sec-titulo i { color: var(--rojo); margin-right: 10px; font-size: 0.85em; }
+
+        .sec-texto {
+            font-size: 15px; color: var(--sec);
+            line-height: 1.85; margin-bottom: 16px;
+        }
+
+        .quote-line {
+            border-left: 2px solid var(--rojo);
+            padding: 12px 20px; margin: 28px 0;
+            background: rgba(192,57,43,0.04);
+            font-size: 14px; font-style: italic;
+            color: var(--dorado); line-height: 1.7;
+        }
+
+        /* ── Sistema de dados ── */
+        .dados-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 12px; margin: 28px 0;
+        }
+
+        .dado-card {
+            background: var(--sup2);
+            border: 1px solid var(--borde);
+            padding: 20px 16px; text-align: center;
+            transition: border-color 0.2s, transform 0.2s;
+        }
+
+        .dado-card:hover { border-color: var(--borde-r); transform: translateY(-3px); }
+        .dado-card.critico { border-color: var(--borde-r); background: rgba(192,57,43,0.05); }
+
+        .dado-num {
+            font-family: 'Cinzel', serif;
+            font-size: 2.2rem; font-weight: 800;
+            color: rgba(255,255,255,0.15);
+            display: block; margin-bottom: 10px;
+            line-height: 1;
+        }
+
+        .dado-card.critico .dado-num { color: var(--rojo); text-shadow: 0 0 20px var(--rojo-glow); }
+
+        .dado-card h3 {
+            font-family: 'Cinzel', serif;
+            font-size: 13px; font-weight: 600;
+            color: var(--texto); margin-bottom: 6px;
+            letter-spacing: 0.05em;
+        }
+
+        .dado-card.critico h3 { color: var(--rojo); }
+
+        .dado-card p { font-size: 12px; color: var(--muted); line-height: 1.6; }
+
+        /* Reglas adicionales */
+        .reglas-grid {
+            display: grid; grid-template-columns: 1fr 1fr;
+            gap: 14px; margin-top: 24px;
+        }
+
+        .regla-card {
+            background: var(--sup2); border: 1px solid var(--borde);
+            padding: 22px 20px;
+            transition: border-color 0.2s;
+        }
+
+        .regla-card:hover { border-color: var(--borde-r); }
+
+        .regla-card-header {
+            display: flex; align-items: center; gap: 10px;
+            margin-bottom: 12px;
+        }
+
+        .regla-card-header i { font-size: 18px; color: var(--rojo); }
+
+        .regla-card-header h3 {
+            font-family: 'Cinzel', serif;
+            font-size: 14px; font-weight: 600; color: var(--texto);
+        }
+
+        .regla-card p { font-size: 13px; color: var(--sec); line-height: 1.7; }
+
+        /* ── Culturas ── */
+        .culturas-grid {
+            display: grid; grid-template-columns: 1fr 1fr;
+            gap: 12px; margin-top: 28px;
+        }
+
+        .cultura-item {
+            display: flex; align-items: flex-start; gap: 14px;
+            background: var(--sup2); border: 1px solid var(--borde);
+            padding: 18px 20px;
+            transition: border-color 0.2s, background 0.2s;
+        }
+
+        .cultura-item:hover { border-color: var(--borde-r); background: var(--sup3); }
+
+        .cultura-icono {
+            font-size: 22px; color: var(--rojo);
+            flex-shrink: 0; margin-top: 2px;
+            width: 28px; text-align: center;
+        }
+
+        .cultura-info h3 {
+            font-family: 'Cinzel', serif;
+            font-size: 14px; font-weight: 600;
+            color: var(--texto); margin-bottom: 5px;
+        }
+
+        .cultura-info p { font-size: 12px; color: var(--sec); line-height: 1.6; }
+
+        .cultura-habilidad {
+            font-size: 10px; font-weight: 700;
+            letter-spacing: 0.1em; text-transform: uppercase;
+            color: var(--dorado); margin-top: 6px; display: block;
+        }
+
+        /* ════════════════════════════════
+           FOOTER
+        ════════════════════════════════ */
+        footer {
+            background: var(--sup);
+            border-top: 1px solid var(--borde);
+            padding: 48px 48px 32px;
+        }
+
+        .footer-inner {
+            max-width: 900px; margin: 0 auto;
+            display: flex; flex-direction: column; align-items: center;
+            gap: 24px;
+        }
+
+        .footer-logo img {
+            height: 52px; width: auto;
+            filter: invert(1) brightness(0.4);
+        }
+
+        .footer-links {
+            display: flex; gap: 32px;
+            flex-wrap: wrap; justify-content: center;
+        }
+
+        .footer-link {
+            font-size: 11px; font-weight: 600;
+            letter-spacing: 0.12em; text-transform: uppercase;
+            color: var(--muted); text-decoration: none;
+            transition: color 0.2s;
+        }
+
+        .footer-link:hover { color: var(--sec); }
+
+        .footer-divider {
+            width: 100%; height: 1px;
+            background: var(--borde);
+        }
+
+        .footer-bottom {
+            display: flex; align-items: center; justify-content: space-between;
+            width: 100%; flex-wrap: wrap; gap: 12px;
+        }
+
+        .footer-copy {
+            font-size: 11px; color: var(--muted);
+            letter-spacing: 0.05em; line-height: 1.6;
+        }
+
+        .footer-copy strong { color: var(--sec); }
+
+        .footer-badge {
+            font-size: 10px; font-weight: 600;
+            letter-spacing: 0.2em; text-transform: uppercase;
+            color: var(--rojo);
+            border: 1px solid var(--borde-r);
+            padding: 4px 12px;
+        }
+
+        /* ════════════════════════════════
+           RESPONSIVE
+        ════════════════════════════════ */
+        @media (max-width: 768px) {
+            .navbar { padding: 0 20px; }
+            .nav-links { display: none; }
+            .hero-ctas { flex-direction: column; align-items: center; }
+            .dados-grid { grid-template-columns: 1fr 1fr; }
+            .reglas-grid { grid-template-columns: 1fr; }
+            .culturas-grid { grid-template-columns: 1fr; }
+            .footer { padding: 40px 20px 24px; }
+            .footer-bottom { flex-direction: column; align-items: center; text-align: center; }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- ════════════════════════════════
+         NAVBAR
+    ════════════════════════════════ -->
+    <nav class="navbar" id="navbar">
+        <a href="index.html" class="nav-logo">
+            <img src="imagenes/logo.png" alt="Crónicas del Cazador">
+        </a>
+
+        <div class="nav-links">
+            <a href="#lore"     class="nav-link">El Mundo</a>
+            <a href="#sistema"  class="nav-link">Sistema</a>
+            <a href="#culturas" class="nav-link">Culturas</a>
+        </div>
+
+        <div class="nav-actions">
+            <a href="vistas/login.html" class="btn-login">
+                <i class="ri-user-line"></i> Iniciar Sesión
+            </a>
+            <a href="vistas/registro.html" class="btn-register">
+                <i class="ri-quill-pen-line"></i> Registrarse
+            </a>
+        </div>
+    </nav>
+
+    <!-- ════════════════════════════════
+         HERO
+    ════════════════════════════════ -->
+    <section class="hero">
+        <div class="hero-bg"></div>
+        <div class="hero-overlay"></div>
+
+        <div class="hero-content">
+            <p class="hero-eyebrow">Edición Génesis</p>
+            <img src="imagenes/logo.png" alt="Crónicas del Cazador" class="hero-logo">
+            <div class="hero-divider"></div>
+            <p class="hero-tagline">
+                Un mundo viciado, dominado en las sombras por las mafias.<br>
+                <em>Arriesga la vida por tus objetivos. Conviértete en leyenda.</em>
+            </p>
+            <div class="hero-ctas">
+                <a href="vistas/registro.html" class="cta-primary">
+                    <i class="ri-quill-pen-line"></i> Comenzar Aventura
+                </a>
+                <a href="#lore" class="cta-secondary">
+                    <i class="ri-compass-discover-line"></i> Explorar el Mundo
+                </a>
+            </div>
+        </div>
+
+        <div class="scroll-hint">
+            <span>Explorar</span>
+            <div class="scroll-arrow"></div>
+        </div>
+    </section>
+
+    <!-- ════════════════════════════════
+         SECCIONES
+    ════════════════════════════════ -->
+    <div class="contenido">
+
+        <!-- 01 / EL MUNDO -->
+        <section id="lore" class="seccion">
+            <p class="sec-eyebrow">01 / El Mundo</p>
+            <h2 class="sec-titulo">
+                <i class="ri-global-line"></i> ¿Qué es Crónicas del Cazador?
+            </h2>
+            <p class="sec-texto">
+                Un juego de rol narrativo ambientado en el universo de Hunter × Hunter de Yoshihiro Togashi. El mundo no cambia por los personajes… son los personajes quienes deben adaptarse a él.
+            </p>
+            <div class="quote-line">
+                "No es un paraíso idealizado: es un mundo donde una sociedad elitista arriesga todo. Se hacen llamar Cazadores."
+            </div>
+        </section>
+
+        <!-- 02 / SISTEMA -->
+        <section id="sistema" class="seccion">
+            <p class="sec-eyebrow">02 / Mecánicas</p>
+            <h2 class="sec-titulo">
+                <i class="ri-sword-line"></i> Sistema de Dados d6
+            </h2>
+            <p class="sec-texto">
+                Lanza tu pool de dados (Atributo + Habilidad). Cada resultado moldea tu destino en tiempo real:
+            </p>
+
+            <div class="dados-grid">
+                <div class="dado-card">
+                    <span class="dado-num">1</span>
+                    <h3>Complicación</h3>
+                    <p>Éxito con consecuencias graves o fallo agravado.</p>
+                </div>
+                <div class="dado-card">
+                    <span class="dado-num">2-3</span>
+                    <h3>Fallo Simple</h3>
+                    <p>No se logra la acción, el escenario no cambia.</p>
+                </div>
+                <div class="dado-card">
+                    <span class="dado-num">4-5</span>
+                    <h3>Éxito Normal</h3>
+                    <p>La acción se realiza correctamente según lo planeado.</p>
+                </div>
+                <div class="dado-card critico">
+                    <span class="dado-num">6</span>
+                    <h3>Crítico</h3>
+                    <p>¡Cuenta como dos éxitos! Rompe los límites de la situación.</p>
+                </div>
+            </div>
+
+            <div class="reglas-grid">
+                <div class="regla-card">
+                    <div class="regla-card-header">
+                        <i class="ri-book-open-line"></i>
+                        <h3>Progreso Narrativo</h3>
+                    </div>
+                    <p>No se sube de nivel por matar enemigos. Los hitos son momentos clave de la historia: decisiones, pérdidas, revelaciones y logros personales.</p>
+                </div>
+                <div class="regla-card">
+                    <div class="regla-card-header">
+                        <i class="ri-git-repository-private-line"></i>
+                        <h3>Director de Juego</h3>
+                    </div>
+                    <p>El DJ tiene acceso completo a todos los personajes del grupo, puede seguir su progreso y coordinar la campaña desde su vista exclusiva.</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- 03 / CULTURAS -->
+        <section id="culturas" class="seccion">
+            <p class="sec-eyebrow">03 / Orígenes</p>
+            <h2 class="sec-titulo">
+                <i class="ri-team-line"></i> Culturas del Mundo Conocido
+            </h2>
+            <p class="sec-texto">
+                Las culturas no solo determinan cómo vives… determinan en qué te conviertes. Cada origen moldea tus habilidades, tu forma de ver el mundo y los enemigos que heredas.
+            </p>
+            <div class="quote-line">
+                "Las culturas no son solo un origen. Son una filosofía de vida."
+            </div>
+
+            <div class="culturas-grid">
+                <div class="cultura-item">
+                    <i class="ri-sparkling-fill cultura-icono"></i>
+                    <div class="cultura-info">
+                        <h3>Habitantes de las Estrellas</h3>
+                        <p>Forjados en el abandono de Meteor City. Duros, resilientes y desconfiados. Su lealtad con los suyos es inquebrantable.</p>
+                        <span class="cultura-habilidad">✦ Los Invisibles</span>
+                    </div>
+                </div>
+                <div class="cultura-item">
+                    <i class="ri-spy-line cultura-icono"></i>
+                    <div class="cultura-info">
+                        <h3>Casas del Bajo Mundo</h3>
+                        <p>La mafia. Poder, jerarquía y juramento de sangre. Ingresar es una elección de vida que no tiene retorno.</p>
+                        <span class="cultura-habilidad">✦ Red de la Familia</span>
+                    </div>
+                </div>
+                <div class="cultura-item">
+                    <i class="ri-leaf-line cultura-icono"></i>
+                    <div class="cultura-info">
+                        <h3>Aislados de NGL</h3>
+                        <p>Hijos de la tierra y la comunidad. Conectados con la naturaleza, completamente ajenos a la tecnología moderna.</p>
+                        <span class="cultura-habilidad">✦ Instinto Natural</span>
+                    </div>
+                </div>
+                <div class="cultura-item">
+                    <i class="ri-anchor-line cultura-icono"></i>
+                    <div class="cultura-info">
+                        <h3>Hombres del Mar</h3>
+                        <p>El océano es su hogar. Libres, temerarios e indomables. No siguen leyes ni reyes, solo los códigos del mar.</p>
+                        <span class="cultura-habilidad">✦ Cuerpo del Navegante</span>
+                    </div>
+                </div>
+                <div class="cultura-item">
+                    <i class="ri-walk-line cultura-icono"></i>
+                    <div class="cultura-info">
+                        <h3>Foráneos</h3>
+                        <p>Hijos del camino. No pertenecen a ningún lugar. Adaptables, sociables y eternamente en movimiento.</p>
+                        <span class="cultura-habilidad">✦ Siempre en Ruta</span>
+                    </div>
+                </div>
+                <div class="cultura-item">
+                    <i class="ri-heart-pulse-line cultura-icono"></i>
+                    <div class="cultura-info">
+                        <h3>Herederos de Linaje</h3>
+                        <p>La sangre define su destino. Linajes Zoldyck, Kurta o Netero. Con el linaje vienen los enemigos.</p>
+                        <span class="cultura-habilidad">✦ Sangre Despierta</span>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+    </div>
+
+    <!-- ════════════════════════════════
+         FOOTER
+    ════════════════════════════════ -->
+    <footer>
+        <div class="footer-inner">
+            <div class="footer-logo">
+                <img src="imagenes/logo.png" alt="Crónicas del Cazador">
+            </div>
+
+            <div class="footer-links">
+                <a href="#lore"     class="footer-link">El Mundo</a>
+                <a href="#sistema"  class="footer-link">Sistema</a>
+                <a href="#culturas" class="footer-link">Culturas</a>
+                <a href="vistas/login.html"    class="footer-link">Iniciar Sesión</a>
+                <a href="vistas/registro.html" class="footer-link">Registrarse</a>
+            </div>
+
+            <div class="footer-divider"></div>
+
+            <div class="footer-bottom">
+                <p class="footer-copy">
+                    © 2025 <strong>Crónicas del Cazador — Edición Génesis</strong>.<br>
+                    Todos los derechos reservados. Proyecto de rol independiente.<br>
+                    <span style="font-size:10px; opacity:0.6;">Basado en el universo de Hunter × Hunter © Yoshihiro Togashi / Shueisha. Uso no comercial.</span>
+                </p>
+                <div class="footer-badge">Edición Génesis</div>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        // Navbar scroll effect
+        const navbar = document.getElementById('navbar');
+        window.addEventListener('scroll', () => {
+            navbar.classList.toggle('scrolled', window.scrollY > 60);
+        });
+    </script>
+
+</body>
+</html>

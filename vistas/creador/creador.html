@@ -1,0 +1,1891 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Creador de Personaje — Crónicas del Cazador</title>
+  <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700;800&family=Raleway:wght@300;400;500;600&display=swap" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/remixicon@3.5.0/fonts/remixicon.css" rel="stylesheet">
+  <style>
+    :root {
+      --rojo: #c0392b;
+      --rojo-hover: #e74c3c;
+      --rojo-glow: rgba(192,57,43,0.35);
+      --negro: #0a0a0c;
+      --sup: #111117;
+      --sup2: #16161e;
+      --sup3: #1e1e28;
+      --borde: rgba(255,255,255,0.07);
+      --borde-r: rgba(192,57,43,0.4);
+      --texto: #e8e2d9;
+      --muted: #8a8490;
+      --sec: #b0aab8;
+      --dorado: #c9a84c;
+      --verde: #2ecc71;
+      --azul: #7ec8e3;
+    }
+
+    *, *::before, *::after { margin:0; padding:0; box-sizing:border-box; }
+
+    body {
+      font-family: 'Raleway', sans-serif;
+      background: var(--negro);
+      color: var(--texto);
+      min-height: 100vh;
+      overflow-x: hidden;
+    }
+
+    body::before {
+      content: '';
+      position: fixed; inset: 0;
+      background:
+        radial-gradient(ellipse 60% 40% at 15% 0%, rgba(192,57,43,0.07) 0%, transparent 65%),
+        radial-gradient(ellipse 50% 60% at 85% 100%, rgba(192,57,43,0.04) 0%, transparent 65%);
+      pointer-events: none; z-index: 0;
+    }
+
+    /* ══════════════════════════
+       NAVBAR
+    ══════════════════════════ */
+    .navbar {
+      position: sticky; top: 0; z-index: 100;
+      display: flex; align-items: center;
+      padding: 0 32px; height: 60px;
+      background: rgba(10,10,12,0.95);
+      border-bottom: 1px solid var(--borde);
+      backdrop-filter: blur(16px);
+      gap: 16px;
+    }
+
+    .logo {
+      display: flex; align-items: center;
+      text-decoration: none; flex-shrink: 0;
+    }
+
+    .logo img {
+      height: 36px; width: auto;
+      filter: invert(1) brightness(0.85);
+      mix-blend-mode: screen;
+      transition: filter 0.2s;
+    }
+
+    .logo:hover img {
+      filter: invert(1) brightness(1) drop-shadow(0 0 8px rgba(192,57,43,0.5));
+    }
+
+    .nav-titulo {
+      font-family: 'Cinzel', serif;
+      font-size: 13px; font-weight: 600;
+      letter-spacing: 0.15em; text-transform: uppercase;
+      color: var(--muted);
+    }
+
+    .nav-titulo span { color: var(--rojo); }
+
+    .nav-back {
+      display: flex; align-items: center; gap: 7px;
+      padding: 0 16px; height: 34px;
+      background: transparent; border: 1px solid var(--borde);
+      color: var(--muted);
+      font-family: 'Raleway', sans-serif;
+      font-size: 11px; font-weight: 600;
+      letter-spacing: 0.1em; text-transform: uppercase;
+      cursor: pointer; text-decoration: none;
+      transition: border-color 0.2s, color 0.2s;
+      margin-left: auto;
+    }
+
+    .nav-back:hover { border-color: var(--borde-r); color: var(--texto); }
+
+    /* ══════════════════════════
+       HEADER
+    ══════════════════════════ */
+    .page-header {
+      text-align: center;
+      padding: 40px 20px 24px;
+      position: relative; z-index: 1;
+    }
+
+    .page-eyebrow {
+      font-size: 10px; font-weight: 600;
+      letter-spacing: 0.3em; text-transform: uppercase;
+      color: var(--rojo); margin-bottom: 10px;
+    }
+
+    .page-titulo {
+      font-family: 'Cinzel', serif;
+      font-size: clamp(22px, 4vw, 36px);
+      font-weight: 800; color: var(--texto);
+      margin-bottom: 8px;
+    }
+
+    .page-subtitulo {
+      font-size: 14px; color: var(--muted);
+      font-style: italic;
+    }
+
+    /* ══════════════════════════
+       STEPPER
+    ══════════════════════════ */
+    .stepper {
+      display: flex; align-items: center; justify-content: center;
+      padding: 20px 32px 28px;
+      flex-wrap: wrap; gap: 4px;
+      position: relative; z-index: 1;
+    }
+
+    .step-item {
+      display: flex; align-items: center; gap: 8px;
+      cursor: pointer; opacity: 0.35;
+      transition: opacity 0.2s;
+    }
+
+    .step-item.active { opacity: 1; }
+    .step-item.done   { opacity: 0.6; }
+
+    .step-num {
+      width: 30px; height: 30px;
+      border: 1px solid rgba(255,255,255,0.12);
+      display: flex; align-items: center; justify-content: center;
+      font-family: 'Cinzel', serif;
+      font-size: 12px; font-weight: 700;
+      color: var(--muted); flex-shrink: 0;
+      transition: all 0.25s;
+    }
+
+    .step-item.active .step-num {
+      background: var(--rojo); border-color: var(--rojo);
+      color: white; box-shadow: 0 0 12px var(--rojo-glow);
+    }
+
+    .step-item.done .step-num {
+      background: rgba(192,57,43,0.15);
+      border-color: var(--borde-r); color: var(--rojo);
+    }
+
+    .step-label {
+      font-family: 'Raleway', sans-serif;
+      font-size: 11px; font-weight: 600;
+      letter-spacing: 0.1em; text-transform: uppercase;
+      color: var(--muted); white-space: nowrap;
+    }
+
+    .step-item.active .step-label { color: var(--texto); }
+    .step-item.done  .step-label  { color: var(--sec); }
+
+    .step-sep {
+      width: 20px; height: 1px;
+      background: rgba(255,255,255,0.08);
+      flex-shrink: 0;
+    }
+
+    /* ══════════════════════════
+       LAYOUT PRINCIPAL
+    ══════════════════════════ */
+    .creator-wrap {
+      position: relative; z-index: 1;
+      display: grid;
+      grid-template-columns: 1fr 290px;
+      gap: 24px;
+      max-width: 1140px;
+      margin: 0 auto;
+      padding: 0 32px 80px;
+    }
+
+    /* ══════════════════════════
+       PANELES
+    ══════════════════════════ */
+    .step-panel { display: none; }
+    .step-panel.active { display: block; animation: panelIn 0.3s ease; }
+
+    @keyframes panelIn {
+      from { opacity: 0; transform: translateY(8px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    .panel-titulo {
+      font-family: 'Cinzel', serif;
+      font-size: clamp(20px, 3vw, 28px);
+      font-weight: 800; color: var(--texto);
+      margin-bottom: 6px;
+    }
+
+    .panel-desc {
+      font-size: 13px; color: var(--muted);
+      font-style: italic; line-height: 1.6;
+      margin-bottom: 24px; padding-bottom: 20px;
+      border-bottom: 1px solid var(--borde);
+    }
+
+    /* Límite info badge */
+    .limite-badge {
+      display: inline-flex; align-items: center; gap: 8px;
+      padding: 8px 16px; margin-bottom: 20px;
+      background: rgba(192,57,43,0.06);
+      border: 1px solid var(--borde-r);
+      font-size: 12px; color: var(--sec);
+    }
+
+    .limite-badge i { color: var(--rojo); font-size: 14px; }
+    .limite-badge strong { color: var(--texto); }
+
+    /* ══════════════════════════
+       TARJETAS CULTURA
+    ══════════════════════════ */
+    .culture-grid {
+      display: grid; grid-template-columns: 1fr 1fr;
+      gap: 12px;
+    }
+
+    .culture-card {
+      background: var(--sup2); border: 1px solid var(--borde);
+      padding: 18px; cursor: pointer;
+      transition: border-color 0.2s, background 0.2s, transform 0.2s;
+      position: relative; overflow: hidden;
+    }
+
+    .culture-card::before {
+      content: '';
+      position: absolute; top: 0; left: 0; right: 0; height: 2px;
+      background: var(--rojo);
+      transform: scaleX(0); transition: transform 0.25s;
+    }
+
+    .culture-card:hover::before,
+    .culture-card.selected::before { transform: scaleX(1); }
+
+    .culture-card:hover { border-color: var(--borde-r); background: var(--sup3); transform: translateY(-2px); }
+    .culture-card.selected { border-color: var(--borde-r); background: rgba(192,57,43,0.06); }
+
+    .culture-card.selected::after {
+      content: '✓';
+      position: absolute; top: 10px; right: 10px;
+      width: 20px; height: 20px;
+      background: var(--rojo); border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 10px; color: white; font-weight: 700;
+    }
+
+    .culture-card h4 {
+      font-family: 'Cinzel', serif; font-size: 14px;
+      font-weight: 700; color: var(--texto); margin-bottom: 4px;
+    }
+
+    .culture-origin {
+      font-size: 10px; font-weight: 700;
+      letter-spacing: 0.15em; text-transform: uppercase;
+      color: var(--rojo); margin-bottom: 8px; display: block;
+    }
+
+    .culture-card p {
+      font-size: 12px; color: var(--muted);
+      line-height: 1.6; margin-bottom: 10px;
+    }
+
+    .tags { display: flex; flex-wrap: wrap; gap: 4px; }
+
+    .tag {
+      font-size: 10px; font-weight: 700;
+      padding: 2px 8px; letter-spacing: 0.05em;
+    }
+
+    .tag-bonus   { background: rgba(46,204,113,0.1); border: 1px solid rgba(46,204,113,0.3); color: #2ecc71; }
+    .tag-penalty { background: rgba(192,57,43,0.1);  border: 1px solid var(--borde-r);        color: #e74c3c; }
+    .tag-ability { background: rgba(126,200,227,0.1); border: 1px solid rgba(126,200,227,0.3); color: var(--azul); }
+
+    /* Linaje */
+    .linaje-selector {
+      grid-column: 1/-1; margin-top: 4px;
+      padding: 16px; background: rgba(192,57,43,0.04);
+      border: 1px solid var(--borde-r);
+      animation: panelIn 0.3s ease;
+    }
+
+    .linaje-titulo {
+      font-family: 'Cinzel', serif; font-size: 12px;
+      font-weight: 600; color: var(--rojo);
+      letter-spacing: 0.15em; text-transform: uppercase;
+      margin-bottom: 12px;
+    }
+
+    .linaje-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; }
+
+    .linaje-card {
+      background: var(--sup3); border: 1px solid var(--borde);
+      padding: 14px; cursor: pointer;
+      transition: border-color 0.2s, background 0.2s;
+      text-align: center;
+    }
+
+    .linaje-card:hover { border-color: var(--borde-r); }
+    .linaje-card.selected { border-color: var(--rojo); background: rgba(192,57,43,0.08); }
+
+    .linaje-card h5 {
+      font-family: 'Cinzel', serif; font-size: 12px;
+      font-weight: 700; color: var(--texto); margin-bottom: 4px;
+    }
+
+    .linaje-rasgo {
+      font-size: 10px; color: var(--rojo); font-weight: 600;
+      margin-bottom: 6px; display: block;
+    }
+
+    .linaje-card p { font-size: 11px; color: var(--muted); line-height: 1.4; margin-bottom: 8px; }
+
+    /* ══════════════════════════
+       FORMULARIOS
+    ══════════════════════════ */
+    .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+
+    .form-group { margin-bottom: 16px; }
+    .form-group:last-child { margin-bottom: 0; }
+
+    .form-label {
+      display: block; font-size: 11px; font-weight: 600;
+      letter-spacing: 0.12em; text-transform: uppercase;
+      color: var(--muted); margin-bottom: 8px;
+    }
+
+    .form-input, .form-select, .form-textarea {
+      width: 100%;
+      background: rgba(255,255,255,0.03);
+      border: 1px solid var(--borde);
+      color: var(--texto);
+      font-family: 'Raleway', sans-serif;
+      font-size: 14px; font-weight: 500;
+      outline: none;
+      transition: border-color 0.2s, background 0.2s;
+    }
+
+    .form-input, .form-select { height: 42px; padding: 0 14px; }
+    .form-textarea { padding: 12px 14px; resize: vertical; min-height: 80px; }
+
+    .form-input::placeholder, .form-textarea::placeholder { color: rgba(138,132,144,0.4); }
+
+    .form-input:focus, .form-select:focus, .form-textarea:focus {
+      border-color: var(--borde-r);
+      background: rgba(192,57,43,0.04);
+    }
+
+    .form-select { cursor: pointer; appearance: none; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%238a8490' d='M6 8L1 3h10z'/%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: right 14px center; }
+
+    .form-select option { background: #16161e; color: var(--texto); }
+
+    /* ══════════════════════════
+       SELECTOR ATRIBUTO/HAB ESPECIAL
+    ══════════════════════════ */
+    .especial-grid {
+      display: grid; grid-template-columns: repeat(3, 1fr);
+      gap: 10px; margin-bottom: 20px;
+    }
+
+    .especial-btn {
+      padding: 12px 8px; text-align: center;
+      background: var(--sup2); border: 1px solid var(--borde);
+      cursor: pointer; transition: all 0.2s;
+    }
+
+    .especial-btn:hover { border-color: var(--borde-r); background: var(--sup3); }
+
+    .especial-btn.selected {
+      border-color: var(--dorado);
+      background: rgba(201,168,76,0.08);
+    }
+
+    .especial-btn .eb-icon { font-size: 20px; display: block; margin-bottom: 4px; }
+
+    .especial-btn .eb-nombre {
+      font-family: 'Cinzel', serif; font-size: 11px;
+      font-weight: 600; color: var(--texto);
+      display: block;
+    }
+
+    .especial-btn.selected .eb-nombre { color: var(--dorado); }
+
+    .especial-label {
+      font-size: 10px; color: var(--muted);
+      letter-spacing: 0.05em; display: block;
+      margin-top: 2px;
+    }
+
+    /* ══════════════════════════
+       TRACKER DE PUNTOS
+    ══════════════════════════ */
+    .pts-tracker {
+      display: flex; justify-content: space-between; align-items: center;
+      padding: 12px 20px; margin-bottom: 20px;
+      background: rgba(192,57,43,0.05);
+      border: 1px solid var(--borde-r);
+    }
+
+    .pts-tracker-label {
+      font-size: 12px; font-weight: 600;
+      letter-spacing: 0.1em; text-transform: uppercase;
+      color: var(--muted);
+    }
+
+    .pts-tracker-val {
+      font-family: 'Cinzel', serif;
+      font-size: 28px; font-weight: 800;
+      color: var(--rojo); line-height: 1;
+    }
+
+    .pts-tracker-val.agotado { color: var(--muted); }
+
+    /* ══════════════════════════
+       ATRIBUTOS
+    ══════════════════════════ */
+    .attr-grid {
+      display: grid; grid-template-columns: repeat(3, 1fr);
+      gap: 10px; margin-bottom: 20px;
+    }
+
+    .attr-card {
+      background: var(--sup2); border: 1px solid var(--borde);
+      padding: 14px 10px; text-align: center;
+      transition: border-color 0.2s;
+      position: relative;
+    }
+
+    .attr-card:hover { border-color: rgba(255,255,255,0.12); }
+
+    .attr-card.especial {
+      border-color: rgba(201,168,76,0.4);
+      background: rgba(201,168,76,0.04);
+    }
+
+    .attr-especial-badge {
+      position: absolute; top: -1px; right: -1px;
+      background: var(--dorado); color: var(--negro);
+      font-size: 8px; font-weight: 800;
+      padding: 2px 6px; letter-spacing: 0.08em;
+      text-transform: uppercase;
+    }
+
+    .attr-icon { font-size: 18px; display: block; margin-bottom: 4px; }
+
+    .attr-nombre {
+      font-size: 10px; font-weight: 600;
+      letter-spacing: 0.1em; text-transform: uppercase;
+      color: var(--muted); display: block; margin-bottom: 8px;
+    }
+
+    .attr-controls {
+      display: flex; align-items: center;
+      justify-content: center; gap: 8px;
+    }
+
+    .attr-btn {
+      width: 26px; height: 26px;
+      background: rgba(255,255,255,0.04);
+      border: 1px solid var(--borde);
+      color: var(--muted); font-size: 14px;
+      cursor: pointer; display: flex;
+      align-items: center; justify-content: center;
+      transition: all 0.15s; font-weight: 700;
+      font-family: 'Raleway', sans-serif;
+    }
+
+    .attr-btn:hover { background: var(--rojo); border-color: var(--rojo); color: white; }
+
+    .attr-val {
+      font-family: 'Cinzel', serif;
+      font-size: 22px; font-weight: 800;
+      color: var(--texto); min-width: 28px;
+    }
+
+    .attr-val.boosted { color: var(--rojo); text-shadow: 0 0 10px var(--rojo-glow); }
+
+    .attr-bono-label {
+      font-size: 10px; color: var(--rojo);
+      margin-top: 3px; display: block; font-weight: 600;
+    }
+
+    .attr-limite {
+      font-size: 10px; color: var(--muted);
+      margin-top: 2px; display: block;
+    }
+
+    .attr-limite.es-max { color: var(--dorado); }
+
+    /* Stats derivados */
+    .stats-derivados {
+      display: grid; grid-template-columns: 1fr 1fr;
+      gap: 10px; margin-top: 4px;
+    }
+
+    .stat-der {
+      background: var(--sup2); border: 1px solid var(--borde);
+      padding: 12px 16px;
+      display: flex; justify-content: space-between; align-items: center;
+    }
+
+    .stat-der-label {
+      font-size: 11px; font-weight: 600;
+      letter-spacing: 0.1em; text-transform: uppercase;
+      color: var(--muted);
+    }
+
+    .stat-der-val {
+      font-family: 'Cinzel', serif;
+      font-size: 20px; font-weight: 800; color: var(--texto);
+    }
+
+    /* ══════════════════════════
+       HABILIDADES
+    ══════════════════════════ */
+    .skill-cat-header {
+      font-size: 10px; font-weight: 700;
+      letter-spacing: 0.2em; text-transform: uppercase;
+      color: var(--rojo); padding: 8px 0 6px;
+      border-bottom: 1px solid var(--borde);
+      margin-bottom: 4px; margin-top: 16px;
+      display: flex; align-items: center; gap: 8px;
+    }
+
+    .skill-cat-header:first-child { margin-top: 0; }
+
+    .skill-row {
+      display: flex; align-items: center;
+      padding: 5px 0; gap: 12px;
+    }
+
+    .skill-nombre {
+      flex: 1; font-size: 13px; color: var(--sec);
+    }
+
+    .skill-nombre.especial-skill { color: var(--dorado); font-weight: 600; }
+
+    .skill-dots { display: flex; gap: 3px; align-items: center; }
+
+    .skill-dot {
+      width: 14px; height: 14px;
+      border: 1px solid rgba(255,255,255,0.1);
+      cursor: pointer; transition: all 0.15s;
+    }
+
+    .skill-dot.filled { background: var(--rojo); border-color: var(--rojo); }
+    .skill-dot.bono   { background: rgba(192,57,43,0.25); border-color: var(--borde-r); }
+    .skill-dot:hover  { border-color: var(--rojo); }
+
+    .skill-eff {
+      font-size: 12px; color: var(--rojo);
+      font-weight: 700; min-width: 16px; text-align: right;
+    }
+
+    .bono-chip {
+      font-size: 10px; font-weight: 700;
+      padding: 1px 6px;
+      background: rgba(192,57,43,0.1);
+      border: 1px solid var(--borde-r);
+      color: #ff8888;
+    }
+
+    /* ══════════════════════════
+       CAMINOS
+    ══════════════════════════ */
+    .path-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+
+    .path-card {
+      background: var(--sup2); border: 1px solid var(--borde);
+      padding: 16px; cursor: pointer;
+      transition: all 0.2s; position: relative; overflow: hidden;
+    }
+
+    .path-card::before {
+      content: ''; position: absolute; top: 0; left: 0; right: 0; height: 2px;
+      background: var(--rojo); transform: scaleX(0); transition: transform 0.25s;
+      transform-origin: left;
+    }
+
+    .path-card:hover::before, .path-card.selected::before { transform: scaleX(1); }
+    .path-card:hover { border-color: var(--borde-r); background: var(--sup3); transform: translateY(-2px); }
+    .path-card.selected { border-color: var(--borde-r); background: rgba(192,57,43,0.06); }
+
+    .path-cat {
+      font-size: 10px; font-weight: 700;
+      letter-spacing: 0.15em; text-transform: uppercase;
+      margin-bottom: 4px; display: block;
+    }
+
+    .path-cat-combat   { color: #e74c3c; }
+    .path-cat-mental   { color: var(--azul); }
+    .path-cat-survival { color: var(--verde); }
+
+    .path-card h4 {
+      font-family: 'Cinzel', serif; font-size: 14px;
+      font-weight: 700; color: var(--texto); margin-bottom: 4px;
+    }
+
+    .path-card p { font-size: 12px; color: var(--muted); line-height: 1.5; margin-bottom: 8px; }
+
+    .path-bonos { display: flex; flex-wrap: wrap; gap: 4px; }
+
+    .path-bono {
+      font-size: 10px; font-weight: 700; padding: 2px 7px;
+      background: rgba(192,57,43,0.1); border: 1px solid var(--borde-r);
+      color: #ff9999;
+    }
+
+    .path-locked {
+      text-align: center; padding: 40px 20px;
+      background: var(--sup2); border: 1px solid var(--borde);
+    }
+
+    .path-locked i { font-size: 32px; color: var(--muted); display: block; margin-bottom: 12px; }
+    .path-locked h3 { font-family: 'Cinzel', serif; font-size: 16px; color: var(--texto); margin-bottom: 8px; }
+    .path-locked p { font-size: 13px; color: var(--muted); line-height: 1.6; }
+
+    /* ══════════════════════════
+       OBJETIVOS
+    ══════════════════════════ */
+    .obj-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+
+    .obj-box {
+      background: var(--sup2); border: 1px solid var(--borde);
+      border-top: 2px solid var(--borde-r); padding: 18px;
+    }
+
+    .obj-box h4 {
+      font-family: 'Cinzel', serif; font-size: 13px;
+      font-weight: 600; color: var(--texto); margin-bottom: 4px;
+    }
+
+    .obj-box p { font-size: 12px; color: var(--muted); font-style: italic; margin-bottom: 12px; }
+
+    /* ══════════════════════════
+       BOTONES NAVEGACIÓN
+    ══════════════════════════ */
+    .nav-btns {
+      display: flex; gap: 12px;
+      margin-top: 28px; padding-top: 20px;
+      border-top: 1px solid var(--borde);
+    }
+
+    .btn-prev {
+      padding: 0 20px; height: 42px;
+      background: transparent; border: 1px solid var(--borde);
+      color: var(--muted); font-family: 'Raleway', sans-serif;
+      font-size: 12px; font-weight: 600;
+      letter-spacing: 0.1em; text-transform: uppercase;
+      cursor: pointer; transition: all 0.2s;
+    }
+
+    .btn-prev:hover { border-color: rgba(255,255,255,0.2); color: var(--texto); }
+
+    .btn-next {
+      flex: 1; height: 42px;
+      background: var(--rojo); border: none;
+      color: white; font-family: 'Cinzel', serif;
+      font-size: 13px; font-weight: 700;
+      letter-spacing: 0.15em; text-transform: uppercase;
+      cursor: pointer; transition: background 0.2s, transform 0.15s;
+      box-shadow: 0 4px 16px var(--rojo-glow);
+    }
+
+    .btn-next:hover { background: var(--rojo-hover); transform: translateY(-1px); }
+
+    /* ══════════════════════════
+       RESUMEN FINAL
+    ══════════════════════════ */
+    .resumen-wrap { text-align: center; padding: 20px 0 32px; }
+
+    .resumen-icon { font-size: 40px; margin-bottom: 12px; display: block; }
+
+    .resumen-titulo {
+      font-family: 'Cinzel', serif; font-size: 24px;
+      font-weight: 800; color: var(--texto); margin-bottom: 8px;
+    }
+
+    .resumen-desc { font-size: 14px; color: var(--muted); font-style: italic; margin-bottom: 28px; }
+
+    .resumen-grid {
+      display: grid; grid-template-columns: repeat(3,1fr);
+      gap: 10px; margin-bottom: 24px; text-align: left;
+    }
+
+    .resumen-box {
+      background: var(--sup2); border: 1px solid var(--borde);
+      padding: 12px 14px;
+    }
+
+    .resumen-box .rb-label {
+      font-size: 10px; font-weight: 700;
+      letter-spacing: 0.12em; text-transform: uppercase;
+      color: var(--muted); display: block; margin-bottom: 4px;
+    }
+
+    .resumen-box .rb-val {
+      font-family: 'Cinzel', serif; font-size: 14px;
+      font-weight: 600; color: var(--rojo);
+    }
+
+    .resumen-box.full { grid-column: 1/-1; }
+
+    .ability-resumen {
+      background: rgba(192,57,43,0.05);
+      border: 1px solid var(--borde-r);
+      border-left: 3px solid var(--rojo);
+      padding: 16px 18px; text-align: left;
+      margin-bottom: 24px;
+    }
+
+    .ability-resumen .ar-label {
+      font-size: 10px; font-weight: 700;
+      letter-spacing: 0.15em; text-transform: uppercase;
+      color: var(--rojo); display: block; margin-bottom: 6px;
+    }
+
+    .ability-resumen .ar-nombre {
+      font-family: 'Cinzel', serif; font-size: 15px;
+      font-weight: 700; color: var(--texto); margin-bottom: 6px;
+    }
+
+    .ability-resumen .ar-desc { font-size: 13px; color: var(--sec); line-height: 1.6; margin-bottom: 8px; }
+
+    .ability-resumen .ar-weak {
+      font-size: 12px; color: #ff8080; line-height: 1.5;
+      padding-top: 8px; border-top: 1px solid rgba(192,57,43,0.2);
+    }
+
+    .resumen-acciones {
+      display: flex; gap: 12px; justify-content: center; flex-wrap: wrap;
+    }
+
+    .btn-guardar-final {
+      display: flex; align-items: center; gap: 8px;
+      padding: 0 28px; height: 46px;
+      background: var(--rojo); border: none;
+      color: white; font-family: 'Cinzel', serif;
+      font-size: 13px; font-weight: 700;
+      letter-spacing: 0.15em; text-transform: uppercase;
+      cursor: pointer; transition: background 0.2s;
+    }
+
+    .btn-guardar-final:hover { background: var(--rojo-hover); }
+
+    .btn-outline {
+      display: flex; align-items: center; gap: 8px;
+      padding: 0 20px; height: 46px;
+      background: transparent; border: 1px solid var(--borde);
+      color: var(--sec); font-family: 'Raleway', sans-serif;
+      font-size: 12px; font-weight: 600;
+      letter-spacing: 0.1em; text-transform: uppercase;
+      cursor: pointer; text-decoration: none;
+      transition: border-color 0.2s, color 0.2s;
+    }
+
+    .btn-outline:hover { border-color: rgba(255,255,255,0.25); color: var(--texto); }
+
+    /* ══════════════════════════
+       SIDEBAR
+    ══════════════════════════ */
+    .sidebar {
+      background: var(--sup2); border: 1px solid var(--borde);
+      border-top: 2px solid var(--rojo);
+      position: sticky; top: 76px;
+      max-height: calc(100vh - 100px);
+      overflow-y: auto;
+    }
+
+    .sidebar::-webkit-scrollbar { width: 3px; }
+    .sidebar::-webkit-scrollbar-thumb { background: var(--borde-r); }
+
+    .sidebar-header {
+      padding: 14px 18px;
+      border-bottom: 1px solid var(--borde);
+      background: rgba(192,57,43,0.04);
+    }
+
+    .sidebar-header h3 {
+      font-family: 'Cinzel', serif; font-size: 12px;
+      font-weight: 600; color: var(--rojo);
+      letter-spacing: 0.12em; text-transform: uppercase;
+    }
+
+    .sidebar-body { padding: 14px 18px; }
+
+    .s-section {
+      font-size: 9px; font-weight: 700;
+      letter-spacing: 0.2em; text-transform: uppercase;
+      color: rgba(192,57,43,0.5); margin: 12px 0 6px;
+    }
+
+    .s-row {
+      display: flex; justify-content: space-between; align-items: center;
+      padding: 4px 0; border-bottom: 1px solid rgba(255,255,255,0.03);
+      font-size: 12px;
+    }
+
+    .s-row:last-child { border-bottom: none; }
+
+    .s-label {
+      font-size: 10px; font-weight: 600;
+      letter-spacing: 0.08em; text-transform: uppercase;
+      color: var(--muted);
+    }
+
+    .s-val {
+      font-family: 'Raleway', sans-serif;
+      color: var(--texto); font-size: 12px;
+      text-align: right; max-width: 140px;
+    }
+
+    .s-bono { font-size: 10px; color: var(--rojo); font-weight: 700; margin-left: 3px; }
+
+    .health-mini { display: flex; gap: 3px; margin-top: 8px; }
+
+    .hm-state {
+      flex: 1; text-align: center; padding: 3px 0;
+      font-size: 9px; font-weight: 700;
+      letter-spacing: 0.04em; text-transform: uppercase;
+      border: 1px solid rgba(255,255,255,0.06);
+      color: var(--muted);
+    }
+
+    .hm-state.sano { border-color: rgba(46,204,113,0.35); color: var(--verde); }
+
+    .bonos-area { display: flex; flex-wrap: wrap; gap: 3px; margin-top: 6px; }
+
+    .s-bono-chip {
+      font-size: 10px; padding: 2px 7px;
+      background: rgba(192,57,43,0.1); border: 1px solid var(--borde-r);
+      color: #ffaaaa;
+    }
+
+    /* Modal errores */
+    .modal-overlay {
+      position: fixed; inset: 0; z-index: 1000;
+      display: flex; align-items: center; justify-content: center;
+      background: rgba(0,0,0,0.75); backdrop-filter: blur(4px);
+      opacity: 0; pointer-events: none; transition: opacity 0.2s;
+    }
+
+    .modal-overlay.open { opacity: 1; pointer-events: all; }
+
+    .modal-box {
+      background: var(--sup2); border: 1px solid var(--borde-r);
+      border-top: 2px solid var(--rojo);
+      padding: 28px 28px 24px; max-width: 420px; width: 90%;
+    }
+
+    .modal-box h3 {
+      font-family: 'Cinzel', serif; font-size: 16px;
+      color: var(--texto); margin-bottom: 8px;
+    }
+
+    .modal-box p { font-size: 13px; color: var(--muted); margin-bottom: 14px; }
+
+    .error-list { list-style: none; display: flex; flex-direction: column; gap: 6px; margin-bottom: 20px; }
+
+    .error-list li {
+      font-size: 13px; color: #ff8080;
+      display: flex; align-items: center; gap: 8px;
+    }
+
+    .error-list li::before { content: '✗'; color: var(--rojo); font-weight: 700; }
+
+    .btn-cerrar-modal {
+      width: 100%; height: 40px;
+      background: var(--rojo); border: none;
+      color: white; font-family: 'Cinzel', serif;
+      font-size: 12px; font-weight: 700;
+      letter-spacing: 0.12em; text-transform: uppercase;
+      cursor: pointer; transition: background 0.2s;
+    }
+
+    .btn-cerrar-modal:hover { background: var(--rojo-hover); }
+
+    /* Toast */
+    #toast {
+      position: fixed; bottom: 24px; right: 24px; z-index: 9999;
+      padding: 12px 20px; border-left: 3px solid;
+      font-family: 'Raleway', sans-serif; font-size: 13px; font-weight: 600;
+      opacity: 0; transition: opacity 0.3s; pointer-events: none;
+    }
+
+    @media (max-width: 768px) {
+      .creator-wrap { grid-template-columns: 1fr; }
+      .sidebar { display: none; }
+      .culture-grid, .form-grid, .path-grid, .obj-grid { grid-template-columns: 1fr; }
+      .attr-grid { grid-template-columns: repeat(3,1fr); }
+      .linaje-grid { grid-template-columns: 1fr; }
+      .stepper { gap: 2px; }
+      .step-label { display: none; }
+      .creator-wrap { padding: 0 16px 60px; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- NAVBAR -->
+<nav class="navbar">
+  <a href="../../index.html" class="logo">
+    <img src="../../imagenes/logo.png" alt="CDC">
+  </a>
+  <span class="nav-titulo">Creación de <span>Personaje</span></span>
+  <a href="../panel-del-jugador/panel-del-jugador.html" class="nav-back">
+    <i class="ri-arrow-left-line"></i> Menú del Cazador
+  </a>
+</nav>
+
+<!-- HEADER -->
+<div class="page-header">
+  <p class="page-eyebrow">Crónicas del Cazador</p>
+  <h1 class="page-titulo">Crear Personaje</h1>
+  <p class="page-subtitulo">Cada elección define tu camino. Cada camino moldea tu destino.</p>
+</div>
+
+<!-- STEPPER -->
+<div class="stepper" id="stepper"></div>
+
+<!-- LAYOUT -->
+<div class="creator-wrap">
+  <div id="panels-wrap">
+
+    <!-- PASO 1: CULTURA -->
+    <div id="panel-1" class="step-panel active">
+      <h2 class="panel-titulo">Elige tu Cultura</h2>
+      <p class="panel-desc">"Las culturas no solo determinan cómo vives… determinan en qué te conviertes."</p>
+      <div class="culture-grid" id="culture-grid"></div>
+      <div class="nav-btns">
+        <button class="btn-next" onclick="nextStep(1)">Siguiente: Identidad →</button>
+      </div>
+    </div>
+
+    <!-- PASO 2: IDENTIDAD -->
+    <div id="panel-2" class="step-panel">
+      <h2 class="panel-titulo">Identidad del Personaje</h2>
+      <p class="panel-desc">Tu nombre, edad y origen son las primeras huellas de tu historia.</p>
+      <div class="form-grid">
+        <div class="form-group">
+          <label class="form-label">Nombre del Personaje</label>
+          <input class="form-input" type="text" id="char-name" oninput="updateSidebar()" placeholder="¿Cómo te llaman?">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Edad</label>
+          <input class="form-input" type="number" id="char-age" oninput="updateSidebar()" placeholder="Años" min="10" max="80">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Nombre del Jugador</label>
+          <input class="form-input" type="text" id="char-player" oninput="updateSidebar()" placeholder="Tu alias">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Nivel inicial</label>
+          <select class="form-select" id="char-level" onchange="onNivelChange()">
+            <option value="1">Nivel 1 — Novato</option>
+            <option value="2">Nivel 2 — Novato</option>
+            <option value="3">Nivel 3 — Iniciado</option>
+            <option value="4">Nivel 4 — Iniciado</option>
+            <option value="5">Nivel 5 — Iniciado</option>
+            <option value="6">Nivel 6 — Practicante</option>
+            <option value="7">Nivel 7 — Practicante</option>
+            <option value="8">Nivel 8 — Practicante</option>
+            <option value="9">Nivel 9 — Practicante</option>
+            <option value="10">Nivel 10 — Despertar</option>
+          </select>
+        </div>
+      </div>
+      <div class="form-group" style="margin-top:4px;">
+        <label class="form-label">Apariencia / Descripción</label>
+        <textarea class="form-textarea" id="char-desc" placeholder="Describe brevemente la apariencia de tu personaje..."></textarea>
+      </div>
+      <div class="nav-btns">
+        <button class="btn-prev" onclick="prevStep(2)">← Atrás</button>
+        <button class="btn-next" onclick="nextStep(2)">Siguiente: Camino →</button>
+      </div>
+    </div>
+
+    <!-- PASO 3: CAMINO -->
+    <div id="panel-3" class="step-panel">
+      <h2 class="panel-titulo">Elige tu Camino</h2>
+      <p class="panel-desc">Los Caminos definen tu especialización. Una vez elegido, no puede cambiarse. Sus bonos se aplicarán cuando repartas tus puntos.</p>
+      <div id="path-container"></div>
+      <div class="nav-btns">
+        <button class="btn-prev" onclick="prevStep(3)">← Atrás</button>
+        <button class="btn-next" onclick="nextStep(3)">Siguiente: Atributos →</button>
+      </div>
+    </div>
+
+    <!-- PASO 4: ATRIBUTOS -->
+    <div id="panel-4" class="step-panel">
+      <h2 class="panel-titulo">Atributos</h2>
+      <p class="panel-desc" id="desc-atributos"></p>
+      <div id="limite-attr-badge" class="limite-badge"></div>
+      <div class="pts-tracker">
+        <span class="pts-tracker-label">Puntos disponibles</span>
+        <span class="pts-tracker-val" id="attr-pts-val">6</span>
+      </div>
+      <p style="font-size:12px;color:var(--muted);margin-bottom:12px;">
+        <i class="ri-star-line" style="color:var(--dorado);"></i>
+        Elige tu <strong style="color:var(--dorado)">atributo destacado</strong> — ese podrá llegar al techo máximo del nivel:
+      </p>
+      <div class="especial-grid" id="attr-especial-selector"></div>
+      <div class="attr-grid" id="attr-grid"></div>
+      <div class="stats-derivados">
+        <div class="stat-der">
+          <span class="stat-der-label">Puntos de Aguante</span>
+          <span class="stat-der-val" id="pa-val">4</span>
+        </div>
+        <div class="stat-der">
+          <span class="stat-der-label">Iniciativa</span>
+          <span class="stat-der-val" id="init-val">1</span>
+        </div>
+      </div>
+      <div class="nav-btns">
+        <button class="btn-prev" onclick="prevStep(4)">← Atrás</button>
+        <button class="btn-next" onclick="nextStep(4)">Siguiente: Habilidades →</button>
+      </div>
+    </div>
+
+    <!-- PASO 5: HABILIDADES -->
+    <div id="panel-5" class="step-panel">
+      <h2 class="panel-titulo">Habilidades</h2>
+      <p class="panel-desc" id="desc-habilidades"></p>
+      <div id="limite-skill-badge" class="limite-badge"></div>
+      <div class="pts-tracker">
+        <span class="pts-tracker-label">Puntos disponibles</span>
+        <span class="pts-tracker-val" id="skill-pts-val">6</span>
+      </div>
+      <div id="skill-especial-wrap"></div>
+      <div id="skills-container"></div>
+      <div class="nav-btns">
+        <button class="btn-prev" onclick="prevStep(5)">← Atrás</button>
+        <button class="btn-next" onclick="nextStep(5)">Siguiente: Objetivos →</button>
+      </div>
+    </div>
+
+    <!-- PASO 6: OBJETIVOS -->
+    <div id="panel-6" class="step-panel">
+      <h2 class="panel-titulo">Objetivos del Personaje</h2>
+      <p class="panel-desc">El sistema necesita saber por qué sigues adelante. Este apartado no es opcional.</p>
+      <div class="obj-grid">
+        <div class="obj-box">
+          <h4>🎯 Objetivo Actual</h4>
+          <p>Meta a corto plazo. Clara y alcanzable.</p>
+          <textarea class="form-textarea" id="obj-current" oninput="updateSidebar()" placeholder="Ej: Sobrevivir la primera semana..."></textarea>
+        </div>
+        <div class="obj-box">
+          <h4>👑 Objetivo de Vida</h4>
+          <p>Tu ambición mayor. Define el sentido de tu viaje.</p>
+          <textarea class="form-textarea" id="obj-life" placeholder="Ej: Obtener la licencia de Cazador..."></textarea>
+        </div>
+      </div>
+      <div class="form-group" style="margin-top:16px;">
+        <label class="form-label">Equipo inicial</label>
+        <input class="form-input" type="text" id="char-equip" placeholder="Ej: Ropa de viaje, cuchillo, 200 Jenny...">
+        <p style="font-size:11px;color:var(--muted);font-style:italic;margin-top:6px;">Máximo 2 armas al inicio. El Director determinará el equipamiento final.</p>
+      </div>
+      <div class="nav-btns">
+        <button class="btn-prev" onclick="prevStep(6)">← Atrás</button>
+        <button class="btn-next" onclick="nextStep(6)">Finalizar Personaje →</button>
+      </div>
+    </div>
+
+    <!-- PASO 7: RESUMEN -->
+    <div id="panel-7" class="step-panel">
+      <div class="resumen-wrap">
+        <span class="resumen-icon">✦</span>
+        <h2 class="resumen-titulo">Personaje Registrado</h2>
+        <p class="resumen-desc">"Tu avatar ha sido registrado en el sistema. Ahora, comienza la cacería."</p>
+        <div class="resumen-grid" id="resumen-grid"></div>
+        <div id="resumen-ability"></div>
+        <div class="resumen-acciones">
+          <button class="btn-guardar-final" onclick="saveCharacter()">
+            <i class="ri-save-line"></i> Guardar Personaje
+          </button>
+          <a href="../panel-del-jugador/panel-del-jugador.html" class="btn-outline">
+            <i class="ri-layout-line"></i> Menú del Cazador
+          </a>
+          <button class="btn-outline" onclick="resetCreador()">
+            <i class="ri-refresh-line"></i> Crear otro
+          </button>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- SIDEBAR -->
+  <div class="sidebar">
+    <div class="sidebar-header">
+      <h3>✦ Ficha del Personaje</h3>
+    </div>
+    <div class="sidebar-body">
+      <div class="s-row"><span class="s-label">Nombre</span><span class="s-val" id="s-nombre">—</span></div>
+      <div class="s-row"><span class="s-label">Jugador</span><span class="s-val" id="s-jugador">—</span></div>
+      <div class="s-row"><span class="s-label">Edad</span><span class="s-val" id="s-edad">—</span></div>
+      <div class="s-row"><span class="s-label">Nivel</span><span class="s-val" id="s-nivel">Nivel 1</span></div>
+      <div class="s-row"><span class="s-label">Cultura</span><span class="s-val" id="s-cultura">—</span></div>
+      <div class="s-row"><span class="s-label">Camino</span><span class="s-val" id="s-camino">—</span></div>
+      <div class="s-section">Parámetros</div>
+      <div class="s-row"><span class="s-label">PA</span><span class="s-val" id="s-pa">4</span></div>
+      <div class="s-row"><span class="s-label">Iniciativa</span><span class="s-val" id="s-init">1</span></div>
+      <div class="s-section">Atributos</div>
+      <div id="s-attrs"></div>
+      <div class="s-section">Bonos Activos</div>
+      <div class="bonos-area" id="s-bonos"><span style="font-size:11px;color:var(--muted);font-style:italic;">Sin bonos</span></div>
+      <div class="s-section">Salud</div>
+      <div class="health-mini">
+        <div class="hm-state sano">Sano</div>
+        <div class="hm-state">Herido</div>
+        <div class="hm-state">Grave</div>
+        <div class="hm-state">Crítico</div>
+        <div class="hm-state">KO</div>
+      </div>
+      <div class="s-section">Objetivo</div>
+      <div style="font-size:11px;color:var(--muted);font-style:italic;line-height:1.5;margin-top:4px;" id="s-obj">—</div>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL ERRORES -->
+<div class="modal-overlay" id="modal-errores">
+  <div class="modal-box">
+    <h3>Faltan datos obligatorios</h3>
+    <p>Completa los siguientes campos antes de guardar:</p>
+    <ul class="error-list" id="error-list"></ul>
+    <button class="btn-cerrar-modal" onclick="cerrarModal()">Entendido</button>
+  </div>
+</div>
+
+<div id="toast"></div>
+
+<script>
+// ════════════════════════════════════════════════════
+// DATOS
+// ════════════════════════════════════════════════════
+const ATTRS = [
+  {key:'fuerza',       label:'Fuerza',       icon:'✊'},
+  {key:'destreza',     label:'Destreza',     icon:'⚡'},
+  {key:'resistencia',  label:'Resistencia',  icon:'🛡️'},
+  {key:'carisma',      label:'Carisma',      icon:'💛'},
+  {key:'manipulacion', label:'Manipulación', icon:'🎭'},
+  {key:'compostura',   label:'Compostura',   icon:'🧘'},
+  {key:'percepcion',   label:'Percepción',   icon:'👁️'},
+  {key:'inteligencia', label:'Inteligencia', icon:'🧠'},
+  {key:'astucia',      label:'Astucia',      icon:'♟️'}
+];
+
+const SKILLS_CAT = {
+  'Combate':            ['Pelea','Esquivar','Armas Cuerpo a Cuerpo','Armas a Distancia','Armas de Fuego'],
+  'Supervivencia':      ['Alerta','Sigilo','Callejeo / Orientación','Supervivencia','Atletismo','Seguridad','Reparación'],
+  'Personalidad':       ['Empatía','Subterfugio','Liderazgo','Intimidación','Trato con Animales','Interpretación'],
+  'Profesión / Oficio': ['Investigación','Medicina','Academicismo','Informática','Conducir','Política']
+};
+
+const ALL_SKILLS = Object.values(SKILLS_CAT).flat();
+
+// Límites por nivel según tabla del sistema
+function getLimites(nivel) {
+  const n = parseInt(nivel);
+  if (n <= 2)  return { attrMax: 3, attrResto: 2, skillMax: 2, skillResto: 2 };
+  if (n <= 5)  return { attrMax: 4, attrResto: 3, skillMax: 3, skillResto: 3 };
+  if (n <= 9)  return { attrMax: 5, attrResto: 4, skillMax: 5, skillResto: 4 };
+  return           { attrMax: 5, attrResto: 5, skillMax: 5, skillResto: 5 };
+}
+
+// Puntos iniciales según nivel
+function getPuntosIniciales(nivel) {
+  const n = parseInt(nivel);
+  if (n <= 2)  return { attrs: 6,  skills: 6  };
+  if (n <= 5)  return { attrs: 10, skills: 10 };
+  if (n <= 9)  return { attrs: 14, skills: 14 };
+  return           { attrs: 18, skills: 18 };
+}
+
+const CULTURES = [
+  {
+    name:'Habitantes de las Estrellas', origin:'Meteor City',
+    desc:'Forjados en el abandono. Duros, resilientes, desconfiados.',
+    bonuses:[{type:'skill',key:'Supervivencia',val:2},{type:'attr',key:'resistencia',val:1},{type:'attr',key:'manipulacion',val:1}],
+    penalties:['−2 Social'],
+    ability:{name:'Los Invisibles',desc:'Dificultad extrema para ser rastreado. Ventajas automáticas en tiradas de Sigilo urbanas.',weakness:'Paranoia: Penaliza gravemente interacciones sociales con autoridades.'}
+  },
+  {
+    name:'Casas del Bajo Mundo', origin:'Imperio del Crimen',
+    desc:'Poder, tradición y jerarquía. Formar parte es un juramento de vida.',
+    bonuses:[{type:'skill',key:'Intimidación',val:2},{type:'attr',key:'carisma',val:1},{type:'attr',key:'astucia',val:1}],
+    penalties:['Juramento de sangre'],
+    ability:{name:'Red de la Familia',desc:'Acceso a contactos, información y recursos dentro de su territorio criminal.',weakness:'No pueden rechazar órdenes directas de su familia.'}
+  },
+  {
+    name:'Aislados de NGL', origin:'Neo Green Life',
+    desc:'Sin tecnología, conectados con la tierra y la comunidad.',
+    bonuses:[{type:'skill',key:'Supervivencia',val:2},{type:'attr',key:'resistencia',val:1},{type:'attr',key:'percepcion',val:1}],
+    penalties:['−2 Tecnología'],
+    ability:{name:'Instinto Natural',desc:'Bonificación al rastrear, recolectar y orientarse en entornos naturales.',weakness:'−2 penalización con tecnología avanzada y en entornos urbanos.'}
+  },
+  {
+    name:'Hombres del Mar', origin:'Puertos y Océanos',
+    desc:'Hijos de las olas. Libres, temerarios e indomables.',
+    bonuses:[{type:'skill',key:'Atletismo',val:2},{type:'attr',key:'destreza',val:1},{type:'attr',key:'compostura',val:1}],
+    penalties:['Espíritu indomable'],
+    ability:{name:'Cuerpo del Navegante',desc:'Bonificación en superficies inestables. Ignoran penalizadores por condiciones adversas de movimiento.',weakness:'Penalización bajo órdenes rígidas y entornos estáticos.'}
+  },
+  {
+    name:'Foráneos', origin:'El Camino',
+    desc:'Hijos del camino. Sociables, adaptables, eternamente en movimiento.',
+    bonuses:[{type:'skill',key:'Atletismo',val:2},{type:'attr',key:'carisma',val:1},{type:'attr',key:'astucia',val:1}],
+    penalties:['Raíces inquietas'],
+    ability:{name:'Siempre en Ruta',desc:'Bonificación al adaptarse a nuevos entornos y desenvolverse en lugares desconocidos.',weakness:'Penalización al permanecer demasiado tiempo en un lugar.'}
+  },
+  {
+    name:'Herederos de Linaje', origin:'Zoldyck / Kurta / Netero',
+    desc:'La sangre define su destino. Nombres que pesan.',
+    bonuses:[], penalties:['Enemigos heredados'],
+    isLinaje:true,
+    linajes:[
+      {name:'Linaje Zoldyck',rasgo:'Crianza en las Sombras',rasgodesc:'Mente fría, pulso firme, emociones bajo llave.',bonuses:[{type:'skill',key:'Sigilo',val:2},{type:'attr',key:'destreza',val:1},{type:'attr',key:'astucia',val:1}],penalties:['Enemigos heredados'],ability:{name:'Instinto Asesino',desc:'Bonificación en sigilo, venenos y ataques precisos bajo presión.',weakness:'El apellido atrae enemigos implacables.'}},
+      {name:'Sangre Escarlata',rasgo:'Eco de los Ojos Escarlata',rasgodesc:'Un legado que despierta bajo presión.',bonuses:[{type:'skill',key:'Intimidación',val:2},{type:'attr',key:'percepcion',val:1},{type:'attr',key:'destreza',val:1}],penalties:['Ojos codiciados'],ability:{name:'Eco Carmesí',desc:'Bonificación en percepción y poder bajo intensidad emocional.',weakness:'Los Ojos Escarlata los convierten en objetivos permanentes.'}},
+      {name:'Linaje Netero',rasgo:'Disciplina Absoluta',rasgodesc:'El poder se forja con entrenamiento incesante.',bonuses:[{type:'skill',key:'Pelea',val:2},{type:'attr',key:'destreza',val:1},{type:'attr',key:'resistencia',val:1}],penalties:['Deber institucional'],ability:{name:'Voluntad Inquebrantable',desc:'Bonificación en resistencia mental y combate disciplinado.',weakness:'La institución puede llamar al personaje en cualquier momento.'}}
+    ]
+  }
+];
+
+const PATH_BONUS_MAP = {
+  '+1 Destreza':[{type:'attr',key:'destreza',val:1}],
+  '+2 Destreza':[{type:'attr',key:'destreza',val:2}],
+  '+1 Fuerza':[{type:'attr',key:'fuerza',val:1}],
+  '+1 Resistencia':[{type:'attr',key:'resistencia',val:1}],
+  '+2 Resistencia':[{type:'attr',key:'resistencia',val:2}],
+  '+1 Percepción':[{type:'attr',key:'percepcion',val:1}],
+  '+1 Inteligencia':[{type:'attr',key:'inteligencia',val:1}],
+  '+1 Manipulación':[{type:'attr',key:'manipulacion',val:1}],
+  '+1 Astucia':[{type:'attr',key:'astucia',val:1}],
+  '+1 Sigilo':[{type:'skill',key:'Sigilo',val:1}],
+  '+2 Sigilo':[{type:'skill',key:'Sigilo',val:2}],
+  '+1 Arma CC':[{type:'skill',key:'Armas Cuerpo a Cuerpo',val:1}],
+  '+2 Arma CC':[{type:'skill',key:'Armas Cuerpo a Cuerpo',val:2}],
+  '+2 Arma Proyectil':[{type:'skill',key:'Armas a Distancia',val:2}],
+  '+2 Pelea':[{type:'skill',key:'Pelea',val:2}],
+  '+2 Investigación':[{type:'skill',key:'Investigación',val:2}],
+  '+2 Medicina':[{type:'skill',key:'Medicina',val:2}],
+  '+2 Liderazgo':[{type:'skill',key:'Liderazgo',val:2}],
+  '+2 Subterfugio':[{type:'skill',key:'Subterfugio',val:2}],
+  '+2 Academicismo':[{type:'skill',key:'Academicismo',val:2}],
+  '+2 Supervivencia':[{type:'skill',key:'Supervivencia',val:2}],
+  '+2 Atletismo':[{type:'skill',key:'Atletismo',val:2}],
+  '+2 Orientación':[{type:'skill',key:'Callejeo / Orientación',val:2}],
+};
+
+function parseBonusStr(str) {
+  return str.split(',').flatMap(p => PATH_BONUS_MAP[p.trim()] || []);
+}
+
+const PATHS = [
+  {name:'Asesino',         cat:'COMBATE',       cc:'path-cat-combat',   desc:'Precisión letal y sombras.',            bonus:'+1 Destreza, +1 Sigilo, +1 Arma CC'},
+  {name:'Tirador',         cat:'COMBATE',       cc:'path-cat-combat',   desc:'La distancia es tu ventaja.',           bonus:'+1 Percepción, +2 Arma Proyectil'},
+  {name:'Corpulento',      cat:'COMBATE',       cc:'path-cat-combat',   desc:'Tu cuerpo es tu herramienta.',          bonus:'+2 Resistencia, +1 Fuerza'},
+  {name:'Luchador Técnico',cat:'COMBATE',       cc:'path-cat-combat',   desc:'No necesitas armas. Cada movimiento es preciso.', bonus:'+2 Pelea, +1 Destreza'},
+  {name:'Duelista',        cat:'COMBATE',       cc:'path-cat-combat',   desc:'Las arenas templaron tu cuerpo.',       bonus:'+1 Destreza, +2 Arma CC'},
+  {name:'Investigador',    cat:'MENTAL',        cc:'path-cat-mental',   desc:'Donde otros miran, tú observas.',       bonus:'+1 Percepción, +2 Investigación'},
+  {name:'Médico',          cat:'MENTAL',        cc:'path-cat-mental',   desc:'Entre la vida y la muerte.',            bonus:'+1 Inteligencia, +2 Medicina'},
+  {name:'Estratega',       cat:'MENTAL',        cc:'path-cat-mental',   desc:'El combate comienza antes del primer golpe.', bonus:'+1 Astucia, +2 Liderazgo'},
+  {name:'Embustero',       cat:'MENTAL',        cc:'path-cat-mental',   desc:'La verdad es solo una versión bien contada.', bonus:'+1 Manipulación, +2 Subterfugio'},
+  {name:'Académico',       cat:'MENTAL',        cc:'path-cat-mental',   desc:'El conocimiento es ventaja.',           bonus:'+1 Inteligencia, +2 Academicismo'},
+  {name:'Infiltrador',     cat:'SUPERVIVENCIA', cc:'path-cat-survival', desc:'Lugares donde no deberías estar.',      bonus:'+1 Destreza, +2 Sigilo'},
+  {name:'Rastreador',      cat:'SUPERVIVENCIA', cc:'path-cat-survival', desc:'El mundo siempre deja señales.',        bonus:'+1 Percepción, +2 Supervivencia'},
+  {name:'Sobreviviente',   cat:'SUPERVIVENCIA', cc:'path-cat-survival', desc:'El mundo intentó quebrarte.',           bonus:'+1 Resistencia, +2 Supervivencia'},
+  {name:'Escapista',       cat:'SUPERVIVENCIA', cc:'path-cat-survival', desc:'A veces se trata de salir.',            bonus:'+1 Destreza, +2 Atletismo'},
+  {name:'Explorador',      cat:'SUPERVIVENCIA', cc:'path-cat-survival', desc:'El mundo es vasto.',                   bonus:'+1 Percepción, +2 Orientación'}
+];
+
+// ════════════════════════════════════════════════════
+// ESTADO
+// ════════════════════════════════════════════════════
+let S = {
+  culture:'', linaje:'', name:'', player:'', age:'', level:'1', desc:'',
+  path:'',
+  attrEspecial: '',
+  skillEspecial: '',
+  attrs:{}, attrPts:6,
+  skills:{}, skillPts:6,
+  objCurrent:'', currentStep:1
+};
+
+ATTRS.forEach(a => S.attrs[a.key] = 1);
+ALL_SKILLS.forEach(s => S.skills[s] = 0);
+
+// ════════════════════════════════════════════════════
+// STEPPER
+// ════════════════════════════════════════════════════
+const STEPS = ['Cultura','Identidad','Camino','Atributos','Habilidades','Objetivos','Finalizar'];
+
+function renderStepper() {
+  const wrap = document.getElementById('stepper');
+  wrap.innerHTML = STEPS.map((label, i) => {
+    const n = i + 1;
+    const cls = n === S.currentStep ? 'active' : (n < S.currentStep ? 'done' : '');
+    const sep = i < STEPS.length - 1 ? '<div class="step-sep"></div>' : '';
+    return `
+      <div class="step-item ${cls}" onclick="goStep(${n})">
+        <div class="step-num">${n < S.currentStep ? '<i class="ri-check-line"></i>' : n}</div>
+        <span class="step-label">${label}</span>
+      </div>${sep}`;
+  }).join('');
+}
+
+// ════════════════════════════════════════════════════
+// NAVEGACIÓN
+// ════════════════════════════════════════════════════
+function goStep(n) {
+  S.currentStep = n;
+  document.querySelectorAll('.step-panel').forEach(p => p.classList.remove('active'));
+  document.getElementById('panel-' + n).classList.add('active');
+  renderStepper();
+  if (n === 1) renderCulturas();
+  if (n === 3) renderCaminos();
+  if (n === 4) renderAtributos();
+  if (n === 5) renderHabilidades();
+  if (n === 7) renderResumen();
+  updateSidebar();
+  window.scrollTo(0, 0);
+}
+
+function nextStep(n) { goStep(n + 1); }
+function prevStep(n) { goStep(n - 1); }
+
+// ════════════════════════════════════════════════════
+// BONUS HELPERS
+// ════════════════════════════════════════════════════
+function getBonusActivos() {
+  const result = [];
+  const cult = CULTURES.find(c => c.name === S.culture);
+  if (cult) {
+    if (cult.isLinaje && S.linaje) {
+      const lin = cult.linajes.find(l => l.name === S.linaje);
+      if (lin) result.push(...lin.bonuses.filter(b => b.val > 0));
+    } else if (!cult.isLinaje) {
+      result.push(...cult.bonuses);
+    }
+  }
+  const path = PATHS.find(p => p.name === S.path);
+  if (path) result.push(...parseBonusStr(path.bonus));
+  return result;
+}
+
+function getAbilityActiva() {
+  const cult = CULTURES.find(c => c.name === S.culture);
+  if (!cult) return null;
+  if (cult.isLinaje && S.linaje) {
+    const lin = cult.linajes.find(l => l.name === S.linaje);
+    return lin ? lin.ability : null;
+  }
+  return cult.ability || null;
+}
+
+function attrBonus(key) {
+  return getBonusActivos().filter(b => b.type === 'attr' && b.key === key).reduce((s,b) => s+b.val, 0);
+}
+
+function skillBonus(name) {
+  return getBonusActivos().filter(b => b.type === 'skill' && b.key === name).reduce((s,b) => s+b.val, 0);
+}
+
+function attrEff(key)   { return S.attrs[key] + attrBonus(key); }
+function skillEff(name) { return (S.skills[name]||0) + skillBonus(name); }
+
+// ════════════════════════════════════════════════════
+// PASO 1 — CULTURAS
+// ════════════════════════════════════════════════════
+function renderCulturas() {
+  const grid = document.getElementById('culture-grid');
+  grid.innerHTML = CULTURES.map(c => {
+    const sel = S.culture === c.name;
+    const bonos = c.isLinaje ? [] : c.bonuses;
+    return `
+      <div class="culture-card ${sel?'selected':''}" onclick="selectCultura(this,'${c.name.replace(/'/g,"\\'")}')">
+        <h4>${c.name}</h4>
+        <span class="culture-origin">${c.origin}</span>
+        <p>${c.desc}</p>
+        <div class="tags">
+          ${bonos.filter(b=>b.type==='attr').map(b=>`<span class="tag tag-bonus">+${b.val} ${ATTRS.find(a=>a.key===b.key)?.label}</span>`).join('')}
+          ${bonos.filter(b=>b.type==='skill').map(b=>`<span class="tag tag-bonus">+${b.val} ${b.key}</span>`).join('')}
+          ${c.isLinaje?`<span class="tag tag-bonus">Elige linaje ↓</span>`:''}
+          ${c.ability?`<span class="tag tag-ability">✦ ${c.ability.name}</span>`:''}
+          ${(c.penalties||[]).map(p=>`<span class="tag tag-penalty">${p}</span>`).join('')}
+        </div>
+      </div>`;
+  }).join('');
+  renderLinajeSelector();
+}
+
+function renderLinajeSelector() {
+  const prev = document.getElementById('linaje-wrap');
+  if (prev) prev.remove();
+  const cult = CULTURES.find(c => c.name === S.culture);
+  if (!cult || !cult.isLinaje) return;
+  const grid = document.getElementById('culture-grid');
+  const wrap = document.createElement('div');
+  wrap.id = 'linaje-wrap';
+  wrap.style.cssText = 'grid-column:1/-1;margin-top:4px;';
+  wrap.innerHTML = `
+    <div class="linaje-selector">
+      <div class="linaje-titulo">✦ Elige tu Linaje</div>
+      <div class="linaje-grid">
+        ${cult.linajes.map(l => {
+          const sel = S.linaje === l.name;
+          const safe = l.name.replace(/'/g,"\\'");
+          return `<div class="linaje-card ${sel?'selected':''}" onclick="selectLinaje('${safe}')">
+            <h5>${l.name}</h5>
+            <span class="linaje-rasgo">${l.rasgo}</span>
+            <p>${l.rasgodesc}</p>
+            <div class="tags" style="justify-content:center;">
+              ${l.bonuses.filter(b=>b.type==='attr').map(b=>`<span class="tag tag-bonus">+${b.val} ${ATTRS.find(a=>a.key===b.key)?.label}</span>`).join('')}
+              ${l.bonuses.filter(b=>b.type==='skill').map(b=>`<span class="tag tag-bonus">+${b.val} ${b.key}</span>`).join('')}
+            </div>
+            ${sel?`<div style="margin-top:6px;font-size:10px;color:var(--azul);font-weight:700;text-align:center;">✦ ${l.ability.name}</div>`:''}
+          </div>`;
+        }).join('')}
+      </div>
+    </div>`;
+  grid.after(wrap);
+}
+
+function selectCultura(el, name) {
+  document.querySelectorAll('.culture-card').forEach(c=>c.classList.remove('selected'));
+  el.classList.add('selected');
+  S.culture = name; S.linaje = '';
+  renderLinajeSelector(); updateSidebar();
+}
+
+function selectLinaje(name) {
+  S.linaje = name;
+  renderLinajeSelector(); updateSidebar();
+}
+
+// ════════════════════════════════════════════════════
+// NIVEL CHANGE
+// ════════════════════════════════════════════════════
+function onNivelChange() {
+  S.level = document.getElementById('char-level').value;
+  const pts = getPuntosIniciales(S.level);
+  S.attrPts = pts.attrs;
+  S.skillPts = pts.skills;
+  // Reset atributos y habilidades al cambiar nivel
+  ATTRS.forEach(a => S.attrs[a.key] = 1);
+  ALL_SKILLS.forEach(s => S.skills[s] = 0);
+  S.attrEspecial = '';
+  S.skillEspecial = '';
+  updateSidebar();
+}
+
+// ════════════════════════════════════════════════════
+// PASO 3 — CAMINOS
+// ════════════════════════════════════════════════════
+function renderCaminos() {
+  const cont = document.getElementById('path-container');
+  const lvl = parseInt(S.level);
+  if (lvl < 3) {
+    cont.innerHTML = `
+      <div class="path-locked">
+        <i class="ri-lock-line"></i>
+        <h3>Camino no disponible en Nivel ${lvl}</h3>
+        <p>Los Caminos se desbloquean al alcanzar el <strong>Nivel 3</strong>.<br>
+        Puedes continuar sin elegir uno. Cuando tu personaje suba de nivel podrás elegir tu especialización.</p>
+      </div>`;
+    return;
+  }
+  cont.innerHTML = `<div class="path-grid">
+    ${PATHS.map(p => {
+      const bonos = parseBonusStr(p.bonus);
+      return `
+        <div class="path-card ${S.path===p.name?'selected':''}" onclick="selectCamino('${p.name.replace(/'/g,"\\'")}')">
+          <span class="path-cat ${p.cc}">${p.cat}</span>
+          <h4>${p.name}</h4>
+          <p>${p.desc}</p>
+          <div class="path-bonos">
+            ${bonos.map(b=>`<span class="path-bono">${b.type==='attr'?ATTRS.find(a=>a.key===b.key)?.label:b.key} +${b.val}</span>`).join('')}
+          </div>
+        </div>`;
+    }).join('')}
+  </div>`;
+}
+
+function selectCamino(name) {
+  S.path = name;
+  // Reset atributos y habilidades cuando cambia el camino
+  ATTRS.forEach(a => S.attrs[a.key] = 1);
+  ALL_SKILLS.forEach(s => S.skills[s] = 0);
+  const pts = getPuntosIniciales(S.level);
+  S.attrPts = pts.attrs; S.skillPts = pts.skills;
+  renderCaminos(); updateSidebar();
+}
+
+// ════════════════════════════════════════════════════
+// PASO 4 — ATRIBUTOS
+// ════════════════════════════════════════════════════
+function renderAtributos() {
+  const lim = getLimites(S.level);
+  const pts = getPuntosIniciales(S.level);
+
+  // Descripción
+  document.getElementById('desc-atributos').textContent =
+    `Todos los atributos comienzan en 1. Tienes ${pts.attrs} puntos para repartir. ` +
+    `Tu atributo destacado puede llegar a ${lim.attrMax}, el resto a ${lim.attrResto}.`;
+
+  // Badge límites
+  document.getElementById('limite-attr-badge').innerHTML =
+    `<i class="ri-information-line"></i> 
+     Destacado: <strong>máx. ${lim.attrMax}</strong> &nbsp;|&nbsp; 
+     Resto: <strong>máx. ${lim.attrResto}</strong>`;
+
+  // Tracker
+  document.getElementById('attr-pts-val').textContent = S.attrPts;
+  document.getElementById('attr-pts-val').className = 'pts-tracker-val' + (S.attrPts === 0 ? ' agotado' : '');
+
+  // Selector atributo especial
+  const selWrap = document.getElementById('attr-especial-selector');
+  selWrap.innerHTML = ATTRS.map(a => {
+    const sel = S.attrEspecial === a.key;
+    return `
+      <div class="especial-btn ${sel?'selected':''}" onclick="selectAttrEspecial('${a.key}')">
+        <span class="eb-icon">${a.icon}</span>
+        <span class="eb-nombre">${a.label}</span>
+        ${sel ? '<span class="especial-label">★ Destacado</span>' : ''}
+      </div>`;
+  }).join('');
+
+  // Grid atributos
+  const grid = document.getElementById('attr-grid');
+  grid.innerHTML = ATTRS.map(a => {
+    const base = S.attrs[a.key];
+    const bono = attrBonus(a.key);
+    const eff  = base + bono;
+    const esEsp = S.attrEspecial === a.key;
+    const maxPerm = esEsp ? lim.attrMax : lim.attrResto;
+    const enTecho = eff >= maxPerm;
+
+    return `
+      <div class="attr-card ${esEsp?'especial':''}">
+        ${esEsp ? '<div class="attr-especial-badge">★ Destacado</div>' : ''}
+        <span class="attr-icon">${a.icon}</span>
+        <span class="attr-nombre">${a.label}</span>
+        <div class="attr-controls">
+          <button class="attr-btn" onclick="cambiarAttr('${a.key}',-1)">−</button>
+          <span class="attr-val ${bono>0?'boosted':''}">${eff}</span>
+          <button class="attr-btn" onclick="cambiarAttr('${a.key}',1)">+</button>
+        </div>
+        ${bono > 0 ? `<span class="attr-bono-label">base ${base} +${bono} bono</span>` : ''}
+        <span class="attr-limite ${enTecho?'es-max':''}">
+          ${enTecho ? `✓ Máx. ${maxPerm}` : `Máx. ${maxPerm}`}
+        </span>
+      </div>`;
+  }).join('');
+
+  actualizarStatsDerivados();
+}
+
+function selectAttrEspecial(key) {
+  S.attrEspecial = key;
+  renderAtributos();
+}
+
+function cambiarAttr(key, delta) {
+  if (!S.attrEspecial) { toast('Elige primero tu atributo destacado.', 'error'); return; }
+  const lim   = getLimites(S.level);
+  const base  = S.attrs[key];
+  const bono  = attrBonus(key);
+  const nuevo = base + delta;
+  const eff   = nuevo + bono;
+  const esEsp = S.attrEspecial === key;
+  const max   = esEsp ? lim.attrMax : lim.attrResto;
+
+  if (nuevo < 1) return;
+  if (delta > 0 && S.attrPts <= 0) { toast('No tienes puntos de atributo disponibles.', 'error'); return; }
+  if (delta > 0 && eff > max) {
+    toast(`Límite ${esEsp?'destacado':'normal'}: máx. ${max}${bono>0?' (incluyendo bono +'+bono+')':''}`, 'error');
+    return;
+  }
+
+  S.attrs[key] = nuevo;
+  S.attrPts -= delta;
+  renderAtributos();
+  updateSidebar();
+}
+
+function actualizarStatsDerivados() {
+  const pa   = attrEff('resistencia') + 3;
+  const init = attrEff('percepcion') + skillEff('Alerta');
+  document.getElementById('pa-val').textContent   = pa;
+  document.getElementById('init-val').textContent = init;
+  document.getElementById('s-pa').textContent     = pa;
+  document.getElementById('s-init').textContent   = init;
+}
+
+// ════════════════════════════════════════════════════
+// PASO 5 — HABILIDADES
+// ════════════════════════════════════════════════════
+function renderHabilidades() {
+  const lim = getLimites(S.level);
+  const pts = getPuntosIniciales(S.level);
+  const lvl = parseInt(S.level);
+  const tieneEspecial = lvl >= 6;
+
+  document.getElementById('desc-habilidades').textContent =
+    `Las habilidades comienzan en 0. Tienes ${pts.skills} puntos para repartir. ` +
+    (tieneEspecial
+      ? `Tu habilidad destacada puede llegar a ${lim.skillMax}, el resto a ${lim.skillResto}.`
+      : `Todas las habilidades tienen un máximo de ${lim.skillResto}.`);
+
+  document.getElementById('limite-skill-badge').innerHTML =
+    tieneEspecial
+      ? `<i class="ri-information-line"></i> Destacada: <strong>máx. ${lim.skillMax}</strong> &nbsp;|&nbsp; Resto: <strong>máx. ${lim.skillResto}</strong>`
+      : `<i class="ri-information-line"></i> Máximo por habilidad: <strong>${lim.skillResto}</strong>`;
+
+  document.getElementById('skill-pts-val').textContent = S.skillPts;
+  document.getElementById('skill-pts-val').className = 'pts-tracker-val' + (S.skillPts === 0 ? ' agotado' : '');
+
+  // Selector habilidad especial (solo nivel 6+)
+  const espWrap = document.getElementById('skill-especial-wrap');
+  if (tieneEspecial) {
+    espWrap.innerHTML = `
+      <p style="font-size:12px;color:var(--muted);margin-bottom:10px;">
+        <i class="ri-star-line" style="color:var(--dorado);"></i>
+        Elige tu <strong style="color:var(--dorado)">habilidad destacada</strong>:
+      </p>
+      <select class="form-select" style="margin-bottom:16px;max-width:300px;" onchange="selectSkillEspecial(this.value)">
+        <option value="">— Selecciona una habilidad —</option>
+        ${ALL_SKILLS.map(s => `<option value="${s}" ${S.skillEspecial===s?'selected':''}>${s}</option>`).join('')}
+      </select>`;
+  } else {
+    espWrap.innerHTML = '';
+    S.skillEspecial = '';
+  }
+
+  // Grid habilidades
+  const cont = document.getElementById('skills-container');
+  cont.innerHTML = Object.entries(SKILLS_CAT).map(([cat, skills]) => `
+    <div class="skill-cat-header">
+      <i class="ri-bookmark-line"></i> ${cat}
+    </div>
+    ${skills.map(s => {
+      const base = S.skills[s] || 0;
+      const bono = skillBonus(s);
+      const eff  = base + bono;
+      const esEsp = tieneEspecial && S.skillEspecial === s;
+      const max  = esEsp ? lim.skillMax : lim.skillResto;
+      const dots = [1,2,3,4,5,6].slice(0, Math.max(lim.skillMax, lim.skillResto)).map(d => {
+        const filled = base >= d;
+        const bonoDot = !filled && bono > 0 && eff >= d;
+        return `<div class="skill-dot ${filled?'filled':''} ${bonoDot?'bono':''}" onclick="setSkill('${s}',${d})"></div>`;
+      }).join('');
+      return `
+        <div class="skill-row">
+          <span class="skill-nombre ${esEsp?'especial-skill':''}">${s}${esEsp?' ★':''}</span>
+          ${bono > 0 ? `<span class="bono-chip">+${bono}</span>` : ''}
+          <div class="skill-dots">${dots}</div>
+          ${bono > 0 ? `<span class="skill-eff">${eff}</span>` : ''}
+        </div>`;
+    }).join('')}
+  `).join('');
+}
+
+function selectSkillEspecial(val) {
+  S.skillEspecial = val;
+  renderHabilidades();
+}
+
+function setSkill(name, val) {
+  if (parseInt(S.level) >= 6 && !S.skillEspecial) {
+    toast('Elige primero tu habilidad destacada.', 'error'); return;
+  }
+  const lim  = getLimites(S.level);
+  const lvl  = parseInt(S.level);
+  const esEsp = lvl >= 6 && S.skillEspecial === name;
+  const max  = esEsp ? lim.skillMax : lim.skillResto;
+  const bono = skillBonus(name);
+  const cur  = S.skills[name] || 0;
+  const nuevo = cur === val ? val - 1 : val;
+  const eff  = nuevo + bono;
+
+  if (eff > max) { toast(`Máximo para esta habilidad: ${max}${bono>0?' (con bono +'+bono+')':''}`, 'error'); return; }
+  const diff = nuevo - cur;
+  if (diff > 0 && S.skillPts < diff) { toast('No tienes puntos de habilidad disponibles.', 'error'); return; }
+
+  S.skillPts     -= diff;
+  S.skills[name]  = Math.max(0, nuevo);
+  renderHabilidades();
+  updateSidebar();
+}
+
+// ════════════════════════════════════════════════════
+// SIDEBAR
+// ════════════════════════════════════════════════════
+function updateSidebar() {
+  S.name       = document.getElementById('char-name')?.value   || S.name;
+  S.player     = document.getElementById('char-player')?.value || S.player;
+  S.age        = document.getElementById('char-age')?.value    || S.age;
+  S.level      = document.getElementById('char-level')?.value  || S.level;
+  S.objCurrent = document.getElementById('obj-current')?.value || S.objCurrent;
+
+  const set = (id,v) => { const el=document.getElementById(id); if(el) el.textContent=v; };
+  set('s-nombre',  S.name   || '—');
+  set('s-jugador', S.player || '—');
+  set('s-edad',    S.age ? S.age+' años' : '—');
+  set('s-nivel',   'Nivel '+(S.level||'1'));
+  set('s-cultura', S.culture ? (S.linaje ? S.culture+' · '+S.linaje : S.culture) : '—');
+  set('s-camino',  S.path || '—');
+  set('s-obj',     S.objCurrent || '—');
+
+  const attrsEl = document.getElementById('s-attrs');
+  if (attrsEl) {
+    attrsEl.innerHTML = ATTRS.map(a => {
+      const bono = attrBonus(a.key);
+      const eff  = S.attrs[a.key] + bono;
+      return `<div class="s-row">
+        <span class="s-label">${a.label}</span>
+        <span class="s-val">${S.attrs[a.key]}${bono>0?`<span class="s-bono">+${bono}=${eff}</span>`:''}</span>
+      </div>`;
+    }).join('');
+  }
+
+  const bonosEl = document.getElementById('s-bonos');
+  if (bonosEl) {
+    const all = getBonusActivos();
+    bonosEl.innerHTML = all.length
+      ? all.map(b=>`<span class="s-bono-chip">${b.type==='attr'?ATTRS.find(a=>a.key===b.key)?.label:b.key} +${b.val}</span>`).join('')
+      : '<span style="font-size:11px;color:var(--muted);font-style:italic;">Sin bonos</span>';
+  }
+
+  actualizarStatsDerivados();
+}
+
+// ════════════════════════════════════════════════════
+// RESUMEN FINAL
+// ════════════════════════════════════════════════════
+function renderResumen() {
+  const bonos   = getBonusActivos();
+  const ability = getAbilityActiva();
+  const cultLabel = S.linaje ? `${S.culture} — ${S.linaje}` : (S.culture || '—');
+
+  document.getElementById('resumen-grid').innerHTML = `
+    <div class="resumen-box"><span class="rb-label">Nombre</span><span class="rb-val">${S.name||'Sin nombre'}</span></div>
+    <div class="resumen-box"><span class="rb-label">Jugador</span><span class="rb-val">${S.player||'—'}</span></div>
+    <div class="resumen-box"><span class="rb-label">Nivel</span><span class="rb-val">${S.level}</span></div>
+    <div class="resumen-box"><span class="rb-label">Cultura</span><span class="rb-val">${cultLabel}</span></div>
+    <div class="resumen-box"><span class="rb-label">Camino</span><span class="rb-val">${S.path||'Sin camino'}</span></div>
+    <div class="resumen-box"><span class="rb-label">PA / Iniciativa</span><span class="rb-val">${attrEff('resistencia')+3} / ${attrEff('percepcion')+skillEff('Alerta')}</span></div>
+    <div class="resumen-box full"><span class="rb-label">Bonos activos</span><span class="rb-val" style="font-size:12px;">${bonos.length?bonos.map(b=>`${b.type==='attr'?ATTRS.find(a=>a.key===b.key)?.label:b.key} +${b.val}`).join(' · '):'—'}</span></div>
+  `;
+
+  document.getElementById('resumen-ability').innerHTML = ability ? `
+    <div class="ability-resumen">
+      <span class="ar-label">✦ Habilidad de Cultura</span>
+      <div class="ar-nombre">${ability.name}</div>
+      <div class="ar-desc">${ability.desc}</div>
+      <div class="ar-weak"><strong>Debilidad —</strong> ${ability.weakness}</div>
+    </div>` : '';
+}
+
+// ════════════════════════════════════════════════════
+// GUARDAR
+// ════════════════════════════════════════════════════
+function validar() {
+  const errors = [];
+  if (!S.culture)                          errors.push('Debes elegir una Cultura (Paso 1)');
+  const cult = CULTURES.find(c=>c.name===S.culture);
+  if (cult?.isLinaje && !S.linaje)         errors.push('Debes elegir un Linaje (Paso 1)');
+  if (!S.name?.trim())                     errors.push('El personaje necesita un nombre (Paso 2)');
+  if (!S.player?.trim())                   errors.push('Falta el nombre del jugador (Paso 2)');
+  if (!S.age)                              errors.push('Falta la edad del personaje (Paso 2)');
+  if (!S.attrEspecial)                     errors.push('Debes elegir un atributo destacado (Paso 4)');
+  if (parseInt(S.level)>=6 && !S.skillEspecial) errors.push('Debes elegir una habilidad destacada (Paso 5)');
+  if (!S.objCurrent?.trim())               errors.push('Falta el Objetivo Actual (Paso 6)');
+  if (!document.getElementById('obj-life')?.value?.trim()) errors.push('Falta el Objetivo de Vida (Paso 6)');
+  return errors;
+}
+
+async function saveCharacter() {
+  const errors = validar();
+  if (errors.length) {
+    document.getElementById('error-list').innerHTML = errors.map(e=>`<li>${e}</li>`).join('');
+    document.getElementById('modal-errores').classList.add('open');
+    return;
+  }
+
+  const btn = document.querySelector('.btn-guardar-final');
+  if (btn) { btn.disabled = true; btn.textContent = 'Guardando...'; }
+
+  const ability = getAbilityActiva();
+  const data = {
+    nombre:               S.name,
+    edad:                 S.age,
+    cultura:              S.culture,
+    linaje:               S.linaje || null,
+    nivel:                S.level,
+    camino:               S.path || null,
+    attrEspecial:         S.attrEspecial,
+    skillEspecial:        S.skillEspecial || null,
+    atributos:            {...S.attrs},
+    atributosEfectivos:   Object.fromEntries(ATTRS.map(a=>[a.key, attrEff(a.key)])),
+    habilidades:          {...S.skills},
+    habilidadesEfectivas: Object.fromEntries(ALL_SKILLS.map(s=>[s, skillEff(s)])),
+    bonusActivos:         getBonusActivos(),
+    habilidadCultura:     ability || null,
+    objetivoActual:       S.objCurrent,
+    objetivoVida:         document.getElementById('obj-life')?.value || '',
+    equipo:               document.getElementById('char-equip')?.value || '',
+    apariencia:           S.desc || '',
+    estadoSalud:          'sano',
+    xpTotal:              0,
+    xpGastada:            0,
+    campanaId:            null,
+    paTemporal:           0,
+    dinero:               0,
+    armas:                [],
+    objetos:              [],
+  };
+
+  try {
+    const { guardarPersonaje } = await import("../../js/personajes.js");
+    const id = await guardarPersonaje(data);
+    toast('¡Personaje guardado correctamente!', 'success');
+    setTimeout(() => { window.location.href = '../panel-del-jugador/panel-del-jugador.html'; }, 1500);
+  } catch (err) {
+    console.error(err);
+    toast('Error al guardar. Intenta de nuevo.', 'error');
+    if (btn) { btn.disabled = false; btn.innerHTML = '<i class="ri-save-line"></i> Guardar Personaje'; }
+  }
+}
+
+function resetCreador() {
+  ATTRS.forEach(a => S.attrs[a.key] = 1);
+  ALL_SKILLS.forEach(s => S.skills[s] = 0);
+  Object.assign(S, {
+    culture:'', linaje:'', name:'', player:'', age:'', level:'1', desc:'',
+    path:'', attrEspecial:'', skillEspecial:'',
+    attrPts:6, skillPts:6, objCurrent:''
+  });
+  goStep(1);
+}
+
+function cerrarModal() {
+  document.getElementById('modal-errores').classList.remove('open');
+}
+
+// ════════════════════════════════════════════════════
+// TOAST
+// ════════════════════════════════════════════════════
+function toast(msg, tipo) {
+  const t = document.getElementById('toast');
+  const cfg = {
+    success:{ bg:'rgba(26,74,46,0.95)', border:'#2d7a4a', color:'#7ad49a' },
+    error:  { bg:'rgba(80,19,19,0.95)', border:'#e74c3c', color:'#ff8080' }
+  }[tipo] || {};
+  Object.assign(t.style,{ background:cfg.bg, borderColor:cfg.border, color:cfg.color, opacity:'1' });
+  t.textContent = msg;
+  clearTimeout(t._t);
+  t._t = setTimeout(()=>{ t.style.opacity='0'; }, 3500);
+}
+
+// ════════════════════════════════════════════════════
+// INIT
+// ════════════════════════════════════════════════════
+renderStepper();
+renderCulturas();
+updateSidebar();
+</script>
+</body>
+</html>

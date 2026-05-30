@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Acceso - Crónicas del Cazador</title>
+    <link rel="stylesheet" href="../css/style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@600;800&family=Space+Grotesk:wght@300;400;600&display=swap" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/remixicon@3.5.0/fonts/remixicon.css" rel="stylesheet">
+    <style>
+        /* Estilos rápidos para el formulario dentro de la card-moderna */
+        .input-moderno {
+            width: 100%;
+            padding: 15px;
+            margin-bottom: 20px;
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid var(--border-color);
+            border-radius: 6px;
+            color: white;
+            font-family: 'Space Grotesk', sans-serif;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="background-animation"></div>
+
+    <main class="contenedor-moderno" style="padding-top: 150px; display: flex; justify-content: center;">
+        <article class="card-moderna" style="max-width: 400px; width: 100%;">
+            <h1 style="font-family: 'Cinzel', serif; font-size: 2rem; color: #fff; margin-bottom: 30px; text-align: center;">Iniciar Sesión</h1>
+            
+            <form id="login-form">
+                <input type="email" id="email" class="input-moderno" placeholder="Correo electrónico" required>
+                <input type="password" id="password" class="input-moderno" placeholder="Contraseña" required>
+                
+                <button type="submit" class="btn-glow" style="width: 100%; cursor: pointer;">
+                    Entrar al mundo
+                </button>
+            </form>
+
+            <p style="text-align: center; margin-top: 20px; color: var(--text-muted);">
+                ¿Aún no eres un Cazador? <a href="registro.html" style="color: var(--accent-red); text-decoration: none;">Registrarse</a>
+            </p>
+        </article>
+    </main>
+
+    <script type="module" src="../js/auth.js"></script> 
+</body>
+</html>
