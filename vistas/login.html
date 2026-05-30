@@ -1,49 +1,523 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Acceso - Crónicas del Cazador</title>
-    <link rel="stylesheet" href="../css/style.css">
-    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@600;800&family=Space+Grotesk:wght@300;400;600&display=swap" rel="stylesheet">
-    <link href="https://cdn.jsdelivr.net/npm/remixicon@3.5.0/fonts/remixicon.css" rel="stylesheet">
-    <style>
-        /* Estilos rápidos para el formulario dentro de la card-moderna */
-        .input-moderno {
-            width: 100%;
-            padding: 15px;
-            margin-bottom: 20px;
-            background: rgba(255, 255, 255, 0.03);
-            border: 1px solid var(--border-color);
-            border-radius: 6px;
-            color: white;
-            font-family: 'Space Grotesk', sans-serif;
-        }
-    </style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Iniciar Sesión | Crónicas del Cazador</title>
+  <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700;800&family=Raleway:wght@300;400;500;600&display=swap" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/remixicon@3.5.0/fonts/remixicon.css" rel="stylesheet">
+  <style>
+    :root {
+      --rojo: #c0392b; --rojo-hover: #e74c3c; --rojo-glow: rgba(192,57,43,0.35);
+      --negro: #0a0a0c; --sup: #111117; --sup2: #16161e; --sup3: #1e1e28;
+      --borde: rgba(255,255,255,0.07); --borde-r: rgba(192,57,43,0.4);
+      --texto: #e8e2d9; --muted: #8a8490; --sec: #b0aab8; --dorado: #c9a84c;
+    }
+
+    *, *::before, *::after { margin:0; padding:0; box-sizing:border-box; }
+
+    body {
+      font-family: 'Raleway', sans-serif;
+      background: var(--negro); color: var(--texto);
+      min-height: 100vh; overflow: hidden;
+      display: flex; align-items: center; justify-content: center;
+    }
+
+    /* Fondo atmosférico */
+    .bg {
+      position: fixed; inset: 0; z-index: 0;
+      background:
+        radial-gradient(ellipse 80% 60% at 50% 0%, rgba(192,57,43,0.12) 0%, transparent 60%),
+        radial-gradient(ellipse 60% 40% at 0% 100%, rgba(192,57,43,0.06) 0%, transparent 60%);
+    }
+
+    /* Partículas decorativas */
+    .bg::before {
+      content: '';
+      position: absolute; inset: 0;
+      background-image:
+        radial-gradient(1px 1px at 20% 30%, rgba(255,255,255,0.15) 0%, transparent 100%),
+        radial-gradient(1px 1px at 80% 70%, rgba(255,255,255,0.1) 0%, transparent 100%),
+        radial-gradient(1px 1px at 50% 50%, rgba(192,57,43,0.2) 0%, transparent 100%);
+    }
+
+    /* Marca de agua */
+    .bg::after {
+      content: 'CDC';
+      position: absolute; bottom: -60px; right: -30px;
+      font-family: 'Cinzel', serif; font-size: 320px; font-weight: 800;
+      color: rgba(192,57,43,0.04); pointer-events: none;
+      letter-spacing: -0.05em; user-select: none;
+    }
+
+    /* Card */
+    .card {
+      position: relative; z-index: 1;
+      width: 100%; max-width: 420px;
+      background: var(--sup2); border: 1px solid var(--borde);
+      border-top: 2px solid var(--rojo);
+      padding: 40px;
+      animation: cardEntrada 0.5s cubic-bezier(0.25,0.46,0.45,0.94) both;
+    }
+
+    @keyframes cardEntrada {
+      from { opacity:0; transform:translateY(20px); }
+      to   { opacity:1; transform:translateY(0); }
+    }
+
+    /* Logo */
+    .card-logo {
+      text-align: center; margin-bottom: 28px;
+    }
+
+    .card-logo img {
+      height: 52px; width: auto;
+      filter: invert(1) brightness(0.85);
+      mix-blend-mode: screen;
+    }
+
+    /* Título */
+    .card-titulo {
+      font-family: 'Cinzel', serif;
+      font-size: 22px; font-weight: 800;
+      color: var(--texto); text-align: center;
+      margin-bottom: 6px;
+    }
+
+    .card-subtitulo {
+      font-size: 13px; color: var(--muted);
+      text-align: center; margin-bottom: 28px;
+      font-style: italic;
+    }
+
+    /* Formulario */
+    .form-group { margin-bottom: 16px; }
+
+    .form-label {
+      display: block; font-size: 11px; font-weight: 600;
+      letter-spacing: 0.12em; text-transform: uppercase;
+      color: var(--muted); margin-bottom: 7px;
+    }
+
+    .input-wrap { position: relative; }
+
+    .input-wrap i {
+      position: absolute; left: 13px; top: 50%;
+      transform: translateY(-50%);
+      font-size: 15px; color: var(--muted);
+      pointer-events: none; transition: color 0.2s;
+    }
+
+    .input-wrap:focus-within i { color: var(--rojo); }
+
+    .form-input {
+      width: 100%; height: 44px;
+      background: rgba(255,255,255,0.03);
+      border: 1px solid var(--borde);
+      color: var(--texto); font-family: 'Raleway', sans-serif;
+      font-size: 14px; font-weight: 500;
+      padding: 0 14px 0 40px; outline: none;
+      transition: border-color 0.2s, background 0.2s;
+    }
+
+    .form-input::placeholder { color: rgba(138,132,144,0.4); }
+    .form-input:focus { border-color: var(--borde-r); background: rgba(192,57,43,0.04); }
+
+    .toggle-pass {
+      position: absolute; right: 10px; top: 50%;
+      transform: translateY(-50%);
+      background: transparent; border: none;
+      color: var(--muted); cursor: pointer; font-size: 15px;
+      padding: 4px; transition: color 0.2s;
+    }
+    .toggle-pass:hover { color: var(--texto); }
+
+    /* Mantener sesión + olvidé contraseña */
+    .form-meta {
+      display: flex; justify-content: space-between; align-items: center;
+      margin-bottom: 20px;
+    }
+
+    .checkbox-wrap {
+      display: flex; align-items: center; gap: 8px; cursor: pointer;
+    }
+
+    .checkbox-custom {
+      width: 16px; height: 16px;
+      border: 1px solid var(--borde); background: transparent;
+      display: flex; align-items: center; justify-content: center;
+      flex-shrink: 0; transition: all 0.15s; cursor: pointer;
+    }
+
+    .checkbox-custom.checked {
+      background: var(--rojo); border-color: var(--rojo);
+    }
+
+    .checkbox-custom i { font-size: 10px; color: white; display: none; }
+    .checkbox-custom.checked i { display: block; }
+
+    .checkbox-label {
+      font-size: 12px; color: var(--muted);
+      user-select: none;
+    }
+
+    .forgot-link {
+      font-size: 12px; color: var(--muted);
+      text-decoration: none; transition: color 0.2s;
+      cursor: pointer; background: none; border: none;
+      font-family: 'Raleway', sans-serif;
+    }
+    .forgot-link:hover { color: var(--rojo); }
+
+    /* Botón principal */
+    .btn-login {
+      width: 100%; height: 46px;
+      background: var(--rojo); border: none;
+      color: white; font-family: 'Cinzel', serif;
+      font-size: 13px; font-weight: 700;
+      letter-spacing: 0.15em; text-transform: uppercase;
+      cursor: pointer; transition: background 0.2s, transform 0.15s;
+      box-shadow: 0 4px 16px var(--rojo-glow);
+      margin-bottom: 20px;
+    }
+    .btn-login:hover:not(:disabled) { background: var(--rojo-hover); transform: translateY(-1px); }
+    .btn-login:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
+
+    /* Separador */
+    .sep {
+      display: flex; align-items: center; gap: 12px;
+      margin-bottom: 16px;
+    }
+    .sep-line { flex: 1; height: 1px; background: var(--borde); }
+    .sep-texto { font-size: 11px; color: var(--muted); white-space: nowrap; }
+
+    /* Registro link */
+    .registro-link {
+      text-align: center; font-size: 13px; color: var(--muted);
+    }
+    .registro-link a {
+      color: var(--rojo); text-decoration: none; font-weight: 600;
+      transition: color 0.2s;
+    }
+    .registro-link a:hover { color: var(--rojo-hover); }
+
+    /* Error */
+    .error-msg {
+      background: rgba(192,57,43,0.08);
+      border: 1px solid var(--borde-r);
+      color: #ff8080; font-size: 13px;
+      padding: 10px 14px; margin-bottom: 16px;
+      display: none; line-height: 1.5;
+    }
+    .error-msg.visible { display: block; }
+
+    /* Modal reset contraseña */
+    .modal-overlay {
+      position: fixed; inset: 0; z-index: 100;
+      background: rgba(0,0,0,0.8); backdrop-filter: blur(4px);
+      display: flex; align-items: center; justify-content: center;
+      padding: 20px; opacity: 0; pointer-events: none;
+      transition: opacity 0.2s;
+    }
+    .modal-overlay.open { opacity: 1; pointer-events: all; }
+
+    .modal {
+      background: var(--sup2); border: 1px solid var(--borde-r);
+      border-top: 2px solid var(--rojo);
+      padding: 28px; max-width: 380px; width: 100%;
+      transform: translateY(14px); transition: transform 0.25s;
+    }
+    .modal-overlay.open .modal { transform: translateY(0); }
+
+    .modal-titulo {
+      font-family: 'Cinzel', serif; font-size: 17px;
+      font-weight: 700; color: var(--texto); margin-bottom: 6px;
+    }
+    .modal-desc {
+      font-size: 13px; color: var(--muted);
+      line-height: 1.6; margin-bottom: 18px;
+    }
+
+    .modal-acciones { display: flex; gap: 10px; margin-top: 16px; }
+
+    .btn-modal-enviar {
+      flex: 1; height: 42px;
+      background: var(--rojo); border: none;
+      color: white; font-family: 'Cinzel', serif;
+      font-size: 12px; font-weight: 700;
+      letter-spacing: 0.12em; text-transform: uppercase;
+      cursor: pointer; transition: background 0.2s;
+    }
+    .btn-modal-enviar:hover:not(:disabled) { background: var(--rojo-hover); }
+    .btn-modal-enviar:disabled { opacity: 0.5; cursor: not-allowed; }
+
+    .btn-modal-cancel {
+      padding: 0 16px; height: 42px;
+      background: transparent; border: 1px solid var(--borde);
+      color: var(--muted); font-family: 'Raleway', sans-serif;
+      font-size: 12px; font-weight: 600; cursor: pointer;
+      transition: border-color 0.2s, color 0.2s;
+    }
+    .btn-modal-cancel:hover { border-color: rgba(255,255,255,0.2); color: var(--texto); }
+
+    /* Toast */
+    #toast {
+      position: fixed; bottom: 24px; right: 24px; z-index: 999;
+      padding: 12px 20px; border-left: 3px solid;
+      font-family: 'Raleway', sans-serif; font-size: 13px; font-weight: 600;
+      opacity: 0; transition: opacity 0.3s; pointer-events: none;
+    }
+  </style>
 </head>
 <body>
 
-    <div class="background-animation"></div>
+<div class="bg"></div>
 
-    <main class="contenedor-moderno" style="padding-top: 150px; display: flex; justify-content: center;">
-        <article class="card-moderna" style="max-width: 400px; width: 100%;">
-            <h1 style="font-family: 'Cinzel', serif; font-size: 2rem; color: #fff; margin-bottom: 30px; text-align: center;">Iniciar Sesión</h1>
-            
-            <form id="login-form">
-                <input type="email" id="email" class="input-moderno" placeholder="Correo electrónico" required>
-                <input type="password" id="password" class="input-moderno" placeholder="Contraseña" required>
-                
-                <button type="submit" class="btn-glow" style="width: 100%; cursor: pointer;">
-                    Entrar al mundo
-                </button>
-            </form>
+<!-- CARD LOGIN -->
+<div class="card">
+  <div class="card-logo">
+    <img src="../imagenes/logo.png" alt="Crónicas del Cazador">
+  </div>
+  <h1 class="card-titulo">Iniciar Sesión</h1>
+  <p class="card-subtitulo">La cacería te espera, Cazador.</p>
 
-            <p style="text-align: center; margin-top: 20px; color: var(--text-muted);">
-                ¿Aún no eres un Cazador? <a href="registro.html" style="color: var(--accent-red); text-decoration: none;">Registrarse</a>
-            </p>
-        </article>
-    </main>
+  <div class="error-msg" id="error-msg"></div>
 
-    <script type="module" src="../js/auth.js"></script> 
+  <form id="login-form">
+    <div class="form-group">
+      <label class="form-label">Correo electrónico</label>
+      <div class="input-wrap">
+        <i class="ri-mail-line"></i>
+        <input class="form-input" type="email" id="email"
+               placeholder="tu@correo.com" required autocomplete="email">
+      </div>
+    </div>
+
+    <div class="form-group">
+      <label class="form-label">Contraseña</label>
+      <div class="input-wrap">
+        <i class="ri-lock-line"></i>
+        <input class="form-input" type="password" id="password"
+               placeholder="••••••••" required autocomplete="current-password">
+        <button type="button" class="toggle-pass" onclick="togglePass()">
+          <i class="ri-eye-line" id="pass-icon"></i>
+        </button>
+      </div>
+    </div>
+
+    <!-- Mantener sesión + Olvidé contraseña -->
+    <div class="form-meta">
+      <div class="checkbox-wrap" onclick="toggleRecordar()">
+        <div class="checkbox-custom" id="checkbox-recordar">
+          <i class="ri-check-line"></i>
+        </div>
+        <span class="checkbox-label">Mantener sesión</span>
+      </div>
+      <button type="button" class="forgot-link" onclick="abrirResetModal()">
+        ¿Olvidaste tu contraseña?
+      </button>
+    </div>
+
+    <button type="submit" class="btn-login" id="btn-login">
+      Entrar al mundo
+    </button>
+  </form>
+
+  <div class="sep">
+    <div class="sep-line"></div>
+    <span class="sep-texto">¿Nuevo por aquí?</span>
+    <div class="sep-line"></div>
+  </div>
+
+  <div class="registro-link">
+    ¿Aún no eres un Cazador? <a href="registro.html">Registrarse</a>
+  </div>
+</div>
+
+<!-- MODAL RESET CONTRASEÑA -->
+<div class="modal-overlay" id="modal-reset" onclick="cerrarModalFuera(event)">
+  <div class="modal">
+    <h2 class="modal-titulo">Restablecer contraseña</h2>
+    <p class="modal-desc">
+      Ingresa tu correo electrónico y te enviaremos un enlace para restablecer tu contraseña.
+    </p>
+    <div class="error-msg" id="reset-error"></div>
+    <div class="form-group">
+      <label class="form-label">Correo electrónico</label>
+      <div class="input-wrap">
+        <i class="ri-mail-line"></i>
+        <input class="form-input" type="email" id="reset-email"
+               placeholder="tu@correo.com">
+      </div>
+    </div>
+    <div class="modal-acciones">
+      <button class="btn-modal-cancel" onclick="cerrarResetModal()">Cancelar</button>
+      <button class="btn-modal-enviar" id="btn-enviar-reset" onclick="enviarReset()">
+        <i class="ri-send-plane-line"></i> Enviar enlace
+      </button>
+    </div>
+  </div>
+</div>
+
+<div id="toast"></div>
+
+<script type="module">
+  import { auth } from "../js/firebase-config.js";
+  import {
+    signInWithEmailAndPassword,
+    sendPasswordResetEmail,
+    onAuthStateChanged,
+    setPersistence,
+    browserLocalPersistence,
+    browserSessionPersistence
+  } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-auth.js";
+
+  window._recordarSesion = true; // por defecto activado
+
+  // Si ya hay sesión activa, redirigir directo al dashboard
+  onAuthStateChanged(auth, (user) => {
+    if (user) {
+      window.location.href = "dashboard.html";
+    }
+  });
+
+  // ── LOGIN ──
+  document.getElementById('login-form').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const email    = document.getElementById('email').value.trim();
+    const password = document.getElementById('password').value;
+    const btn      = document.getElementById('btn-login');
+
+    btn.disabled = true; btn.textContent = 'Entrando...';
+    ocultarError();
+
+    try {
+      // Persistencia según checkbox
+      const persistence = window._recordarSesion
+        ? browserLocalPersistence    // persiste aunque cierren el navegador
+        : browserSessionPersistence; // solo dura la sesión del navegador
+
+      await setPersistence(auth, persistence);
+      await signInWithEmailAndPassword(auth, email, password);
+      window.location.href = "dashboard.html";
+
+    } catch (err) {
+      mostrarError(traducirError(err.code));
+      btn.disabled = false;
+      btn.textContent = 'Entrar al mundo';
+    }
+  });
+
+  // ── RESET CONTRASEÑA ──
+  window.enviarReset = async function() {
+    const email = document.getElementById('reset-email').value.trim();
+    const btn   = document.getElementById('btn-enviar-reset');
+    const errEl = document.getElementById('reset-error');
+    errEl.classList.remove('visible');
+
+    if (!email) {
+      errEl.textContent = 'Ingresa tu correo electrónico.';
+      errEl.classList.add('visible'); return;
+    }
+
+    btn.disabled = true; btn.textContent = 'Enviando...';
+
+    try {
+      await sendPasswordResetEmail(auth, email);
+      cerrarResetModal();
+      toast('Correo enviado. Revisa tu bandeja de entrada.', 'success');
+    } catch(err) {
+      errEl.textContent = traducirError(err.code);
+      errEl.classList.add('visible');
+    }
+
+    btn.disabled = false;
+    btn.innerHTML = '<i class="ri-send-plane-line"></i> Enviar enlace';
+  };
+
+  function traducirError(code) {
+    const errores = {
+      'auth/invalid-email':          'El correo no es válido.',
+      'auth/user-not-found':         'No existe una cuenta con ese correo.',
+      'auth/wrong-password':         'Contraseña incorrecta.',
+      'auth/invalid-credential':     'Correo o contraseña incorrectos.',
+      'auth/too-many-requests':      'Demasiados intentos. Espera unos minutos.',
+      'auth/network-request-failed': 'Error de conexión. Verifica tu internet.',
+      'auth/user-disabled':          'Esta cuenta ha sido desactivada.',
+    };
+    return errores[code] || 'Ocurrió un error inesperado. Intenta de nuevo.';
+  }
+
+  function mostrarError(msg) {
+    const el = document.getElementById('error-msg');
+    el.textContent = msg; el.classList.add('visible');
+  }
+
+  function ocultarError() {
+    document.getElementById('error-msg').classList.remove('visible');
+  }
+
+  function toast(msg, tipo) {
+    const t = document.getElementById('toast');
+    const cfg = {
+      success: { bg:'rgba(26,74,46,0.95)', border:'#2d7a4a', color:'#7ad49a' },
+      error:   { bg:'rgba(80,19,19,0.95)', border:'#e74c3c', color:'#ff8080' }
+    }[tipo] || {};
+    Object.assign(t.style,{background:cfg.bg,borderColor:cfg.border,color:cfg.color,opacity:'1'});
+    t.textContent = msg;
+    clearTimeout(t._t);
+    t._t = setTimeout(() => { t.style.opacity='0'; }, 4000);
+  }
+
+  window.toast = toast;
+</script>
+
+<script>
+  // ── TOGGLE CONTRASEÑA ──
+  function togglePass() {
+    const input = document.getElementById('password');
+    const icon  = document.getElementById('pass-icon');
+    if (input.type === 'password') {
+      input.type = 'text'; icon.className = 'ri-eye-off-line';
+    } else {
+      input.type = 'password'; icon.className = 'ri-eye-line';
+    }
+  }
+
+  // ── CHECKBOX RECORDAR ──
+  const checkbox = document.getElementById('checkbox-recordar');
+  checkbox.classList.add('checked'); // activo por defecto
+
+  function toggleRecordar() {
+    window._recordarSesion = !window._recordarSesion;
+    checkbox.classList.toggle('checked', window._recordarSesion);
+  }
+
+  // ── MODAL RESET ──
+  function abrirResetModal() {
+    // Pre-rellenar con el email si ya lo escribió
+    const email = document.getElementById('email').value.trim();
+    if (email) document.getElementById('reset-email').value = email;
+    document.getElementById('reset-error').classList.remove('visible');
+    document.getElementById('modal-reset').classList.add('open');
+    document.body.style.overflow = 'hidden';
+  }
+
+  function cerrarResetModal() {
+    document.getElementById('modal-reset').classList.remove('open');
+    document.body.style.overflow = '';
+  }
+
+  function cerrarModalFuera(e) {
+    if (e.target.id === 'modal-reset') cerrarResetModal();
+  }
+
+  window.togglePass      = togglePass;
+  window.toggleRecordar  = toggleRecordar;
+  window.abrirResetModal = abrirResetModal;
+  window.cerrarResetModal = cerrarResetModal;
+  window.cerrarModalFuera = cerrarModalFuera;
+</script>
+
 </body>
 </html>
