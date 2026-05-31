@@ -1039,17 +1039,18 @@ window.lanzarDados = async function() {
 // ═══════════════════════════════════
 function iniciarDibujoRealtime() {
   if (unsubDibujo) unsubDibujo();
-  // Sin orderBy para evitar requerir índice compuesto — ordenamos en cliente
-  unsubDibujo = onSnapshot(collection(db,'campanas',CAMPANA_ID,'trazos'), snap => {
-    trazosRemotos = snap.docs
-      .map(d => ({...d.data(), firestoreId:d.id}))
+  const trazosRef = collection(db,'campanas',CAMPANA_ID,'trazos');
+  unsubDibujo = onSnapshot(trazosRef, snap => {
+    console.log('[trazos] snapshot recibido, docs:', snap.docs.length);
+    const todos = snap.docs.map(d => ({...d.data(), firestoreId:d.id}));
+    console.log('[trazos] autorIds:', todos.map(t=>t.autorId), 'mi uid:', ME.uid);
+    trazosRemotos = todos
       .filter(t => t.autorId !== ME.uid)
-      .sort((a,b) => {
-        const ta = a.creadoEn?.seconds || 0;
-        const tb = b.creadoEn?.seconds || 0;
-        return ta - tb;
-      });
+      .sort((a,b) => (a.creadoEn?.seconds||0) - (b.creadoEn?.seconds||0));
+    console.log('[trazos] remotos a dibujar:', trazosRemotos.length);
     redibujarCanvas();
+  }, err => {
+    console.error('[trazos] error onSnapshot:', err);
   });
 }
 
