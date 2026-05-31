@@ -959,28 +959,6 @@ window.lanzarDados = async function() {
 // CANVAS DIBUJO + TIEMPO REAL
 // ═══════════════════════════════════
 
-// Redibujar todos los trazos (locales + remotos)
-function redibujarCanvas() {
-  const drawCanvas = document.getElementById('canvas-draw');
-  const ctx = drawCanvas.getContext('2d');
-  ctx.clearRect(0,0,drawCanvas.width,drawCanvas.height);
-
-  const todos = [...trazosRemotos, ...misLineas];
-  todos.forEach(linea => {
-    if (!linea.puntos || linea.puntos.length < 2) return;
-    ctx.beginPath();
-    ctx.strokeStyle = linea.color || '#e74c3c';
-    ctx.lineWidth   = linea.size  || 2;
-    ctx.lineCap     = 'round';
-    ctx.lineJoin    = 'round';
-    ctx.moveTo(linea.puntos[0][0], linea.puntos[0][1]);
-    for (let i=1; i<linea.puntos.length; i++) {
-      ctx.lineTo(linea.puntos[i][0], linea.puntos[i][1]);
-    }
-    ctx.stroke();
-  });
-}
-
 // Escuchar trazos de otros usuarios en tiempo real
 function iniciarDibujoRealtime() {
   if (unsubDibujo) unsubDibujo();
