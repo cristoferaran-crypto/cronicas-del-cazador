@@ -291,6 +291,7 @@
     .tienda-titulo{font-family:'Cinzel',serif;font-size:16px;font-weight:800;color:var(--dorado);}
     .tienda-tabs{display:flex;border-bottom:1px solid var(--borde);flex-shrink:0;overflow-x:auto;}
     .tienda-tab{padding:10px 16px;font-size:11px;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;color:var(--muted);cursor:pointer;white-space:nowrap;border-bottom:2px solid transparent;background:transparent;border-top:none;border-left:none;border-right:none;transition:color 0.15s,border-color 0.15s;}
+    .tienda-tab:hover{color:var(--sec);}
     .tienda-tab.active{color:var(--dorado);border-bottom-color:var(--dorado);}
     .tienda-tab.mercado.active{color:#a78bfa;border-bottom-color:#a78bfa;}
     .tienda-saldo{padding:10px 20px;background:rgba(201,168,76,0.06);border-bottom:1px solid var(--borde);display:flex;align-items:center;gap:10px;flex-shrink:0;}
@@ -317,11 +318,11 @@
     .btn-comprar-prod:hover:not(:disabled){background:#e2be6a;}
     .btn-comprar-prod:disabled{opacity:0.4;cursor:not-allowed;background:var(--borde);}
     .btn-comprar-prod.mercado-btn{background:#a78bfa;color:white;}
+    .btn-comprar-prod.mercado-btn:hover:not(:disabled){background:#c4b5fd;}
     .tienda-empty{text-align:center;padding:40px;color:var(--muted);font-size:13px;font-style:italic;}
     .btn-tienda-inactivo{opacity:0.4;cursor:not-allowed;}
     .btn-tienda-activo{border-color:var(--borde-d)!important;color:var(--dorado)!important;animation:tiendasPulse 2s ease-in-out infinite;}
     @keyframes tiendasPulse{0%,100%{box-shadow:0 0 0 0 rgba(201,168,76,0.3);}50%{box-shadow:0 0 0 6px rgba(201,168,76,0);}}
-    /* ══ DASHBOARD DJ ══ */
     .dj-dashboard{padding:20px;display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;}
     .dj-dash-btn{background:var(--sup2);border:1px solid var(--borde);padding:20px 10px;display:flex;flex-direction:column;align-items:center;gap:10px;cursor:pointer;transition:all 0.2s;text-align:center;}
     .dj-dash-btn:hover{border-color:var(--borde-d);background:var(--sup3);transform:translateY(-2px);}
@@ -337,6 +338,14 @@
     .dj-seccion-body{flex:1;overflow-y:auto;padding:16px;}
     .dj-seccion-body::-webkit-scrollbar{width:3px;}
     .dj-seccion-body::-webkit-scrollbar-thumb{background:var(--borde-d);}
+
+    /* ══ MAPA INTERACTIVO ══ */
+    .mapa-inactivo #canvas-tokens{display:none;}
+    .mapa-inactivo #canvas-draw{display:none;}
+    .mapa-inactivo .mapa-tools{display:none;}
+    .mapa-inactivo .color-picker-wrap{display:none!important;}
+    .mapa-overlay-msg{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;z-index:5;pointer-events:none;}
+    .mapa-overlay-msg span{background:rgba(0,0,0,0.6);border:1px solid var(--borde-d);color:var(--dorado);font-family:'Cinzel',serif;font-size:13px;font-weight:700;padding:10px 20px;letter-spacing:0.1em;}
 
     /* Toast */
     #toast{position:fixed;bottom:70px;right:16px;z-index:999;padding:10px 16px;border-left:3px solid;font-family:'Raleway',sans-serif;font-size:12px;font-weight:600;opacity:0;transition:opacity 0.3s;pointer-events:none;max-width:280px;}
@@ -390,6 +399,10 @@
         <button class="img-flotante-close" onclick="cerrarImgFlotante()"><i class="ri-close-line"></i></button>
       </div>
       <img id="img-flotante-src" src="" alt="">
+    </div>
+    <!-- Overlay mapa inactivo -->
+    <div class="mapa-overlay-msg" id="mapa-overlay-msg" style="display:none;">
+      <span>⏸ Mapa no disponible</span>
     </div>
     <!-- Herramientas -->
     <div class="mapa-tools">
@@ -452,7 +465,8 @@
       <div class="dj-dash-btn" onclick="abrirSeccionDJ('biblioteca')"><i class="ri-image-line"></i><span>Biblioteca</span><small>Assets y mapas</small></div>
       <div class="dj-dash-btn" onclick="abrirSeccionDJ('susurro')"><i class="ri-message-3-line"></i><span>Susurro</span><small>Mensaje privado</small></div>
       <div class="dj-dash-btn" onclick="abrirSeccionDJ('tienda')"><i class="ri-store-2-line"></i><span>Tienda</span><small>Control de acceso</small></div>
-      <div class="dj-dash-btn" onclick="abrirSeccionDJ('notas')" style="grid-column:span 3;"><i class="ri-sticky-note-line"></i><span>Notas DJ</span><small>Solo tú las ves</small></div>
+      <div class="dj-dash-btn" onclick="abrirSeccionDJ('mapa')"><i class="ri-map-2-line"></i><span>Mapa</span><small>Tokens y dibujo</small></div>
+      <div class="dj-dash-btn" onclick="abrirSeccionDJ('notas')" style="grid-column:span 2;"><i class="ri-sticky-note-line"></i><span>Notas DJ</span><small>Solo tú las ves</small></div>
     </div>
     <div class="dj-seccion" id="dj-sec-jugadores"><div class="dj-seccion-header"><button class="dj-back-btn" onclick="volverDashboard()"><i class="ri-arrow-left-line"></i></button><span class="dj-seccion-titulo"><i class="ri-group-line"></i> Jugadores</span></div><div class="dj-seccion-body" id="body-jugadores"></div></div>
     <div class="dj-seccion" id="dj-sec-xp"><div class="dj-seccion-header"><button class="dj-back-btn" onclick="volverDashboard()"><i class="ri-arrow-left-line"></i></button><span class="dj-seccion-titulo"><i class="ri-star-line"></i> XP & Nivel & Marcas</span></div><div class="dj-seccion-body" id="body-xp"></div></div>
@@ -460,6 +474,7 @@
     <div class="dj-seccion" id="dj-sec-biblioteca"><div class="dj-seccion-header"><button class="dj-back-btn" onclick="volverDashboard()"><i class="ri-arrow-left-line"></i></button><span class="dj-seccion-titulo"><i class="ri-image-line"></i> Biblioteca</span></div><div class="dj-seccion-body" id="body-biblioteca"></div></div>
     <div class="dj-seccion" id="dj-sec-susurro"><div class="dj-seccion-header"><button class="dj-back-btn" onclick="volverDashboard()"><i class="ri-arrow-left-line"></i></button><span class="dj-seccion-titulo"><i class="ri-message-3-line"></i> Susurro</span></div><div class="dj-seccion-body" id="body-susurro"></div></div>
     <div class="dj-seccion" id="dj-sec-tienda"><div class="dj-seccion-header"><button class="dj-back-btn" onclick="volverDashboard()"><i class="ri-arrow-left-line"></i></button><span class="dj-seccion-titulo"><i class="ri-store-2-line"></i> Control de Tienda</span></div><div class="dj-seccion-body" id="body-tienda"></div></div>
+    <div class="dj-seccion" id="dj-sec-mapa"><div class="dj-seccion-header"><button class="dj-back-btn" onclick="volverDashboard()"><i class="ri-arrow-left-line"></i></button><span class="dj-seccion-titulo"><i class="ri-map-2-line"></i> Control de Mapa</span></div><div class="dj-seccion-body" id="body-mapa"></div></div>
     <div class="dj-seccion" id="dj-sec-notas"><div class="dj-seccion-header"><button class="dj-back-btn" onclick="volverDashboard()"><i class="ri-arrow-left-line"></i></button><span class="dj-seccion-titulo"><i class="ri-sticky-note-line"></i> Notas DJ</span></div><div class="dj-seccion-body" id="body-notas"></div></div>
   </div>
 </div>
@@ -614,6 +629,7 @@ async function cargarMiPersonaje() {
   if (!snap.empty) MI_PERSONAJE = { id:snap.docs[0].id, ...snap.docs[0].data() };
 }
 
+// getDocs necesita importarse también
 
 function iniciarPersonajesRealtime() {
   if (unsubPersonajes) unsubPersonajes();
@@ -685,13 +701,22 @@ function iniciarMapaRealtime() {
   unsubMapa = onSnapshot(doc(db,'campanas',CAMPANA_ID), snap => {
     if (!snap.exists()) return;
     const data = snap.data();
+
+    // Mapa
     const mapaUrl = data.mapaUrl || '../imagenes/mapa.png';
     document.getElementById('mapa-bg').style.backgroundImage = `url('${mapaUrl}')`;
+
+    // Imagen flotante
     if (data.imgFlotante && data.imgFlotante.visible) {
       mostrarImgFlotante(data.imgFlotante.url, data.imgFlotante.nombre);
-    } else { cerrarImgFlotante(false); }
+    } else {
+      cerrarImgFlotante(false);
+    }
+
+    // Tokens
     if (data.tokens) renderTokensCanvas(data.tokens);
-    // TIENDA — evitar doble onSnapshot
+
+    // ══ TIENDA ══
     window._tiendaActiva = data.tiendaActiva||false;
     window._mnAcceso     = data.mercadoNegroAcceso||[];
     window._tiendaData   = data;
@@ -705,6 +730,32 @@ function iniciarMapaRealtime() {
         btn.title = 'Tienda cerrada';
       }
     }
+
+    // ══ MAPA INTERACTIVO ══
+    window._mapaActivo   = data.mapaInteractivo   !== false;
+    window._dibujoActivo = data.dibujoHabilitado  !== false;
+
+    const mapaWrap   = document.querySelector('.mapa-wrap');
+    const overlayMsg = document.getElementById('mapa-overlay-msg');
+    if (window._mapaActivo) {
+      mapaWrap?.classList.remove('mapa-inactivo');
+      if (overlayMsg) overlayMsg.style.display = 'none';
+    } else {
+      mapaWrap?.classList.add('mapa-inactivo');
+      if (overlayMsg) overlayMsg.style.display = 'flex';
+    }
+    // Bloquear dibujo a jugadores si DJ lo desactivó
+    const dc = document.getElementById('canvas-draw');
+    if (dc && !ES_DIRECTOR) {
+      if (!window._mapaActivo || !window._dibujoActivo) {
+        dc.style.pointerEvents = 'none';
+        dc.style.cursor = 'default';
+      } else {
+        dc.style.pointerEvents = herramienta==='lapiz' ? 'all' : 'none';
+        dc.style.cursor = herramienta==='lapiz' ? 'crosshair' : 'default';
+      }
+    }
+    if (ES_DIRECTOR && tabActiva==='mapa') renderSeccion('mapa');
   });
 }
 
@@ -936,7 +987,7 @@ function renderMensaje(msg) {
   } else if (tipo==='item') {
     contenido = `🎒 <strong>${msg.paraName}</strong> recibió: <strong>${msg.item}</strong>${msg.cantidad>1?` ×${msg.cantidad}`:''}`;
   } else if (tipo==='dinero') {
-    contenido = `⚖️ <strong>${msg.paraName}</strong> recibió <strong>${msg.cantidad} Marcas</strong>`;
+    contenido = `💰 <strong>${msg.paraName}</strong> recibió <strong>${msg.cantidad} Marcas</strong>`;
   } else if (tipo==='privado') {
     contenido = `🔒 <em>(Privado al DJ)</em> ${msg.texto}`;
   } else if (tipo==='susurro') {
@@ -1026,42 +1077,57 @@ window.lanzarDados = async function() {
 // ═══════════════════════════════════
 function iniciarDibujoRealtime() {
   if (unsubDibujo) unsubDibujo();
-  unsubDibujo = onSnapshot(collection(db,'campanas',CAMPANA_ID,'trazos'), snap => {
-    trazosRemotos = snap.docs
-      .map(d => ({...d.data(), firestoreId:d.id}))
+  const trazosRef = collection(db,'campanas',CAMPANA_ID,'trazos');
+  unsubDibujo = onSnapshot(trazosRef, snap => {
+    console.log('[trazos] snapshot recibido, docs:', snap.docs.length);
+    const todos = snap.docs.map(d => ({...d.data(), firestoreId:d.id}));
+    console.log('[trazos] autorIds:', todos.map(t=>t.autorId), 'mi uid:', ME.uid);
+    trazosRemotos = todos
       .filter(t => t.autorId !== ME.uid)
       .sort((a,b) => (a.creadoEn?.seconds||0) - (b.creadoEn?.seconds||0));
+    console.log('[trazos] remotos a dibujar:', trazosRemotos.length);
     redibujarCanvas();
-  }, err => console.error('[trazos]', err));
+  }, err => {
+    console.error('[trazos] error onSnapshot:', err);
+  });
 }
 
 async function guardarTrazoFirestore(linea) {
-  if (!linea || linea.puntos.length < 2) return;
+  if (!linea||linea.puntos.length<2) return;
   const canvas = document.getElementById('canvas-draw');
-  const puntos = linea.puntos.map(([px,py]) => ({ x: px/canvas.width, y: py/canvas.height }));
+  const w = canvas.width, h = canvas.height;
+  // Aplanar puntos como {x,y} — Firestore no acepta arrays anidados
+  const puntos = linea.puntos.map(([px,py])=>({ x: px/w, y: py/h }));
   try {
     await addDoc(collection(db,'campanas',CAMPANA_ID,'trazos'), {
-      autorId: ME.uid, color: linea.color, size: linea.size, puntos, creadoEn: serverTimestamp(),
+      autorId:ME.uid, color:linea.color, size:linea.size, puntos, creadoEn:serverTimestamp(),
     });
   } catch(e) { console.error('Error guardando trazo:', e); }
 }
 
+function desnormalizarPuntos(linea, w, h) {
+  // puntos son objetos {x,y}
+  return {...linea, puntos: linea.puntos.map(p => [p.x*w, p.y*h])};
+}
+
 function redibujarCanvas() {
-  const dc = document.getElementById('canvas-draw');
-  const ctx = dc.getContext('2d');
-  const w = dc.width, h = dc.height;
+  const drawCanvas = document.getElementById('canvas-draw');
+  const ctx = drawCanvas.getContext('2d');
+  const w = drawCanvas.width, h = drawCanvas.height;
   ctx.clearRect(0,0,w,h);
-  [...trazosRemotos, ...misLineas].forEach(linea => {
-    const pts = (linea.puntos[0]?.x !== undefined)
-      ? linea.puntos.map(p => [p.x*w, p.y*h])
-      : linea.puntos;
-    if (!pts || pts.length < 2) return;
-    ctx.beginPath();
-    ctx.strokeStyle = linea.color||'#e74c3c';
-    ctx.lineWidth   = linea.size||2;
-    ctx.lineCap = 'round'; ctx.lineJoin = 'round';
-    ctx.moveTo(pts[0][0], pts[0][1]);
-    for (let i=1; i<pts.length; i++) ctx.lineTo(pts[i][0], pts[i][1]);
+  trazosRemotos.forEach(linea => {
+    const l = desnormalizarPuntos(linea,w,h);
+    if (!l.puntos||l.puntos.length<2) return;
+    ctx.beginPath(); ctx.strokeStyle=l.color||'#e74c3c'; ctx.lineWidth=l.size||2; ctx.lineCap='round'; ctx.lineJoin='round';
+    ctx.moveTo(l.puntos[0][0],l.puntos[0][1]);
+    for(let i=1;i<l.puntos.length;i++) ctx.lineTo(l.puntos[i][0],l.puntos[i][1]);
+    ctx.stroke();
+  });
+  misLineas.forEach(linea => {
+    if (!linea.puntos||linea.puntos.length<2) return;
+    ctx.beginPath(); ctx.strokeStyle=linea.color||'#e74c3c'; ctx.lineWidth=linea.size||2; ctx.lineCap='round'; ctx.lineJoin='round';
+    ctx.moveTo(linea.puntos[0][0],linea.puntos[0][1]);
+    for(let i=1;i<linea.puntos.length;i++) ctx.lineTo(linea.puntos[i][0],linea.puntos[i][1]);
     ctx.stroke();
   });
 }
@@ -1097,13 +1163,12 @@ function iniciarCanvas() {
     if (herramienta!=='lapiz') return;
     dibujando=true; drawCanvas.setPointerCapture(e.pointerId);
     const pos=getPos(e); ctx.beginPath(); ctx.moveTo(pos.x,pos.y);
-    misLineas.push({color:drawColor, size:brushSize, puntos:[[pos.x,pos.y]]});
+    misLineas.push({color:drawColor,size:brushSize,puntos:[[pos.x,pos.y]]});
   });
 
   drawCanvas.addEventListener('pointermove', e => {
     if (!dibujando||herramienta!=='lapiz') return;
-    const pos=getPos(e);
-    ctx.strokeStyle=drawColor; ctx.lineWidth=brushSize; ctx.lineCap='round'; ctx.lineJoin='round';
+    const pos=getPos(e); ctx.strokeStyle=drawColor; ctx.lineWidth=brushSize; ctx.lineCap='round'; ctx.lineJoin='round';
     ctx.lineTo(pos.x,pos.y); ctx.stroke(); ctx.beginPath(); ctx.moveTo(pos.x,pos.y);
     if (misLineas.length) misLineas[misLineas.length-1].puntos.push([pos.x,pos.y]);
   });
@@ -1119,8 +1184,9 @@ function iniciarCanvas() {
 
 window.borrarPropios = async function() {
   try {
-    const snap = await getDocs(query(collection(db,'campanas',CAMPANA_ID,'trazos'), where('autorId','==',ME.uid)));
-    await Promise.all(snap.docs.map(d => deleteDoc(doc(db,'campanas',CAMPANA_ID,'trazos',d.id))));
+    const q = query(collection(db,'campanas',CAMPANA_ID,'trazos'), where('autorId','==',ME.uid));
+    const snap = await getDocs(q);
+    await Promise.all(snap.docs.map(d=>deleteDoc(doc(db,'campanas',CAMPANA_ID,'trazos',d.id))));
   } catch(e) { console.error(e); }
   misLineas=[]; redibujarCanvas();
   toast('Tus trazos borrados.','info');
@@ -1130,7 +1196,7 @@ window.borrarTodo = async function() {
   if (!ES_DIRECTOR) return;
   try {
     const snap = await getDocs(collection(db,'campanas',CAMPANA_ID,'trazos'));
-    await Promise.all(snap.docs.map(d => deleteDoc(doc(db,'campanas',CAMPANA_ID,'trazos',d.id))));
+    await Promise.all(snap.docs.map(d=>deleteDoc(doc(db,'campanas',CAMPANA_ID,'trazos',d.id))));
   } catch(e) { console.error(e); }
   misLineas=[]; trazosRemotos=[]; redibujarCanvas();
   toast('Lienzo limpiado para todos.','info');
@@ -1169,8 +1235,11 @@ window.abrirSeccionDJ = function(seccion) {
   const sec = document.getElementById('dj-sec-'+seccion);
   if (sec) sec.classList.add('active');
   renderSeccion(seccion);
-  if (seccion==='xp') {
-    setTimeout(()=>{ const sel=document.getElementById('xp-personaje'); if(sel&&PERSONAJES_CAMPANA.length) actualizarInfoPersonaje(sel); },50);
+  if (seccion === 'xp') {
+    setTimeout(() => {
+      const sel = document.getElementById('xp-personaje');
+      if (sel && PERSONAJES_CAMPANA.length) actualizarInfoPersonaje(sel);
+    }, 50);
   }
 };
 
@@ -1181,15 +1250,16 @@ window.volverDashboard = function() {
 };
 
 function renderSeccion(seccion) {
-  const bodyMap = { jugadores:'body-jugadores', xp:'body-xp', inventario:'body-inventario', biblioteca:'body-biblioteca', susurro:'body-susurro', tienda:'body-tienda', notas:'body-notas' };
+  const bodyMap = { jugadores:'body-jugadores', xp:'body-xp', inventario:'body-inventario', biblioteca:'body-biblioteca', susurro:'body-susurro', tienda:'body-tienda', mapa:'body-mapa', notas:'body-notas' };
   const body = document.getElementById(bodyMap[seccion]);
   if (!body) return;
   if (seccion==='jugadores')  body.innerHTML = renderTabJugadores();
   if (seccion==='xp')         body.innerHTML = renderTabXP();
   if (seccion==='inventario') body.innerHTML = renderTabInventario();
-  if (seccion==='biblioteca') { body.innerHTML = renderTabBiblioteca(); setTimeout(cargarAssets,100); }
+  if (seccion==='biblioteca') { body.innerHTML = renderTabBiblioteca(); setTimeout(cargarAssets, 100); }
   if (seccion==='susurro')    body.innerHTML = renderTabSusurro();
   if (seccion==='tienda')     body.innerHTML = renderTabTiendaDJ();
+  if (seccion==='mapa')       body.innerHTML = renderTabMapaDJ();
   if (seccion==='notas')      body.innerHTML = renderTabNotas();
 }
 
@@ -1237,8 +1307,14 @@ function renderTabXP() {
   return `<div class="xp-form">
     <div><label class="form-label">Personaje</label><select class="form-select" id="xp-personaje" onchange="actualizarInfoPersonaje(this)">${opts}</select></div>
     <div style="background:var(--sup3);border:1px solid var(--borde);padding:10px 12px;margin-bottom:4px;">
-      <div style="display:flex;justify-content:space-between;align-items:center;"><span style="font-size:11px;color:var(--muted);font-weight:700;text-transform:uppercase;">XP Actual</span><span style="font-family:'Cinzel',serif;font-size:18px;font-weight:800;color:var(--dorado);" id="dj-xp-actual">—</span></div>
-      <div style="display:flex;justify-content:space-between;align-items:center;margin-top:4px;"><span style="font-size:11px;color:var(--muted);font-weight:700;text-transform:uppercase;">Marcas</span><span style="font-family:'Cinzel',serif;font-size:18px;font-weight:800;color:var(--verde);" id="dj-marcas">—</span></div>
+      <div style="display:flex;justify-content:space-between;align-items:center;">
+        <span style="font-size:11px;color:var(--muted);font-weight:700;letter-spacing:0.1em;text-transform:uppercase;">XP Actual</span>
+        <span style="font-family:'Cinzel',serif;font-size:18px;font-weight:800;color:var(--dorado);" id="dj-xp-actual">—</span>
+      </div>
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-top:4px;">
+        <span style="font-size:11px;color:var(--muted);font-weight:700;letter-spacing:0.1em;text-transform:uppercase;">Marcas</span>
+        <span style="font-family:'Cinzel',serif;font-size:18px;font-weight:800;color:var(--verde);" id="dj-marcas">—</span>
+      </div>
     </div>
     <div style="height:1px;background:var(--borde);margin:12px 0;"></div>
     <div><label class="form-label">Criterios de XP (máx. 8)</label>
@@ -1251,14 +1327,16 @@ function renderTabXP() {
     <button class="btn-accion-dj" onclick="otorgarXP()"><i class="ri-star-line"></i> Otorgar XP</button>
     <div style="height:1px;background:var(--borde);margin:16px 0;"></div>
     <label class="form-label" style="color:var(--dorado);">⬆ Subir Nivel</label>
-    <div style="display:flex;gap:8px;align-items:center;margin-bottom:8px;">
-      <span style="font-size:12px;color:var(--sec);">Nivel actual: <strong id="dj-nivel-actual">—</strong></span>
-      <span style="color:var(--muted);">→</span>
+    <p style="font-size:11px;color:var(--muted);margin-bottom:10px;font-style:italic;">Solo el Director puede subir el nivel de un personaje.</p>
+    <div style="display:flex;gap:8px;align-items:center;margin-bottom:4px;">
+      <span style="font-size:12px;color:var(--sec);">Nivel actual: <strong style="color:var(--texto);" id="dj-nivel-actual">—</strong></span>
+      <span style="font-size:12px;color:var(--muted);">→</span>
       <span style="font-size:12px;color:var(--dorado);" id="dj-nivel-nuevo">—</span>
     </div>
     <button class="btn-accion-dj" style="background:rgba(201,168,76,0.15);border:1px solid var(--borde-d);color:var(--dorado);" onclick="subirNivel()"><i class="ri-arrow-up-circle-line"></i> Subir de Nivel</button>
     <div style="height:1px;background:var(--borde);margin:16px 0;"></div>
     <label class="form-label" style="color:var(--verde);">⚖️ Gestión de Marcas</label>
+    <p style="font-size:11px;color:var(--muted);margin-bottom:10px;font-style:italic;">Solo el Director puede modificar las Marcas.</p>
     <input class="form-input-vtt" type="number" id="marcas-cantidad" value="100" min="1" style="margin-bottom:8px;">
     <div style="display:flex;gap:8px;">
       <button class="btn-accion-dj" style="flex:1;" onclick="modificarMarcas(1)"><i class="ri-add-line"></i> Dar Marcas</button>
@@ -1541,6 +1619,67 @@ window.cambiarEstado = async function(personajeId, nuevoEstado, btn) {
   toast(`Estado: ${nuevoEstado}`,'success');
 };
 
+function renderTabMapaDJ() {
+  const mapaActivo   = window._mapaActivo   !== false;
+  const dibujoActivo = window._dibujoActivo !== false;
+
+  const toggleRow = (label, desc, activo, fn, colorOn='var(--dorado)', colorOff='var(--muted)') => `
+    <div style="display:flex;align-items:center;justify-content:space-between;padding:14px;background:var(--sup2);border:1px solid ${activo?'var(--borde-d)':'var(--borde)'};margin-bottom:8px;transition:border-color 0.2s;">
+      <div>
+        <div style="font-family:'Cinzel',serif;font-size:13px;font-weight:700;color:${activo?colorOn:colorOff};margin-bottom:3px;">${label}</div>
+        <div style="font-size:11px;color:var(--muted);">${desc}</div>
+      </div>
+      <button onclick="${fn}()" style="padding:6px 16px;font-size:11px;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;cursor:pointer;border:1px solid;transition:all 0.15s;background:transparent;
+        ${activo?`border-color:${colorOn};color:${colorOn};background:${colorOn}18;`:'border-color:var(--borde);color:var(--muted);'}">
+        ${activo?'Activo':'Inactivo'}
+      </button>
+    </div>`;
+
+  return `
+    <p style="font-size:11px;color:var(--muted);margin-bottom:16px;font-style:italic;">Controla qué ven y pueden hacer los jugadores en el mapa.</p>
+
+    ${toggleRow(
+      '🗺️ Mapa Interactivo',
+      'Muestra tokens y herramientas de dibujo a los jugadores.',
+      mapaActivo, 'toggleMapaInteractivo'
+    )}
+
+    ${toggleRow(
+      '✏️ Dibujo Libre',
+      'Permite a los jugadores dibujar en el mapa.',
+      dibujoActivo && mapaActivo, 'toggleDibujoJugadores',
+      '#639922', 'var(--muted)'
+    )}
+
+    <div style="height:1px;background:var(--borde);margin:16px 0;"></div>
+
+    <div style="font-family:'Cinzel',serif;font-size:12px;font-weight:700;color:var(--muted);letter-spacing:0.1em;text-transform:uppercase;margin-bottom:10px;">Estado actual</div>
+    <div style="padding:12px 14px;background:rgba(255,255,255,0.02);border:1px solid var(--borde);font-size:12px;color:var(--sec);line-height:1.8;">
+      ${mapaActivo
+        ? `🟢 Mapa visible — Los jugadores ven tokens${dibujoActivo?' y pueden dibujar':' pero no pueden dibujar'}.`
+        : `🔴 Mapa oculto — Los jugadores solo ven el fondo.`}
+    </div>
+
+    <div style="height:1px;background:var(--borde);margin:16px 0;"></div>
+
+    <button class="btn-accion-dj" style="background:rgba(192,57,43,0.15);border:1px solid var(--borde-r);color:#ff8080;" onclick="borrarTodo()">
+      <i class="ri-delete-bin-line"></i> Limpiar todos los trazos
+    </button>
+  `;
+}
+
+window.toggleMapaInteractivo = async function() {
+  const actual = window._mapaActivo !== false;
+  await updateDoc(doc(db,'campanas',CAMPANA_ID), { mapaInteractivo: !actual });
+  toast(!actual ? '🗺️ Mapa activado para todos.' : '⏸ Mapa desactivado.', 'success');
+};
+
+window.toggleDibujoJugadores = async function() {
+  const actual = window._dibujoActivo !== false;
+  await updateDoc(doc(db,'campanas',CAMPANA_ID), { dibujoHabilitado: !actual });
+  toast(!actual ? '✏️ Dibujo habilitado para jugadores.' : '🚫 Dibujo bloqueado.', 'info');
+};
+
 window.guardarNotasDJ = () => localStorage.setItem(`notas-dj-${CAMPANA_ID}`, document.getElementById('notas-dj-area')?.value||'');
 
 // ═══════════════════════════════════
@@ -1706,7 +1845,7 @@ window.jugadorDescartarArma = async function(personajeId, idx) {
 };
 
 // ═══════════════════════════════════
-// FUNCIONES DJ NUEVAS
+// ACCIONES DJ NUEVAS
 // ═══════════════════════════════════
 window.actualizarInfoPersonaje = function(sel) {
   const p = PERSONAJES_CAMPANA.find(x => x.id === sel.value);
@@ -1718,72 +1857,91 @@ window.actualizarInfoPersonaje = function(sel) {
 };
 
 window.subirNivel = async function() {
-  const sel=document.getElementById('xp-personaje');
-  const pId=sel.value, pNom=sel.options[sel.selectedIndex]?.dataset.nombre||'?';
-  const p=PERSONAJES_CAMPANA.find(x=>x.id===pId); if(!p) return;
-  const nv=(p.nivel||1)+1;
-  if(!confirm(`¿Subir a ${pNom} al nivel ${nv}?`)) return;
-  await updateDoc(doc(db,'personajes',pId),{nivel:nv});
-  await addDoc(collection(db,'campanas',CAMPANA_ID,'mensajes'),{autorId:ME.uid,autorNombre:(ME.displayName||'Director')+' [DJ]',tipo:'sistema',texto:`⬆ ${pNom} ha subido al Nivel ${nv}!`,timestamp:serverTimestamp()});
-  toast(`⬆ ${pNom} es Nivel ${nv}`,'success');
-  document.getElementById('dj-nivel-actual').textContent=nv;
-  document.getElementById('dj-nivel-nuevo').textContent=`Nivel ${nv+1}`;
+  const sel = document.getElementById('xp-personaje');
+  const pId = sel.value;
+  const pNom = sel.options[sel.selectedIndex]?.dataset.nombre||'?';
+  const p = PERSONAJES_CAMPANA.find(x => x.id === pId);
+  if (!p) return;
+  const nivelNuevo = (p.nivel||1)+1;
+  if (!confirm(`¿Subir a ${pNom} al nivel ${nivelNuevo}?`)) return;
+  await updateDoc(doc(db,'personajes',pId), { nivel: nivelNuevo });
+  await addDoc(collection(db,'campanas',CAMPANA_ID,'mensajes'), {
+    autorId:ME.uid, autorNombre:(ME.displayName||'Director')+' [DJ]',
+    tipo:'sistema', texto:`⬆ ${pNom} ha subido al Nivel ${nivelNuevo}!`, timestamp:serverTimestamp(),
+  });
+  toast(`⬆ ${pNom} ahora es Nivel ${nivelNuevo}`, 'success');
+  document.getElementById('dj-nivel-actual').textContent = nivelNuevo;
+  document.getElementById('dj-nivel-nuevo').textContent = `Nivel ${nivelNuevo+1}`;
 };
 
 window.modificarMarcas = async function(signo) {
-  const sel=document.getElementById('xp-personaje');
-  const pId=sel.value, pNom=sel.options[sel.selectedIndex]?.dataset.nombre||'?';
-  const cant=parseInt(document.getElementById('marcas-cantidad').value)||0;
-  if(cant<=0){toast('Cantidad inválida.','error');return;}
-  const pRef=doc(db,'personajes',pId), pSnap=await getDoc(pRef);
-  const nuevo=Math.max(0,(pSnap.data().dinero||0)+(signo*cant));
-  await updateDoc(pRef,{dinero:nuevo});
-  await addDoc(collection(db,'campanas',CAMPANA_ID,'mensajes'),{autorId:ME.uid,autorNombre:(ME.displayName||'Director')+' [DJ]',tipo:'dinero',paraId:pId,paraName:pNom,cantidad:signo*cant,timestamp:serverTimestamp()});
-  document.getElementById('dj-marcas').textContent=nuevo;
-  toast(`⚖️ ${pNom} ${signo>0?'recibió':'perdió'} ${cant} Marcas. Total: ${nuevo}`,'success');
+  const sel = document.getElementById('xp-personaje');
+  const pId = sel.value;
+  const pNom = sel.options[sel.selectedIndex]?.dataset.nombre||'?';
+  const cantidad = parseInt(document.getElementById('marcas-cantidad').value)||0;
+  if (cantidad<=0) { toast('Cantidad inválida.','error'); return; }
+  const pRef = doc(db,'personajes',pId);
+  const pSnap = await getDoc(pRef);
+  const nuevo = Math.max(0,(pSnap.data().dinero||0)+(signo*cantidad));
+  await updateDoc(pRef, { dinero: nuevo });
+  await addDoc(collection(db,'campanas',CAMPANA_ID,'mensajes'), {
+    autorId:ME.uid, autorNombre:(ME.displayName||'Director')+' [DJ]',
+    tipo:'dinero', paraId:pId, paraName:pNom, cantidad:signo*cantidad, timestamp:serverTimestamp(),
+  });
+  document.getElementById('dj-marcas').textContent = nuevo;
+  toast(`⚖️ ${pNom} ${signo>0?'recibió':'perdió'} ${cantidad} Marcas. Total: ${nuevo}`, 'success');
 };
 
+// ═══════════════════════════════════
+// TIENDA DJ — renderTabTiendaDJ
+// ═══════════════════════════════════
 function renderTabTiendaDJ() {
-  const tiendaActiva=window._tiendaData?.tiendaActiva||false;
-  const mnAcceso=window._tiendaData?.mercadoNegroAcceso||[];
-  return `<div style="margin-bottom:16px;">
-    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;">
-      <div><div style="font-family:'Cinzel',serif;font-size:13px;font-weight:700;color:var(--dorado);margin-bottom:4px;">Estado de la Tienda</div>
-      <div style="font-size:11px;color:var(--muted);">Los jugadores ven el botón en amarillo cuando está abierta.</div></div>
-      <button class="btn-accion-dj" style="width:auto;padding:0 16px;height:38px;flex-shrink:0;${tiendaActiva?'background:rgba(192,57,43,0.2);border:1px solid var(--borde-r);color:#ff8080;':'background:rgba(201,168,76,0.15);border:1px solid var(--borde-d);color:var(--dorado);'}"
-        onclick="toggleTiendaDJ()">${tiendaActiva?'<i class="ri-store-line"></i> Cerrar Tienda':'<i class="ri-store-2-line"></i> Abrir Tienda'}</button>
+  const tiendaActiva = window._tiendaData?.tiendaActiva || false;
+  const mnAcceso = window._tiendaData?.mercadoNegroAcceso || [];
+  return `
+    <div style="margin-bottom:16px;">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;">
+        <div><div style="font-family:'Cinzel',serif;font-size:13px;font-weight:700;color:var(--dorado);margin-bottom:4px;">Estado de la Tienda</div>
+        <div style="font-size:11px;color:var(--muted);">Los jugadores ven el botón en amarillo cuando está abierta.</div></div>
+        <button class="btn-accion-dj" style="width:auto;padding:0 16px;height:38px;flex-shrink:0;${tiendaActiva?'background:rgba(192,57,43,0.2);border:1px solid var(--borde-r);color:#ff8080;':'background:rgba(201,168,76,0.15);border:1px solid var(--borde-d);color:var(--dorado);'}"
+          onclick="toggleTiendaDJ()">${tiendaActiva?'<i class="ri-store-line"></i> Cerrar Tienda':'<i class="ri-store-2-line"></i> Abrir Tienda'}</button>
+      </div>
+      <div style="padding:10px 14px;background:${tiendaActiva?'rgba(201,168,76,0.06)':'rgba(255,255,255,0.02)'};border:1px solid ${tiendaActiva?'var(--borde-d)':'var(--borde)'};font-size:12px;color:${tiendaActiva?'var(--dorado)':'var(--muted)'};">
+        ${tiendaActiva?'🟢 Tienda abierta':'🔴 Tienda cerrada'}
+      </div>
     </div>
-    <div style="padding:10px 14px;background:${tiendaActiva?'rgba(201,168,76,0.06)':'rgba(255,255,255,0.02)'};border:1px solid ${tiendaActiva?'var(--borde-d)':'var(--borde)'};font-size:12px;color:${tiendaActiva?'var(--dorado)':'var(--muted)'};">
-      ${tiendaActiva?'🟢 Tienda abierta':'🔴 Tienda cerrada'}
-    </div></div>
     <div style="height:1px;background:var(--borde);margin:16px 0;"></div>
-    <div style="font-family:'Cinzel',serif;font-size:12px;font-weight:700;color:var(--muted);letter-spacing:0.1em;text-transform:uppercase;margin-bottom:12px;">🌑 Mercado Negro</div>
+    <div style="font-family:'Cinzel',serif;font-size:12px;font-weight:700;color:var(--muted);letter-spacing:0.1em;text-transform:uppercase;margin-bottom:12px;">🌑 Acceso al Mercado Negro</div>
     ${PERSONAJES_CAMPANA.map(p=>`
       <div style="display:flex;align-items:center;justify-content:space-between;padding:10px 12px;background:var(--sup2);border:1px solid var(--borde);margin-bottom:6px;">
-        <div><div style="font-family:'Cinzel',serif;font-size:13px;color:var(--texto);">${p.nombre}</div><div style="font-size:10px;color:var(--muted);">Nv.${p.nivel||1}</div></div>
-        <button style="padding:5px 14px;font-size:10px;font-weight:700;text-transform:uppercase;cursor:pointer;border:1px solid;background:transparent;${mnAcceso.includes(p.id)?'border-color:#a78bfa;color:#a78bfa;':'border-color:var(--borde);color:var(--muted);'}"
+        <div><div style="font-family:'Cinzel',serif;font-size:13px;color:var(--texto);">${p.nombre}</div>
+        <div style="font-size:10px;color:var(--muted);">Nv.${p.nivel||1}</div></div>
+        <button style="padding:5px 14px;font-size:10px;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;cursor:pointer;border:1px solid;transition:all 0.15s;background:transparent;${mnAcceso.includes(p.id)?'border-color:#a78bfa;color:#a78bfa;background:rgba(167,139,250,0.1);':'border-color:var(--borde);color:var(--muted);'}"
           onclick="toggleMercadoNegro('${p.id}','${p.nombre}')">${mnAcceso.includes(p.id)?'🌑 Con Acceso':'Sin Acceso'}</button>
-      </div>`).join('')}`;
+      </div>`).join('')}
+  `;
 }
 
 window.toggleTiendaDJ = async function() {
-  const actual=window._tiendaData?.tiendaActiva||false;
-  await updateDoc(doc(db,'campanas',CAMPANA_ID),{tiendaActiva:!actual});
+  const actual = window._tiendaData?.tiendaActiva || false;
+  await updateDoc(doc(db,'campanas',CAMPANA_ID), { tiendaActiva: !actual });
   toast(!actual?'🛒 Tienda abierta.':'🔒 Tienda cerrada.','success');
-  if(tabActiva==='tienda') renderSeccion('tienda');
+  if (tabActiva==='tienda') renderSeccion('tienda');
 };
 
-window.toggleMercadoNegro = async function(pid,nombre) {
-  const actual=window._tiendaData?.mercadoNegroAcceso||[];
-  const nuevo=actual.includes(pid)?actual.filter(x=>x!==pid):[...actual,pid];
-  await updateDoc(doc(db,'campanas',CAMPANA_ID),{mercadoNegroAcceso:nuevo});
+window.toggleMercadoNegro = async function(pid, nombre) {
+  const actual = window._tiendaData?.mercadoNegroAcceso || [];
+  const nuevo = actual.includes(pid) ? actual.filter(x=>x!==pid) : [...actual,pid];
+  await updateDoc(doc(db,'campanas',CAMPANA_ID), { mercadoNegroAcceso: nuevo });
   toast(nuevo.includes(pid)?`🌑 ${nombre} tiene acceso.`:`${nombre} sin acceso.`,'info');
-  if(tabActiva==='tienda') renderSeccion('tienda');
+  if (tabActiva==='tienda') renderSeccion('tienda');
 };
 
 // ═══════════════════════════════════
-// TIENDA — VENDEDORES + LÓGICA
+// TIENDA — REALTIME + DB
 // ═══════════════════════════════════
+// Tienda procesada dentro de iniciarMapaRealtime
+
 const TIENDA_DB = {"bazar": [{"id": "BZ001", "nombre": "Botella de Agua", "cat": "Consumible", "desc": "Agua purificada", "precio": 500, "rareza": "Común", "color": "#9ca3af", "stock": 20, "peso": 0.5}, {"id": "BZ002", "nombre": "Barra Energética", "cat": "Comida", "desc": "Snack energético", "precio": 800, "rareza": "Común", "color": "#9ca3af", "stock": 20, "peso": 0.1}, {"id": "BZ003", "nombre": "Bebida Energética", "cat": "Bebida", "desc": "Estimula temporalmente", "precio": 1500, "rareza": "Común", "color": "#9ca3af", "stock": 20, "peso": 0.4}, {"id": "BZ004", "nombre": "Café Instantáneo", "cat": "Bebida", "desc": "Preparación rápida", "precio": 2000, "rareza": "Común", "color": "#9ca3af", "stock": 18, "peso": 0.2}, {"id": "BZ005", "nombre": "Comida Enlatada", "cat": "Comida", "desc": "Alimento conservado", "precio": 2500, "rareza": "Común", "color": "#9ca3af", "stock": 20, "peso": 0.4}, {"id": "BZ006", "nombre": "Fideos Instantáneos", "cat": "Comida", "desc": "Comida rápida", "precio": 1000, "rareza": "Común", "color": "#9ca3af", "stock": 20, "peso": 0.1}, {"id": "BZ007", "nombre": "Chocolate", "cat": "Comida", "desc": "Dulce energético", "precio": 1200, "rareza": "Común", "color": "#9ca3af", "stock": 20, "peso": 0.1}, {"id": "BZ008", "nombre": "Cubiertos Desechables", "cat": "Utilidad", "desc": "Pack básico", "precio": 500, "rareza": "Común", "color": "#9ca3af", "stock": 20, "peso": 0.05}, {"id": "BZ009", "nombre": "Encendedor", "cat": "Utilidad", "desc": "Encendedor recargable", "precio": 1500, "rareza": "Común", "color": "#9ca3af", "stock": 20, "peso": 0.1}, {"id": "BZ010", "nombre": "Fósforos", "cat": "Utilidad", "desc": "Caja de fósforos", "precio": 700, "rareza": "Común", "color": "#9ca3af", "stock": 20, "peso": 0.05}, {"id": "BZ011", "nombre": "Linterna LED", "cat": "Electrónica", "desc": "Linterna pequeña", "precio": 5000, "rareza": "Común", "color": "#9ca3af", "stock": 15, "peso": 0.3}, {"id": "BZ012", "nombre": "Pilas AA", "cat": "Electrónica", "desc": "Par de pilas", "precio": 2000, "rareza": "Común", "color": "#9ca3af", "stock": 20, "peso": 0.1}, {"id": "BZ013", "nombre": "Pilas AAA", "cat": "Electrónica", "desc": "Par de pilas", "precio": 2000, "rareza": "Común", "color": "#9ca3af", "stock": 20, "peso": 0.1}, {"id": "BZ014", "nombre": "Power Bank", "cat": "Electrónica", "desc": "Batería portátil", "precio": 15000, "rareza": "Poco Común", "color": "#4ade80", "stock": 12, "peso": 0.4}, {"id": "BZ015", "nombre": "Cable USB", "cat": "Electrónica", "desc": "Cable universal", "precio": 3500, "rareza": "Común", "color": "#9ca3af", "stock": 15, "peso": 0.1}, {"id": "BZ016", "nombre": "Audífonos", "cat": "Electrónica", "desc": "Audífonos económicos", "precio": 6000, "rareza": "Común", "color": "#9ca3af", "stock": 12, "peso": 0.2}, {"id": "BZ017", "nombre": "Cargador Universal", "cat": "Electrónica", "desc": "Adaptador de carga", "precio": 8000, "rareza": "Poco Común", "color": "#4ade80", "stock": 10, "peso": 0.2}, {"id": "BZ018", "nombre": "Libreta", "cat": "Utilidad", "desc": "Libreta de bolsillo", "precio": 1500, "rareza": "Común", "color": "#9ca3af", "stock": 20, "peso": 0.2}, {"id": "BZ019", "nombre": "Bolígrafo", "cat": "Utilidad", "desc": "Lápiz de tinta", "precio": 500, "rareza": "Común", "color": "#9ca3af", "stock": 20, "peso": 0.05}, {"id": "BZ020", "nombre": "Marcador", "cat": "Utilidad", "desc": "Marcador permanente", "precio": 1500, "rareza": "Común", "color": "#9ca3af", "stock": 18, "peso": 0.05}, {"id": "BZ021", "nombre": "Cinta Adhesiva", "cat": "Herramienta", "desc": "Rollo multipropósito", "precio": 2500, "rareza": "Común", "color": "#9ca3af", "stock": 15, "peso": 0.2}, {"id": "BZ022", "nombre": "Cuerda Nylon", "cat": "Supervivencia", "desc": "10 metros", "precio": 7000, "rareza": "Poco Común", "color": "#4ade80", "stock": 10, "peso": 0.8}, {"id": "BZ023", "nombre": "Guantes Trabajo", "cat": "Utilidad", "desc": "Protección básica", "precio": 4000, "rareza": "Común", "color": "#9ca3af", "stock": 15, "peso": 0.3}, {"id": "BZ024", "nombre": "Mascarillas", "cat": "Utilidad", "desc": "Pack desechable", "precio": 1500, "rareza": "Común", "color": "#9ca3af", "stock": 20, "peso": 0.1}, {"id": "BZ025", "nombre": "Gafas Seguridad", "cat": "Utilidad", "desc": "Protección ocular", "precio": 5000, "rareza": "Poco Común", "color": "#4ade80", "stock": 12, "peso": 0.2}, {"id": "BZ026", "nombre": "Paraguas", "cat": "Utilidad", "desc": "Compacto", "precio": 8000, "rareza": "Común", "color": "#9ca3af", "stock": 10, "peso": 0.6}, {"id": "BZ027", "nombre": "Mochila Básica", "cat": "Supervivencia", "desc": "Mochila general", "precio": 15000, "rareza": "Poco Común", "color": "#4ade80", "stock": 8, "peso": 1.0}, {"id": "BZ028", "nombre": "Bolsa Impermeable", "cat": "Supervivencia", "desc": "Protección de equipo", "precio": 4500, "rareza": "Común", "color": "#9ca3af", "stock": 12, "peso": 0.2}, {"id": "BZ029", "nombre": "Manta Térmica", "cat": "Supervivencia", "desc": "Conserva calor", "precio": 5000, "rareza": "Poco Común", "color": "#4ade80", "stock": 10, "peso": 0.3}, {"id": "BZ030", "nombre": "Kit Costura", "cat": "Utilidad", "desc": "Costura básica", "precio": 2000, "rareza": "Común", "color": "#9ca3af", "stock": 15, "peso": 0.2}, {"id": "BZ031", "nombre": "Jabón", "cat": "Consumible", "desc": "Antibacterial", "precio": 1500, "rareza": "Común", "color": "#9ca3af", "stock": 20, "peso": 0.2}, {"id": "BZ032", "nombre": "Toallas Húmedas", "cat": "Consumible", "desc": "Limpieza rápida", "precio": 2500, "rareza": "Común", "color": "#9ca3af", "stock": 20, "peso": 0.3}, {"id": "BZ033", "nombre": "Papel Higiénico", "cat": "Consumible", "desc": "Rollo individual", "precio": 1000, "rareza": "Común", "color": "#9ca3af", "stock": 20, "peso": 0.2}, {"id": "BZ034", "nombre": "Cepillo Dental", "cat": "Consumible", "desc": "Higiene dental", "precio": 1500, "rareza": "Común", "color": "#9ca3af", "stock": 20, "peso": 0.1}, {"id": "BZ035", "nombre": "Pasta Dental", "cat": "Consumible", "desc": "Tubo pequeño", "precio": 2000, "rareza": "Común", "color": "#9ca3af", "stock": 18, "peso": 0.2}, {"id": "BZ036", "nombre": "Desodorante", "cat": "Consumible", "desc": "Uso personal", "precio": 3500, "rareza": "Común", "color": "#9ca3af", "stock": 15, "peso": 0.2}, {"id": "BZ037", "nombre": "Protector Solar", "cat": "Consumible", "desc": "Protección UV", "precio": 5000, "rareza": "Poco Común", "color": "#4ade80", "stock": 10, "peso": 0.2}, {"id": "BZ038", "nombre": "Repelente", "cat": "Consumible", "desc": "Contra insectos", "precio": 4000, "rareza": "Poco Común", "color": "#4ade80", "stock": 10, "peso": 0.2}, {"id": "BZ039", "nombre": "Hielo Instantáneo", "cat": "Consumible", "desc": "Primeros auxilios", "precio": 3000, "rareza": "Común", "color": "#9ca3af", "stock": 15, "peso": 0.3}, {"id": "BZ040", "nombre": "Candado", "cat": "Utilidad", "desc": "Seguridad básica", "precio": 4000, "rareza": "Común", "color": "#9ca3af", "stock": 12, "peso": 0.2}, {"id": "BZ041", "nombre": "Memoria USB", "cat": "Electrónica", "desc": "32 GB", "precio": 10000, "rareza": "Poco Común", "color": "#4ade80", "stock": 8, "peso": 0.05}, {"id": "BZ042", "nombre": "Radio Portátil", "cat": "Electrónica", "desc": "AM/FM", "precio": 20000, "rareza": "Raro", "color": "#60a5fa", "stock": 5, "peso": 0.5}, {"id": "BZ043", "nombre": "Binoculares", "cat": "Herramienta", "desc": "Observación", "precio": 30000, "rareza": "Raro", "color": "#60a5fa", "stock": 4, "peso": 0.8}, {"id": "BZ044", "nombre": "Cámara Desechable", "cat": "Electrónica", "desc": "Fotografía básica", "precio": 12000, "rareza": "Poco Común", "color": "#4ade80", "stock": 6, "peso": 0.2}, {"id": "BZ045", "nombre": "SIM Prepago", "cat": "Electrónica", "desc": "Comunicación móvil", "precio": 5000, "rareza": "Común", "color": "#9ca3af", "stock": 15, "peso": 0.01}, {"id": "BZ046", "nombre": "GPS Mano", "cat": "Electrónica", "desc": "Navegación", "precio": 80000, "rareza": "Muy Raro", "color": "#a78bfa", "stock": 2, "peso": 0.5}, {"id": "BZ047", "nombre": "Teléfono Básico", "cat": "Electrónica", "desc": "Llamadas y mensajes", "precio": 35000, "rareza": "Raro", "color": "#60a5fa", "stock": 4, "peso": 0.3}, {"id": "BZ048", "nombre": "Smartphone", "cat": "Electrónica", "desc": "Equipo económico", "precio": 120000, "rareza": "Muy Raro", "color": "#a78bfa", "stock": 2, "peso": 0.4}, {"id": "BZ049", "nombre": "Laptop", "cat": "Electrónica", "desc": "Reacondicionada", "precio": 250000, "rareza": "Épico", "color": "#c9a84c", "stock": 1, "peso": 2.0}, {"id": "BZ050", "nombre": "Generador Portátil", "cat": "Supervivencia", "desc": "Energía de emergencia", "precio": 400000, "rareza": "Legendario", "color": "#f97316", "stock": 1, "peso": 12.0}], "armero": [{"id": "AR001", "nombre": "Bastón Reforzado", "cat": "Arma Contundente", "desc": "Bastón endurecido", "precio": 15000, "rareza": "Común", "color": "#9ca3af", "stock": 10, "peso": 1.2}, {"id": "AR002", "nombre": "Cachiporra", "cat": "Arma Contundente", "desc": "Porra policial", "precio": 20000, "rareza": "Común", "color": "#9ca3af", "stock": 8, "peso": 0.8}, {"id": "AR003", "nombre": "Porra Extensible", "cat": "Arma Contundente", "desc": "Metálica retráctil", "precio": 35000, "rareza": "Poco Común", "color": "#4ade80", "stock": 6, "peso": 0.7}, {"id": "AR004", "nombre": "Martillo", "cat": "Arma Contundente", "desc": "Herramienta adaptada", "precio": 12000, "rareza": "Común", "color": "#9ca3af", "stock": 10, "peso": 1.0}, {"id": "AR005", "nombre": "Maza Ligera", "cat": "Arma Contundente", "desc": "Impacto contundente", "precio": 40000, "rareza": "Poco Común", "color": "#4ade80", "stock": 5, "peso": 2.0}, {"id": "AR006", "nombre": "Maza Pesada", "cat": "Arma Contundente", "desc": "Requiere fuerza", "precio": 75000, "rareza": "Raro", "color": "#60a5fa", "stock": 3, "peso": 4.0}, {"id": "AR007", "nombre": "Cuchillo Utilitario", "cat": "Arma Cortante", "desc": "Hoja básica", "precio": 8000, "rareza": "Común", "color": "#9ca3af", "stock": 15, "peso": 0.3}, {"id": "AR008", "nombre": "Cuchillo de Caza", "cat": "Arma Cortante", "desc": "Hoja resistente", "precio": 25000, "rareza": "Común", "color": "#9ca3af", "stock": 10, "peso": 0.4}, {"id": "AR009", "nombre": "Navaja", "cat": "Arma Cortante", "desc": "Plegable", "precio": 15000, "rareza": "Común", "color": "#9ca3af", "stock": 12, "peso": 0.2}, {"id": "AR010", "nombre": "Machete", "cat": "Arma Cortante", "desc": "Trabajo pesado", "precio": 30000, "rareza": "Común", "color": "#9ca3af", "stock": 8, "peso": 1.2}, {"id": "AR011", "nombre": "Kukri", "cat": "Arma Cortante", "desc": "Hoja curva", "precio": 70000, "rareza": "Poco Común", "color": "#4ade80", "stock": 4, "peso": 0.9}, {"id": "AR012", "nombre": "Espada Corta", "cat": "Arma Cortante", "desc": "Acero moderno", "precio": 120000, "rareza": "Raro", "color": "#60a5fa", "stock": 3, "peso": 1.5}, {"id": "AR013", "nombre": "Espada Larga", "cat": "Arma Cortante", "desc": "Acero templado", "precio": 180000, "rareza": "Raro", "color": "#60a5fa", "stock": 2, "peso": 2.0}, {"id": "AR014", "nombre": "Sable", "cat": "Arma Cortante", "desc": "Militar", "precio": 250000, "rareza": "Muy Raro", "color": "#a78bfa", "stock": 2, "peso": 1.8}, {"id": "AR015", "nombre": "Espadón", "cat": "Arma Cortante", "desc": "Dos manos", "precio": 350000, "rareza": "Épico", "color": "#c9a84c", "stock": 1, "peso": 4.5}, {"id": "AR016", "nombre": "Lanza", "cat": "Arma de Asta", "desc": "Alcance superior", "precio": 50000, "rareza": "Poco Común", "color": "#4ade80", "stock": 4, "peso": 2.5}, {"id": "AR017", "nombre": "Alabarda", "cat": "Arma de Asta", "desc": "Hoja y asta", "precio": 180000, "rareza": "Raro", "color": "#60a5fa", "stock": 2, "peso": 3.5}, {"id": "AR018", "nombre": "Guja", "cat": "Arma de Asta", "desc": "Combate avanzado", "precio": 220000, "rareza": "Muy Raro", "color": "#a78bfa", "stock": 1, "peso": 3.2}, {"id": "AR019", "nombre": "Honda", "cat": "Arma de Proyectil", "desc": "Proyectiles simples", "precio": 5000, "rareza": "Común", "color": "#9ca3af", "stock": 15, "peso": 0.1}, {"id": "AR020", "nombre": "Tirachinas", "cat": "Arma de Proyectil", "desc": "Disparo ligero", "precio": 10000, "rareza": "Común", "color": "#9ca3af", "stock": 10, "peso": 0.2}, {"id": "AR021", "nombre": "Arco Corto", "cat": "Arco", "desc": "Ligero", "precio": 60000, "rareza": "Poco Común", "color": "#4ade80", "stock": 5, "peso": 1.5}, {"id": "AR022", "nombre": "Arco Largo", "cat": "Arco", "desc": "Mayor alcance", "precio": 120000, "rareza": "Raro", "color": "#60a5fa", "stock": 3, "peso": 2.0}, {"id": "AR023", "nombre": "Arco Compuesto", "cat": "Arco", "desc": "Tecnología moderna", "precio": 300000, "rareza": "Muy Raro", "color": "#a78bfa", "stock": 2, "peso": 2.3}, {"id": "AR024", "nombre": "Ballesta Ligera", "cat": "Ballesta", "desc": "Silenciosa", "precio": 250000, "rareza": "Muy Raro", "color": "#a78bfa", "stock": 2, "peso": 3.0}, {"id": "AR025", "nombre": "Ballesta Pesada", "cat": "Ballesta", "desc": "Alta penetración", "precio": 450000, "rareza": "Épico", "color": "#c9a84c", "stock": 1, "peso": 5.0}, {"id": "AR026", "nombre": "Flechas x5", "cat": "Munición", "desc": "Munición básica", "precio": 5000, "rareza": "Común", "color": "#9ca3af", "stock": 20, "peso": 0.5}, {"id": "AR027", "nombre": "Flechas Reforzadas x5", "cat": "Munición", "desc": "Mayor durabilidad", "precio": 10000, "rareza": "Poco Común", "color": "#4ade80", "stock": 12, "peso": 0.6}, {"id": "AR028", "nombre": "Virotes x5", "cat": "Munición", "desc": "Para ballesta", "precio": 12000, "rareza": "Poco Común", "color": "#4ade80", "stock": 10, "peso": 0.8}, {"id": "AR029", "nombre": "Escudo Antidisturbios", "cat": "Escudo", "desc": "Policarbonato", "precio": 80000, "rareza": "Poco Común", "color": "#4ade80", "stock": 4, "peso": 3.0}, {"id": "AR030", "nombre": "Escudo Metálico", "cat": "Escudo", "desc": "Protección básica", "precio": 120000, "rareza": "Raro", "color": "#60a5fa", "stock": 3, "peso": 4.0}, {"id": "AR031", "nombre": "Escudo Acero", "cat": "Escudo", "desc": "Protección pesada", "precio": 200000, "rareza": "Muy Raro", "color": "#a78bfa", "stock": 2, "peso": 6.0}, {"id": "AR032", "nombre": "Casco", "cat": "Protección", "desc": "Protección cabeza", "precio": 20000, "rareza": "Común", "color": "#9ca3af", "stock": 8, "peso": 1.0}, {"id": "AR033", "nombre": "Rodilleras", "cat": "Protección", "desc": "Protección piernas", "precio": 10000, "rareza": "Común", "color": "#9ca3af", "stock": 10, "peso": 0.4}, {"id": "AR034", "nombre": "Guantes Tácticos", "cat": "Protección", "desc": "Mejor agarre", "precio": 15000, "rareza": "Común", "color": "#9ca3af", "stock": 10, "peso": 0.3}, {"id": "AR035", "nombre": "Chaleco Cuero", "cat": "Protección", "desc": "Ligero", "precio": 70000, "rareza": "Poco Común", "color": "#4ade80", "stock": 5, "peso": 2.0}, {"id": "AR036", "nombre": "Chaleco Anticorte", "cat": "Protección", "desc": "Resistente", "precio": 180000, "rareza": "Raro", "color": "#60a5fa", "stock": 3, "peso": 3.0}, {"id": "AR037", "nombre": "Chaleco Balístico I", "cat": "Protección", "desc": "Antibalas básico", "precio": 400000, "rareza": "Muy Raro", "color": "#a78bfa", "stock": 1, "peso": 4.0}], "drogueria": [{"id": "DR001", "nombre": "Venda Simple", "cat": "Primeros Auxilios", "desc": "Heridas menores", "precio": 2000, "rareza": "Común", "color": "#9ca3af", "stock": 20, "peso": 0.1}, {"id": "DR002", "nombre": "Venda Elástica", "cat": "Primeros Auxilios", "desc": "Soporte lesiones", "precio": 4000, "rareza": "Común", "color": "#9ca3af", "stock": 15, "peso": 0.2}, {"id": "DR003", "nombre": "Gasa Estéril", "cat": "Primeros Auxilios", "desc": "Protección heridas", "precio": 1500, "rareza": "Común", "color": "#9ca3af", "stock": 20, "peso": 0.1}, {"id": "DR004", "nombre": "Cinta Médica", "cat": "Primeros Auxilios", "desc": "Fija vendajes", "precio": 1000, "rareza": "Común", "color": "#9ca3af", "stock": 20, "peso": 0.1}, {"id": "DR005", "nombre": "Antiséptico", "cat": "Medicamento", "desc": "Previene infecciones", "precio": 3000, "rareza": "Común", "color": "#9ca3af", "stock": 15, "peso": 0.2}, {"id": "DR006", "nombre": "Alcohol Médico", "cat": "Medicamento", "desc": "Limpieza rápida", "precio": 2500, "rareza": "Común", "color": "#9ca3af", "stock": 15, "peso": 0.2}, {"id": "DR007", "nombre": "Kit Sutura", "cat": "Primeros Auxilios", "desc": "Cierra heridas", "precio": 15000, "rareza": "Poco Común", "color": "#4ade80", "stock": 8, "peso": 0.3}, {"id": "DR008", "nombre": "Férula", "cat": "Primeros Auxilios", "desc": "Inmoviliza fracturas", "precio": 10000, "rareza": "Poco Común", "color": "#4ade80", "stock": 10, "peso": 0.5}, {"id": "DR009", "nombre": "Botiquín Básico", "cat": "Equipo Médico", "desc": "Insumos básicos", "precio": 20000, "rareza": "Poco Común", "color": "#4ade80", "stock": 10, "peso": 1.0}, {"id": "DR010", "nombre": "Botiquín Avanzado", "cat": "Equipo Médico", "desc": "Equipo completo", "precio": 60000, "rareza": "Raro", "color": "#60a5fa", "stock": 5, "peso": 2.0}, {"id": "DR011", "nombre": "Analgésico", "cat": "Medicamento", "desc": "Reduce dolor", "precio": 3000, "rareza": "Común", "color": "#9ca3af", "stock": 20, "peso": 0.1}, {"id": "DR012", "nombre": "Antiinflamatorio", "cat": "Medicamento", "desc": "Reduce inflamación", "precio": 5000, "rareza": "Común", "color": "#9ca3af", "stock": 15, "peso": 0.1}, {"id": "DR013", "nombre": "Antibiótico", "cat": "Medicamento", "desc": "Trata infecciones", "precio": 12000, "rareza": "Poco Común", "color": "#4ade80", "stock": 10, "peso": 0.1}, {"id": "DR014", "nombre": "Antihistamínico", "cat": "Medicamento", "desc": "Alivio alergias", "precio": 4000, "rareza": "Común", "color": "#9ca3af", "stock": 15, "peso": 0.1}, {"id": "DR015", "nombre": "Antipirético", "cat": "Medicamento", "desc": "Reduce fiebre", "precio": 3000, "rareza": "Común", "color": "#9ca3af", "stock": 15, "peso": 0.1}, {"id": "DR016", "nombre": "Pastillas Dormir", "cat": "Medicamento", "desc": "Induce sueño", "precio": 8000, "rareza": "Poco Común", "color": "#4ade80", "stock": 10, "peso": 0.1}, {"id": "DR017", "nombre": "Suero Oral", "cat": "Medicamento", "desc": "Combate deshidratación", "precio": 3000, "rareza": "Común", "color": "#9ca3af", "stock": 20, "peso": 0.3}, {"id": "DR018", "nombre": "Adrenalina", "cat": "Medicamento", "desc": "Emergencia", "precio": 25000, "rareza": "Raro", "color": "#60a5fa", "stock": 5, "peso": 0.1}, {"id": "DR019", "nombre": "Cafeína", "cat": "Estimulante", "desc": "Mantiene alerta", "precio": 5000, "rareza": "Común", "color": "#9ca3af", "stock": 15, "peso": 0.1}, {"id": "DR020", "nombre": "Energizante Concentrado", "cat": "Estimulante", "desc": "Reduce fatiga", "precio": 8000, "rareza": "Poco Común", "color": "#4ade80", "stock": 12, "peso": 0.2}, {"id": "DR021", "nombre": "Inyección Energizante", "cat": "Estimulante", "desc": "Potente", "precio": 40000, "rareza": "Raro", "color": "#60a5fa", "stock": 5, "peso": 0.1}, {"id": "DR022", "nombre": "Suero Combate", "cat": "Estimulante", "desc": "Mayor resistencia", "precio": 80000, "rareza": "Muy Raro", "color": "#a78bfa", "stock": 3, "peso": 0.2}, {"id": "DR023", "nombre": "Mascarilla Filtrante", "cat": "Equipo Médico", "desc": "Protección respiratoria", "precio": 5000, "rareza": "Común", "color": "#9ca3af", "stock": 15, "peso": 0.2}, {"id": "DR024", "nombre": "Filtro Reemplazable", "cat": "Equipo Médico", "desc": "Repuesto", "precio": 3000, "rareza": "Común", "color": "#9ca3af", "stock": 15, "peso": 0.1}, {"id": "DR025", "nombre": "Purificador Agua", "cat": "Equipo Médico", "desc": "Filtra agua", "precio": 25000, "rareza": "Poco Común", "color": "#4ade80", "stock": 6, "peso": 0.5}, {"id": "DR026", "nombre": "Tabletas Purificadoras", "cat": "Equipo Médico", "desc": "Purifican agua", "precio": 8000, "rareza": "Común", "color": "#9ca3af", "stock": 12, "peso": 0.1}, {"id": "DR027", "nombre": "Neutralizador Químico", "cat": "Compuesto Especial", "desc": "Reduce gases", "precio": 35000, "rareza": "Raro", "color": "#60a5fa", "stock": 5, "peso": 0.2}, {"id": "DR028", "nombre": "Calmante Mental", "cat": "Compuesto Especial", "desc": "Reduce pánico", "precio": 25000, "rareza": "Poco Común", "color": "#4ade80", "stock": 8, "peso": 0.1}, {"id": "DR029", "nombre": "Supresor Pesadillas", "cat": "Compuesto Especial", "desc": "Descanso seguro", "precio": 35000, "rareza": "Raro", "color": "#60a5fa", "stock": 5, "peso": 0.1}, {"id": "DR030", "nombre": "Estabilizador Cognitivo", "cat": "Compuesto Especial", "desc": "Mejora concentración", "precio": 50000, "rareza": "Raro", "color": "#60a5fa", "stock": 4, "peso": 0.1}, {"id": "DR031", "nombre": "Inhibidor Influencia", "cat": "Compuesto Especial", "desc": "Protección mental", "precio": 120000, "rareza": "Muy Raro", "color": "#a78bfa", "stock": 2, "peso": 0.1}, {"id": "DR032", "nombre": "Neutralizador Paranormal", "cat": "Compuesto Especial", "desc": "Experimental", "precio": 250000, "rareza": "Épico", "color": "#c9a84c", "stock": 1, "peso": 0.2}], "mercado_negro": [{"id": "MN001", "nombre": "Pistola .22", "cat": "Arma de Fuego", "desc": "Pequeña y ocultable", "precio": 600000, "rareza": "Muy Raro", "color": "#a78bfa", "stock": 1, "peso": 1.0}, {"id": "MN002", "nombre": "Revólver .38", "cat": "Arma de Fuego", "desc": "Confiable", "precio": 900000, "rareza": "Épico", "color": "#c9a84c", "stock": 1, "peso": 1.2}, {"id": "MN003", "nombre": "Pistola 9mm", "cat": "Arma de Fuego", "desc": "Estándar criminal", "precio": 1500000, "rareza": "Épico", "color": "#c9a84c", "stock": 1, "peso": 1.1}, {"id": "MN004", "nombre": "Escopeta Recortada", "cat": "Arma de Fuego", "desc": "Devastadora", "precio": 2000000, "rareza": "Épico", "color": "#c9a84c", "stock": 1, "peso": 3.0}, {"id": "MN005", "nombre": "Rifle de Caza", "cat": "Arma de Fuego", "desc": "Largo alcance", "precio": 2500000, "rareza": "Legendario", "color": "#f97316", "stock": 1, "peso": 4.5}, {"id": "MN006", "nombre": "Munición .22 x10", "cat": "Munición Restringida", "desc": "Cartuchos", "precio": 80000, "rareza": "Muy Raro", "color": "#a78bfa", "stock": 2, "peso": 0.2}, {"id": "MN007", "nombre": "Munición .38 x6", "cat": "Munición Restringida", "desc": "Cartuchos", "precio": 120000, "rareza": "Épico", "color": "#c9a84c", "stock": 2, "peso": 0.2}, {"id": "MN008", "nombre": "Munición 9mm x10", "cat": "Munición Restringida", "desc": "Cartuchos", "precio": 200000, "rareza": "Épico", "color": "#c9a84c", "stock": 2, "peso": 0.2}, {"id": "MN009", "nombre": "Cartuchos Escopeta x5", "cat": "Munición Restringida", "desc": "Munición pesada", "precio": 250000, "rareza": "Épico", "color": "#c9a84c", "stock": 1, "peso": 0.4}, {"id": "MN010", "nombre": "Munición Rifle x5", "cat": "Munición Restringida", "desc": "Difícil de conseguir", "precio": 350000, "rareza": "Legendario", "color": "#f97316", "stock": 1, "peso": 0.3}, {"id": "MN011", "nombre": "Documento Falso", "cat": "Documento Falso", "desc": "Identidad alterada", "precio": 100000, "rareza": "Raro", "color": "#60a5fa", "stock": 3, "peso": 0.1}, {"id": "MN012", "nombre": "Teléfono Desechable", "cat": "Equipo Ilegal", "desc": "Difícil de rastrear", "precio": 50000, "rareza": "Poco Común", "color": "#4ade80", "stock": 5, "peso": 0.2}, {"id": "MN013", "nombre": "Inhibidor Señal", "cat": "Equipo Ilegal", "desc": "Bloquea comunicaciones", "precio": 750000, "rareza": "Muy Raro", "color": "#a78bfa", "stock": 1, "peso": 0.5}, {"id": "MN014", "nombre": "Cámara Oculta", "cat": "Equipo Ilegal", "desc": "Grabación discreta", "precio": 120000, "rareza": "Raro", "color": "#60a5fa", "stock": 2, "peso": 0.1}, {"id": "MN015", "nombre": "Ganzúas", "cat": "Equipo Ilegal", "desc": "Abrir cerraduras", "precio": 90000, "rareza": "Raro", "color": "#60a5fa", "stock": 3, "peso": 0.1}, {"id": "MN016", "nombre": "Moneda Maldita", "cat": "Reliquia", "desc": "Rumores extraños", "precio": 250000, "rareza": "Raro", "color": "#60a5fa", "stock": 1, "peso": 0.1}, {"id": "MN017", "nombre": "Fragmento Máscara", "cat": "Reliquia", "desc": "Procedencia desconocida", "precio": 400000, "rareza": "Raro", "color": "#60a5fa", "stock": 1, "peso": 0.2}, {"id": "MN018", "nombre": "Ojo Conservado", "cat": "Reliquia", "desc": "Objeto anómalo", "precio": 600000, "rareza": "Muy Raro", "color": "#a78bfa", "stock": 1, "peso": 0.3}, {"id": "MN019", "nombre": "Página Perdida", "cat": "Reliquia", "desc": "Parte de grimorio", "precio": 1000000, "rareza": "Épico", "color": "#c9a84c", "stock": 1, "peso": 0.1}]};
 
 const VENDEDORES = {
@@ -1792,62 +1950,91 @@ const VENDEDORES = {
   drogueria:     { label:'💊 Droguería',     desc:'Medicamentos y químicos' },
   mercado_negro: { label:'🌑 Mercado Negro', desc:'Solo para contactos especiales' },
 };
-let tiendaVendedorActivo='bazar', tiendaFiltroActivo='todos';
+
+let tiendaVendedorActivo = 'bazar';
+let tiendaFiltroActivo = 'todos';
 
 window.abrirTienda = function() {
-  if(!window._tiendaActiva&&!ES_DIRECTOR){toast('La tienda está cerrada.','error');return;}
-  document.getElementById('tienda-saldo-val').textContent=(MI_PERSONAJE?.dinero||0).toLocaleString();
-  const tabs=['bazar','armero','drogueria'];
-  const tieneMN=ES_DIRECTOR||(MI_PERSONAJE&&(window._mnAcceso||[]).includes(MI_PERSONAJE.id));
-  if(tieneMN) tabs.push('mercado_negro');
-  document.getElementById('tienda-tabs').innerHTML=tabs.map(k=>`<button class="tienda-tab ${k==='mercado_negro'?'mercado':''} ${k===tiendaVendedorActivo?'active':''}" onclick="setTiendaVendedor('${k}',this)">${VENDEDORES[k].label}</button>`).join('');
+  if (!window._tiendaActiva && !ES_DIRECTOR) { toast('La tienda está cerrada.','error'); return; }
+  document.getElementById('tienda-saldo-val').textContent = (MI_PERSONAJE?.dinero||0).toLocaleString();
+  const tabs = ['bazar','armero','drogueria'];
+  const tieneMN = ES_DIRECTOR || (MI_PERSONAJE && (window._mnAcceso||[]).includes(MI_PERSONAJE.id));
+  if (tieneMN) tabs.push('mercado_negro');
+  document.getElementById('tienda-tabs').innerHTML = tabs.map(k =>
+    `<button class="tienda-tab ${k==='mercado_negro'?'mercado':''} ${k===tiendaVendedorActivo?'active':''}"
+      onclick="setTiendaVendedor('${k}',this)">${VENDEDORES[k].label}</button>`).join('');
   renderTiendaProductos();
   document.getElementById('tienda-overlay').classList.add('open');
 };
-window.cerrarTienda = ()=>document.getElementById('tienda-overlay').classList.remove('open');
-window.cerrarTiendaFuera = e=>{if(e.target.id==='tienda-overlay')cerrarTienda();};
-window.setTiendaVendedor = function(key,el){
-  tiendaVendedorActivo=key;tiendaFiltroActivo='todos';
-  document.querySelectorAll('.tienda-tab').forEach(t=>t.classList.remove('active')); el.classList.add('active');
-  document.getElementById('tienda-vendedor-nombre').textContent=VENDEDORES[key]?.desc||'';
+
+window.cerrarTienda = () => document.getElementById('tienda-overlay').classList.remove('open');
+window.cerrarTiendaFuera = e => { if(e.target.id==='tienda-overlay') cerrarTienda(); };
+
+window.setTiendaVendedor = function(key, el) {
+  tiendaVendedorActivo = key; tiendaFiltroActivo = 'todos';
+  document.querySelectorAll('.tienda-tab').forEach(t=>t.classList.remove('active'));
+  el.classList.add('active');
+  document.getElementById('tienda-vendedor-nombre').textContent = VENDEDORES[key]?.desc||'';
   renderTiendaProductos();
 };
-window.setTiendaFiltro = function(cat,el){
-  tiendaFiltroActivo=cat;
-  document.querySelectorAll('.filtro-btn').forEach(b=>b.classList.remove('active')); el.classList.add('active');
+
+window.setTiendaFiltro = function(cat, el) {
+  tiendaFiltroActivo = cat;
+  document.querySelectorAll('.filtro-btn').forEach(b=>b.classList.remove('active'));
+  el.classList.add('active');
   renderTiendaProductos();
 };
-function renderTiendaProductos(){
-  const productos=TIENDA_DB[tiendaVendedorActivo]||[];
-  const saldo=MI_PERSONAJE?.dinero||0;
-  const cats=['todos',...new Set(productos.map(p=>p.cat))];
-  const filtroHTML=cats.map(c=>`<button class="filtro-btn ${c===tiendaFiltroActivo?'active':''}" onclick="setTiendaFiltro('${c}',this)">${c==='todos'?'Todos':c}</button>`).join('');
-  const filtrados=tiendaFiltroActivo==='todos'?productos:productos.filter(p=>p.cat===tiendaFiltroActivo);
-  const esMN=tiendaVendedorActivo==='mercado_negro';
-  const prodsHTML=filtrados.map(p=>{
-    const ok=saldo>=p.precio,st=p.stock<=0;
-    return `<div class="prod-card"><span class="prod-rareza" style="color:${p.color};border-color:${p.color}22;">${p.rareza}</span><div class="prod-nombre">${p.nombre}</div><div class="prod-cat">${p.cat}</div><div class="prod-desc">${p.desc}</div><div class="prod-footer"><div><div class="prod-precio">${p.precio.toLocaleString()} <span>Marcas</span></div><div class="prod-stock">Stock: ${p.stock}</div></div>${!ES_DIRECTOR?`<button class="btn-comprar-prod ${esMN?'mercado-btn':''}" onclick="comprarProducto('${p.id}','${tiendaVendedorActivo}')" ${(!ok||st)?'disabled':''}>${st?'Sin stock':!ok?'Sin fondos':'Comprar'}</button>`:`<span style="font-size:10px;color:var(--muted);">Vista DJ</span>`}</div></div>`;
+
+function renderTiendaProductos() {
+  const productos = TIENDA_DB[tiendaVendedorActivo]||[];
+  const saldo = MI_PERSONAJE?.dinero||0;
+  const cats = ['todos',...new Set(productos.map(p=>p.cat))];
+  const filtroHTML = cats.map(c=>`<button class="filtro-btn ${c===tiendaFiltroActivo?'active':''}" onclick="setTiendaFiltro('${c}',this)">${c==='todos'?'Todos':c}</button>`).join('');
+  const filtrados = tiendaFiltroActivo==='todos' ? productos : productos.filter(p=>p.cat===tiendaFiltroActivo);
+  const esMN = tiendaVendedorActivo==='mercado_negro';
+  const prodsHTML = filtrados.map(p => {
+    const puedePagar = saldo>=p.precio, sinStock = p.stock<=0;
+    return `<div class="prod-card">
+      <span class="prod-rareza" style="color:${p.color};border-color:${p.color}22;">${p.rareza}</span>
+      <div class="prod-nombre">${p.nombre}</div>
+      <div class="prod-cat">${p.cat}</div>
+      <div class="prod-desc">${p.desc}</div>
+      <div class="prod-footer">
+        <div><div class="prod-precio">${p.precio.toLocaleString()} <span>Marcas</span></div><div class="prod-stock">Stock: ${p.stock}</div></div>
+        ${!ES_DIRECTOR
+          ? `<button class="btn-comprar-prod ${esMN?'mercado-btn':''}" onclick="comprarProducto('${p.id}','${tiendaVendedorActivo}')" ${(!puedePagar||sinStock)?'disabled':''}>
+              ${sinStock?'Sin stock':!puedePagar?'Sin fondos':'Comprar'}</button>`
+          : `<span style="font-size:10px;color:var(--muted);">Vista DJ</span>`}
+      </div>
+    </div>`;
   }).join('');
-  document.getElementById('tienda-body').innerHTML=`<div class="tienda-filtro">${filtroHTML}</div><div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:10px;">${prodsHTML||'<div class="tienda-empty">Sin productos.</div>'}</div>`;
+  document.getElementById('tienda-body').innerHTML = `<div class="tienda-filtro">${filtroHTML}</div><div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:10px;">${prodsHTML||'<div class="tienda-empty">Sin productos.</div>'}</div>`;
 }
-window.comprarProducto = async function(prodId,vendedor){
-  if(!MI_PERSONAJE){toast('Sin personaje.','error');return;}
-  const prod=(TIENDA_DB[vendedor]||[]).find(p=>p.id===prodId); if(!prod) return;
-  const saldo=MI_PERSONAJE.dinero||0;
-  if(saldo<prod.precio){toast('Marcas insuficientes.','error');return;}
-  if(prod.stock<=0){toast('Sin stock.','error');return;}
-  const pRef=doc(db,'personajes',MI_PERSONAJE.id), pSnap=await getDoc(pRef);
-  const objetos=[...(pSnap.data().objetos||[])];
-  const idx=objetos.findIndex(o=>o.nombre===prod.nombre);
-  if(idx>=0) objetos[idx].cantidad=(objetos[idx].cantidad||1)+1;
+
+window.comprarProducto = async function(prodId, vendedor) {
+  if (!MI_PERSONAJE) { toast('Sin personaje.','error'); return; }
+  const prod = (TIENDA_DB[vendedor]||[]).find(p=>p.id===prodId);
+  if (!prod) return;
+  const saldoActual = MI_PERSONAJE.dinero||0;
+  if (saldoActual<prod.precio) { toast('Marcas insuficientes.','error'); return; }
+  if (prod.stock<=0) { toast('Sin stock.','error'); return; }
+  const pRef = doc(db,'personajes',MI_PERSONAJE.id);
+  const pSnap = await getDoc(pRef);
+  const objetos = [...(pSnap.data().objetos||[])];
+  const idx = objetos.findIndex(o=>o.nombre===prod.nombre);
+  if (idx>=0) objetos[idx].cantidad=(objetos[idx].cantidad||1)+1;
   else objetos.push({nombre:prod.nombre,desc:prod.desc,cantidad:1,tipo:'objeto',cat:prod.cat});
-  const nuevo=saldo-prod.precio;
-  await updateDoc(pRef,{objetos,dinero:nuevo});
+  const nuevoSaldo = saldoActual-prod.precio;
+  await updateDoc(pRef, {objetos, dinero:nuevoSaldo});
   prod.stock=Math.max(0,prod.stock-1);
-  MI_PERSONAJE.dinero=nuevo; MI_PERSONAJE.objetos=objetos;
-  document.getElementById('tienda-saldo-val').textContent=nuevo.toLocaleString();
-  await addDoc(collection(db,'campanas',CAMPANA_ID,'mensajes'),{autorId:ME.uid,autorNombre:MI_PERSONAJE.nombre,tipo:'sistema',texto:`🛒 ${MI_PERSONAJE.nombre} compró ${prod.nombre} por ${prod.precio.toLocaleString()} Marcas.`,timestamp:serverTimestamp()});
-  toast(`✅ ${prod.nombre} comprado. Saldo: ${nuevo.toLocaleString()} Marcas.`,'success');
+  MI_PERSONAJE.dinero=nuevoSaldo; MI_PERSONAJE.objetos=objetos;
+  document.getElementById('tienda-saldo-val').textContent = nuevoSaldo.toLocaleString();
+  await addDoc(collection(db,'campanas',CAMPANA_ID,'mensajes'), {
+    autorId:ME.uid, autorNombre:MI_PERSONAJE.nombre, tipo:'sistema',
+    texto:`🛒 ${MI_PERSONAJE.nombre} compró ${prod.nombre} por ${prod.precio.toLocaleString()} Marcas.`,
+    timestamp:serverTimestamp(),
+  });
+  toast(`✅ ${prod.nombre} comprado. Saldo: ${nuevoSaldo.toLocaleString()} Marcas.`,'success');
   renderTiendaProductos();
 };
 
