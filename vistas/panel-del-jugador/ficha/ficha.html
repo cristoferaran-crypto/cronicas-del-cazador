@@ -158,6 +158,64 @@
     .nen-locked-sub{font-family:var(--mono);font-size:0.72rem;letter-spacing:0.15em;text-transform:uppercase;color:var(--blue);margin-bottom:1rem;display:block;}
     .nen-locked-desc{font-size:0.88rem;color:var(--muted);line-height:1.7;}
     .nen-lvl-badge{display:inline-block;margin-top:1.5rem;font-family:var(--mono);font-size:0.68rem;letter-spacing:0.2em;text-transform:uppercase;color:rgba(126,200,227,0.5);border:1px solid rgba(126,200,227,0.15);border-radius:99px;padding:4px 16px;}
+    /* ══ MEJORAR TAB ══ */
+    .mejorar-seccion { margin-bottom: 20px; }
+    .mejorar-seccion-titulo {
+      font-family: var(--mono); font-size: 0.58rem;
+      letter-spacing: 0.2em; text-transform: uppercase;
+      color: var(--red); margin-bottom: 10px; padding-bottom: 6px;
+      border-bottom: 1px solid var(--border);
+      display: flex; align-items: center; gap: 8px;
+    }
+    .xp-disponible-banner {
+      display: flex; justify-content: space-between; align-items: center;
+      padding: 12px 16px; margin-bottom: 20px;
+      background: rgba(201,168,76,0.08); border: 1px solid rgba(201,168,76,0.3);
+      border-radius: 6px;
+    }
+    .xp-banner-label { font-family: var(--mono); font-size: 0.65rem; letter-spacing: 0.15em; text-transform: uppercase; color: var(--muted); }
+    .xp-banner-val { font-family: var(--serif); font-size: 1.8rem; font-weight: 800; color: var(--gold); }
+    .xp-banner-desc { font-family: var(--mono); font-size: 0.6rem; color: var(--muted); }
+    .mejora-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin-bottom: 8px; }
+    .mejora-card {
+      background: var(--card); border: 1px solid var(--border);
+      border-radius: 6px; padding: 10px;
+      display: flex; flex-direction: column; gap: 6px;
+      transition: border-color 0.2s;
+    }
+    .mejora-card:hover { border-color: rgba(255,51,51,0.25); }
+    .mejora-card.maxed { opacity: 0.5; }
+    .mejora-card.especializado { border-color: rgba(201,168,76,0.3); background: rgba(201,168,76,0.04); }
+    .mejora-nombre { font-family: var(--cond); font-size: 0.82rem; font-weight: 600; color: var(--text); }
+    .mejora-nivel-row { display: flex; align-items: center; gap: 4px; }
+    .mejora-dot { width: 10px; height: 10px; border-radius: 2px; border: 1px solid rgba(255,255,255,0.1); }
+    .mejora-dot.filled { background: var(--red); border-color: var(--red); }
+    .mejora-dot.max-dot { background: var(--gold); border-color: var(--gold); }
+    .mejora-meta {
+      display: flex; justify-content: space-between; align-items: center;
+    }
+    .mejora-costo {
+      font-family: var(--mono); font-size: 0.6rem;
+      color: var(--muted); letter-spacing: 0.05em;
+    }
+    .mejora-costo .costo-val { color: var(--gold); font-weight: 700; }
+    .btn-comprar {
+      padding: 4px 10px; font-family: var(--mono); font-size: 0.6rem;
+      letter-spacing: 0.08em; text-transform: uppercase;
+      background: var(--red-dim); border: 1px solid var(--red-border);
+      color: #ffbbbb; border-radius: 3px; cursor: pointer;
+      transition: all 0.15s; white-space: nowrap;
+    }
+    .btn-comprar:hover:not(:disabled) { background: var(--red); color: white; }
+    .btn-comprar:disabled { opacity: 0.4; cursor: not-allowed; }
+    .descuento-check {
+      display: flex; align-items: center; gap: 8px;
+      padding: 8px 12px; background: rgba(74,222,128,0.06);
+      border: 1px solid rgba(74,222,128,0.2); border-radius: 4px;
+      cursor: pointer; margin-bottom: 16px;
+    }
+    .descuento-check input { accent-color: var(--green); width: 14px; height: 14px; cursor: pointer; }
+    .descuento-check label { font-family: var(--mono); font-size: 0.62rem; letter-spacing: 0.08em; color: var(--bonus-color); cursor: pointer; }
     #toast{position:fixed;bottom:1.5rem;right:1.5rem;z-index:9999;padding:0.75rem 1.25rem;border-radius:5px;font-family:var(--mono);font-size:0.75rem;opacity:0;transition:opacity 0.3s;border-left:3px solid;pointer-events:none;}
     ::-webkit-scrollbar{width:3px;}
     ::-webkit-scrollbar-thumb{background:rgba(255,51,51,0.25);border-radius:2px;}
@@ -168,6 +226,12 @@
 <body>
 
 <nav class="ficha-nav">
+  <a href="../../../index.html" style="display:flex;align-items:center;text-decoration:none;margin-right:8px;flex-shrink:0;">
+    <img src="../../../imagenes/logo.png" alt="CDC"
+      style="height:28px;width:auto;filter:invert(1) brightness(0.85);mix-blend-mode:screen;transition:filter 0.2s;"
+      onmouseover="this.style.filter='invert(1) brightness(1) drop-shadow(0 0 8px rgba(255,51,51,0.5))'"
+      onmouseout="this.style.filter='invert(1) brightness(0.85)'">
+  </a>
   <span class="nav-brand">✦ Crónicas</span>
   <span class="nav-charname" id="nav-charname">—</span>
   <span class="save-ok" id="save-ok">✓ guardado</span>
@@ -187,6 +251,7 @@
   <button class="tab-btn" onclick="switchTab('equipo',this)"><i class="ri-archive-2-line"></i> Equipo</button>
   <button class="tab-btn" onclick="switchTab('historia',this)"><i class="ri-quill-pen-line"></i> Historia</button>
   <button class="tab-btn" onclick="switchTab('nen',this)"><i class="ri-fire-line"></i> Nen</button>
+  <button class="tab-btn" onclick="switchTab('mejorar',this)"><i class="ri-arrow-up-circle-line"></i> Mejorar</button>
 </div>
 
 <div class="tab-panel active" id="tab-ficha">
@@ -319,6 +384,34 @@
     <span class="nen-locked-sub">Habilidad bloqueada</span>
     <p class="nen-locked-desc">El Nen no es algo que se aprende en un libro ni se hereda por sangre.<br>Se despierta cuando el cuerpo y la mente han alcanzado su límite...<br>y lo han superado.</p>
     <div class="nen-lvl-badge">🔒 Alcanza el Nivel 10 para desbloquear esta pestaña</div>
+  </div>
+</div>
+</div>
+
+<div class="tab-panel" id="tab-mejorar">
+<div class="historia-panel" id="mejorar-panel">
+  <div class="fc">
+    <div class="fc-header"><i class="ri-arrow-up-circle-line" style="color:var(--muted);font-size:0.8rem;"></i><span class="fc-title">Gastar Experiencia</span></div>
+    <div class="fc-body">
+      <div class="xp-disponible-banner">
+        <div>
+          <span class="xp-banner-label">XP Disponible</span>
+          <div style="display:flex;align-items:baseline;gap:8px;">
+            <span class="xp-banner-val" id="xp-disp">0</span>
+            <span class="xp-banner-desc">puntos para gastar</span>
+          </div>
+        </div>
+        <div style="text-align:right;">
+          <span class="xp-banner-desc" style="display:block;">XP Total: <strong id="xp-total-disp" style="color:var(--gold);">0</strong></span>
+          <span class="xp-banner-desc" style="display:block;">XP Gastada: <strong id="xp-gastada-disp" style="color:var(--muted);">0</strong></span>
+        </div>
+      </div>
+      <div class="descuento-check" id="descuento-wrap">
+        <input type="checkbox" id="descuento-cb" onchange="renderMejorar()">
+        <label for="descuento-cb">Aplicar descuento de entrenamiento (−20%) — requiere aprobación del DJ</label>
+      </div>
+      <div id="mejorar-contenido"></div>
+    </div>
   </div>
 </div>
 </div>
@@ -626,6 +719,236 @@ onAuthStateChanged(auth, async (user) => {
     showToast('Error al cargar el personaje.','error');
   }
 });
+
+// ══════════════════════════════════════
+// SISTEMA DE MEJORA DE XP
+// ══════════════════════════════════════
+
+// Costos según el documento de progresión
+const COSTO_ATTR  = [0, 4, 8, 12, 16, 35, 42]; // índice = nivel destino
+const COSTO_SKILL = [0, 2, 4,  6,  8, 20, 24];
+
+// Límites por nivel
+function getLimites(nivel) {
+  const n = parseInt(nivel)||1;
+  if (n <= 2)  return { attrMax:3, attrResto:2, skillMax:2, skillResto:2 };
+  if (n <= 5)  return { attrMax:4, attrResto:3, skillMax:3, skillResto:3 };
+  if (n <= 9)  return { attrMax:5, attrResto:4, skillMax:5, skillResto:4 };
+  return           { attrMax:5, attrResto:5, skillMax:5, skillResto:5 };
+}
+
+const ATTR_DEFS = [
+  {k:'fuerza',l:'Fuerza',i:'✊'},{k:'destreza',l:'Destreza',i:'⚡'},{k:'resistencia',l:'Resistencia',i:'🛡️'},
+  {k:'carisma',l:'Carisma',i:'💛'},{k:'manipulacion',l:'Manipulación',i:'🎭'},{k:'compostura',l:'Compostura',i:'🧘'},
+  {k:'percepcion',l:'Percepción',i:'👁️'},{k:'inteligencia',l:'Inteligencia',i:'🧠'},{k:'astucia',l:'Astucia',i:'♟️'}
+];
+
+const SKILL_DEFS = [
+  'Pelea','Esquivar','Armas Cuerpo a Cuerpo','Armas a Distancia','Armas de Fuego',
+  'Alerta','Sigilo','Callejeo / Orientación','Supervivencia','Atletismo','Seguridad','Reparación',
+  'Empatía','Subterfugio','Liderazgo','Intimidación','Trato con Animales','Interpretación',
+  'Investigación','Medicina','Academicismo','Informática','Conducir','Política'
+];
+
+window.renderMejorar = function() {
+  if (!p) return;
+  const xpDisp  = (p.xpTotal||0) - (p.xpGastada||0);
+  const lim      = getLimites(p.nivel);
+  const descuento = document.getElementById('descuento-cb')?.checked || false;
+
+  document.getElementById('xp-disp').textContent        = xpDisp;
+  document.getElementById('xp-total-disp').textContent  = p.xpTotal||0;
+  document.getElementById('xp-gastada-disp').textContent= p.xpGastada||0;
+
+  const attrEspecial  = p.attrEspecial  || '';
+  const skillEspecial = p.skillEspecial || '';
+
+  function costoConDescuento(costo) {
+    return descuento ? Math.floor(costo * 0.8) : costo;
+  }
+
+  function dotsMejora(actual, maximo) {
+    return Array.from({length:6}, (_,i) => {
+      const d = i+1;
+      if (d <= actual) return `<div class="mejora-dot filled"></div>`;
+      if (d === maximo) return `<div class="mejora-dot max-dot" title="Máximo"></div>`;
+      return `<div class="mejora-dot"></div>`;
+    }).join('');
+  }
+
+  // ── ATRIBUTOS ──
+  let attrsHTML = `<div class="mejorar-seccion">
+    <div class="mejorar-seccion-titulo"><i class="ri-bar-chart-fill"></i> Atributos</div>
+    <p style="font-family:var(--mono);font-size:0.6rem;color:var(--muted);margin-bottom:12px;">
+      Destacado: <strong style="color:var(--gold);">${attrEspecial ? ATTR_DEFS.find(a=>a.k===attrEspecial)?.l || attrEspecial : 'No definido'}</strong>
+      — puede llegar a ${lim.attrMax} | Resto: máx. ${lim.attrResto}
+    </p>
+    <div class="mejora-grid">`;
+
+  ATTR_DEFS.forEach(a => {
+    const baseVal  = getAttr(p.atributos||{}, a.k);
+    const bonoVal  = getBonusFor(a.k, 'attr');
+    const effVal   = baseVal + bonoVal;
+    const esEsp    = a.k === attrEspecial;
+    const maxPerm  = esEsp ? lim.attrMax : lim.attrResto;
+    const sigNivel = baseVal + 1;
+    const maxed    = baseVal >= maxPerm || baseVal >= 5;
+    const costo    = maxed ? 0 : costoConDescuento(COSTO_ATTR[sigNivel] || 0);
+    const puedeComprar = !maxed && xpDisp >= costo && costo > 0;
+
+    attrsHTML += `
+      <div class="mejora-card ${maxed?'maxed':''} ${esEsp?'especializado':''}">
+        <div style="display:flex;justify-content:space-between;align-items:center;">
+          <span class="mejora-nombre">${a.i} ${a.l}</span>
+          ${esEsp ? `<span style="font-family:var(--mono);font-size:0.52rem;color:var(--gold);">★ Dest.</span>` : ''}
+        </div>
+        <div class="mejora-nivel-row">${dotsMejora(baseVal, maxPerm)}</div>
+        <div class="mejora-meta">
+          <div class="mejora-costo">
+            ${bonoVal > 0 ? `<span style="color:var(--bonus-color);">base ${baseVal} +${bonoVal}</span><br>` : ''}
+            ${maxed
+              ? `<span style="color:var(--muted);">Máximo alcanzado</span>`
+              : `Subir a ${sigNivel}: <span class="costo-val">${costo} XP</span>${descuento?' (-20%)':''}`}
+          </div>
+          <button class="btn-comprar"
+            onclick="comprarAtributo('${a.k}',${baseVal},${costo})"
+            ${!puedeComprar ? 'disabled' : ''}>
+            ${maxed ? 'Máx' : '▲ Subir'}
+          </button>
+        </div>
+      </div>`;
+  });
+
+  attrsHTML += `</div></div>`;
+
+  // ── HABILIDADES ──
+  let skillsHTML = `<div class="mejorar-seccion">
+    <div class="mejorar-seccion-titulo"><i class="ri-flashlight-fill"></i> Habilidades</div>
+    <p style="font-family:var(--mono);font-size:0.6rem;color:var(--muted);margin-bottom:12px;">
+      ${parseInt(p.nivel||1) >= 6
+        ? `Destacada: <strong style="color:var(--gold);">${skillEspecial||'No definida'}</strong> — puede llegar a ${lim.skillMax} | Resto: máx. ${lim.skillResto}`
+        : `Máximo por habilidad: ${lim.skillResto} (la habilidad destacada se desbloquea en Nv.6)`}
+    </p>
+    <div class="mejora-grid">`;
+
+  SKILL_DEFS.forEach(s => {
+    const baseVal  = getSkill(p.habilidades||{}, s);
+    const bonoVal  = getBonusFor(s, 'skill');
+    const esEsp    = s === skillEspecial;
+    const maxPerm  = (parseInt(p.nivel||1) >= 6 && esEsp) ? lim.skillMax : lim.skillResto;
+    const sigNivel = baseVal + 1;
+    const maxed    = baseVal >= maxPerm || baseVal >= 5;
+    const costo    = maxed ? 0 : costoConDescuento(COSTO_SKILL[sigNivel] || 0);
+    const puedeComprar = !maxed && xpDisp >= costo && costo > 0;
+
+    skillsHTML += `
+      <div class="mejora-card ${maxed?'maxed':''} ${esEsp?'especializado':''}">
+        <div style="display:flex;justify-content:space-between;align-items:center;">
+          <span class="mejora-nombre" style="font-size:0.75rem;">${s}</span>
+          ${esEsp ? `<span style="font-family:var(--mono);font-size:0.52rem;color:var(--gold);">★</span>` : ''}
+        </div>
+        <div class="mejora-nivel-row">${dotsMejora(baseVal, maxPerm)}</div>
+        <div class="mejora-meta">
+          <div class="mejora-costo">
+            ${bonoVal > 0 ? `<span style="color:var(--bonus-color);">+${bonoVal} bono</span><br>` : ''}
+            ${maxed
+              ? `<span style="color:var(--muted);">Máximo</span>`
+              : `A ${sigNivel}: <span class="costo-val">${costo} XP</span>`}
+          </div>
+          <button class="btn-comprar"
+            onclick="comprarHabilidad('${s.replace(/'/g,"\'")}',${baseVal},${costo})"
+            ${!puedeComprar ? 'disabled' : ''}>
+            ${maxed ? 'Máx' : '▲ Subir'}
+          </button>
+        </div>
+      </div>`;
+  });
+
+  skillsHTML += `</div></div>`;
+
+  document.getElementById('mejorar-contenido').innerHTML = attrsHTML + skillsHTML;
+};
+
+window.comprarAtributo = async function(key, nivelActual, costo) {
+  if (!p || costo <= 0) return;
+  const xpDisp = (p.xpTotal||0) - (p.xpGastada||0);
+  if (xpDisp < costo) { showToast('XP insuficiente.','error'); return; }
+
+  const nuevoNivel = nivelActual + 1;
+  if (!p.atributos) p.atributos = {};
+  p.atributos[key] = nuevoNivel;
+
+  // Actualizar efectivos
+  if (!p.atributosEfectivos) p.atributosEfectivos = {...p.atributos};
+  const bono = getBonusFor(key,'attr');
+  p.atributosEfectivos[key] = nuevoNivel + bono;
+
+  p.xpGastada = (p.xpGastada||0) + costo;
+
+  try {
+    await updateDoc(doc(db,'personajes',charId), {
+      [`atributos.${key}`]:         nuevoNivel,
+      [`atributosEfectivos.${key}`]: nuevoNivel + bono,
+      xpGastada:                    p.xpGastada,
+      updatedAt:                    serverTimestamp(),
+    });
+
+    // Re-renderizar todo
+    const attrs = p.atributosEfectivos || p.atributos || {};
+    const skills = p.habilidadesEfectivas || p.habilidades || {};
+    renderAttrs(attrs);
+    renderCombate(attrs, skills);
+    renderRecursos();
+    renderMejorar();
+    showToast(`✓ ${ATTR_DEFS.find(a=>a.k===key)?.l} subido a ${nuevoNivel}. -${costo} XP`,'success');
+  } catch(e) {
+    console.error(e);
+    showToast('Error al guardar.','error');
+  }
+};
+
+window.comprarHabilidad = async function(nombre, nivelActual, costo) {
+  if (!p || costo <= 0) return;
+  const xpDisp = (p.xpTotal||0) - (p.xpGastada||0);
+  if (xpDisp < costo) { showToast('XP insuficiente.','error'); return; }
+
+  const nuevoNivel = nivelActual + 1;
+  if (!p.habilidades) p.habilidades = {};
+  p.habilidades[nombre] = nuevoNivel;
+
+  if (!p.habilidadesEfectivas) p.habilidadesEfectivas = {...p.habilidades};
+  const bono = getBonusFor(nombre,'skill');
+  p.habilidadesEfectivas[nombre] = nuevoNivel + bono;
+
+  p.xpGastada = (p.xpGastada||0) + costo;
+
+  try {
+    await updateDoc(doc(db,'personajes',charId), {
+      [`habilidades.${nombre}`]:         nuevoNivel,
+      [`habilidadesEfectivas.${nombre}`]: nuevoNivel + bono,
+      xpGastada:                          p.xpGastada,
+      updatedAt:                          serverTimestamp(),
+    });
+
+    const attrs  = p.atributosEfectivos  || p.atributos  || {};
+    const skills = p.habilidadesEfectivas || p.habilidades || {};
+    renderSkills(skills);
+    renderCombate(attrs, skills);
+    renderRecursos();
+    renderMejorar();
+    showToast(`✓ ${nombre} subido a ${nuevoNivel}. -${costo} XP`,'success');
+  } catch(e) {
+    console.error(e);
+    showToast('Error al guardar.','error');
+  }
+};
+
+// Hook en switchTab para renderizar Mejorar al entrar
+const _origSwitchTab = window.switchTab;
+window.switchTab = function(name, btn) {
+  _origSwitchTab(name, btn);
+  if (name === 'mejorar') renderMejorar();
+};
 </script>
 </body>
 </html>
