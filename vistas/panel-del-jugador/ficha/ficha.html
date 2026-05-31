@@ -301,9 +301,9 @@
         <div class="hs" data-state="ko" onclick="setHealth('ko')">KO</div>
       </div>
       <div class="resources-grid">
-        <div class="res-cell"><span class="res-lbl">XP Total</span><span class="res-val" id="xp-val">0</span></div>
+        <div class="res-cell"><span class="res-lbl">XP Actual</span><span class="res-val" id="xp-val">0</span></div>
         <div class="res-cell"><span class="res-lbl">XP Gastada</span><span class="res-val" id="xpg-val">0</span></div>
-        <div class="res-cell"><span class="res-lbl">💰 Jenny</span><input type="number" class="res-input" id="dinero-input" value="0"></div>
+        <div class="res-cell"><span class="res-lbl">⚖️ Marcas</span><span class="res-val" id="dinero-val">0</span></div>
       </div>
       <div class="bonus-row">
         <span class="bonus-lbl" style="color:var(--bonus-color);">Bonos</span>
@@ -402,7 +402,7 @@
           </div>
         </div>
         <div style="text-align:right;">
-          <span class="xp-banner-desc" style="display:block;">XP Total: <strong id="xp-total-disp" style="color:var(--gold);">0</strong></span>
+          <span class="xp-banner-desc" style="display:block;">XP Acumulada: <strong id="xp-total-disp" style="color:var(--gold);">0</strong></span>
           <span class="xp-banner-desc" style="display:block;">XP Gastada: <strong id="xp-gastada-disp" style="color:var(--muted);">0</strong></span>
         </div>
       </div>
@@ -544,9 +544,9 @@ function renderHealth() {
 }
 
 function renderRecursos() {
-  document.getElementById('xp-val').textContent  = p.xpTotal  ||0;
+  document.getElementById('xp-val').textContent = (p.xpTotal||0) - (p.xpGastada||0);
   document.getElementById('xpg-val').textContent = p.xpGastada||0;
-  document.getElementById('dinero-input').value  = p.dinero   ||0;
+  document.getElementById('dinero-val').textContent = p.dinero||0;
   document.getElementById('pa-temp-input').value = p.paTemporal||0;
 }
 
@@ -604,7 +604,7 @@ function recopilarCambios() {
     historia:    document.getElementById('historia-input')?.value   ||'',
     apariencia:  document.getElementById('apariencia-input')?.value ||'',
     notasDJ:     document.getElementById('notas-input')?.value      ||'',
-    dinero:      parseInt(document.getElementById('dinero-input')?.value)||0,
+    dinero:      p.dinero || 0,
     equipo:      document.getElementById('equipo-input')?.value     ||'',
     paTemporal:  parseInt(document.getElementById('pa-temp-input')?.value)||0,
     armas:       p.armas   || [],
@@ -704,7 +704,7 @@ onAuthStateChanged(auth, async (user) => {
     document.getElementById('notas-input').value      = p.notasDJ||'';
     document.getElementById('char-counter').textContent = `${(p.historia||'').length} / 2000`;
 
-    ['obj-input','vida-obj-input','historia-input','apariencia-input','notas-input','dinero-input','equipo-input'].forEach(id=>{
+    ['obj-input','vida-obj-input','historia-input','apariencia-input','notas-input','equipo-input'].forEach(id=>{
       const el=document.getElementById(id);
       if(!el) return;
       el.addEventListener('input',()=>{
@@ -756,7 +756,7 @@ window.renderMejorar = function() {
   const lim      = getLimites(p.nivel);
   const descuento = document.getElementById('descuento-cb')?.checked || false;
 
-  document.getElementById('xp-disp').textContent        = xpDisp;
+  document.getElementById('xp-disp').textContent = xpDisp;
   document.getElementById('xp-total-disp').textContent  = p.xpTotal||0;
   document.getElementById('xp-gastada-disp').textContent= p.xpGastada||0;
 

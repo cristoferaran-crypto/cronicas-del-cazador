@@ -850,7 +850,7 @@ function renderMensaje(msg) {
   } else if (tipo==='item') {
     contenido = `🎒 <strong>${msg.paraName}</strong> recibió: <strong>${msg.item}</strong>${msg.cantidad>1?` ×${msg.cantidad}`:''}`;
   } else if (tipo==='dinero') {
-    contenido = `💰 <strong>${msg.paraName}</strong> recibió <strong>${msg.cantidad} Jenny</strong>`;
+    contenido = `⚖️ <strong>${msg.paraName}</strong> recibió <strong>${msg.cantidad} Marcas</strong>`;
   } else if (tipo==='privado') {
     contenido = `🔒 <em>(Privado al DJ)</em> ${msg.texto}`;
   } else if (tipo==='susurro') {
@@ -1070,7 +1070,7 @@ function renderTabJugadores() {
         </div>
         <div class="jfc-stats">
           <div class="jfc-stat"><span class="jfc-stat-val">${p.paActual !== undefined ? p.paActual : pa}/${pa}</span><span class="jfc-stat-lbl">PA</span></div>
-          <div class="jfc-stat"><span class="jfc-stat-val dorado">${p.xpTotal||0}</span><span class="jfc-stat-lbl">XP</span></div>
+          <div class="jfc-stat"><span class="jfc-stat-val dorado">${(p.xpTotal||0)-(p.xpGastada||0)}</span><span class="jfc-stat-lbl">XP Actual</span></div>
           <div class="jfc-stat"><span class="jfc-stat-val" style="font-size:12px;">${estado}</span><span class="jfc-stat-lbl">Estado</span></div>
         </div>
         <div style="margin-top:8px;">
@@ -1086,10 +1086,24 @@ function renderTabJugadores() {
 }
 
 function renderTabXP() {
-  const opts = PERSONAJES_CAMPANA.map(p => `<option value="${p.id}" data-nombre="${p.nombre}">${p.nombre} (Nv.${p.nivel})</option>`).join('');
+  const opts = PERSONAJES_CAMPANA.map(p => `<option value="${p.id}" data-nombre="${p.nombre}" data-nivel="${p.nivel||1}">${p.nombre} (Nv.${p.nivel||1})</option>`).join('');
   return `<div class="xp-form">
-    <div><label class="form-label">Personaje</label><select class="form-select" id="xp-personaje">${opts}</select></div>
-    <div><label class="form-label">Criterios (máx. 8 XP)</label>
+    <div><label class="form-label">Personaje</label><select class="form-select" id="xp-personaje" onchange="actualizarInfoPersonaje(this)">${opts}</select></div>
+
+    <div style="background:var(--sup3);border:1px solid var(--borde);padding:10px 12px;margin-bottom:4px;">
+      <div style="display:flex;justify-content:space-between;align-items:center;">
+        <span style="font-size:11px;color:var(--muted);font-weight:700;letter-spacing:0.1em;text-transform:uppercase;">XP Actual</span>
+        <span style="font-family:'Cinzel',serif;font-size:18px;font-weight:800;color:var(--dorado);" id="dj-xp-actual">—</span>
+      </div>
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-top:4px;">
+        <span style="font-size:11px;color:var(--muted);font-weight:700;letter-spacing:0.1em;text-transform:uppercase;">Marcas</span>
+        <span style="font-family:'Cinzel',serif;font-size:18px;font-weight:800;color:var(--verde);" id="dj-marcas">—</span>
+      </div>
+    </div>
+
+    <div class="form-sep" style="height:1px;background:var(--borde);margin:12px 0;"></div>
+
+    <div><label class="form-label">Criterios de XP (máx. 8)</label>
       <div class="criterios-grid">
         ${CRITERIOS_XP.map((c,i)=>`<div class="criterio-item" id="crit-${i}" onclick="toggleCriterio(${i})"><div class="criterio-check" id="check-${i}"></div><span class="criterio-texto">${c}</span></div>`).join('')}
       </div>
@@ -1097,6 +1111,38 @@ function renderTabXP() {
     <div class="xp-total-preview"><span class="xp-preview-label">XP a otorgar</span><span class="xp-preview-val" id="xp-preview-val">0</span></div>
     <div><label class="form-label">Nota (opcional)</label><input class="form-input-vtt" type="text" id="xp-nota" placeholder="Motivo..."></div>
     <button class="btn-accion-dj" onclick="otorgarXP()"><i class="ri-star-line"></i> Otorgar XP</button>
+
+    <div class="form-sep" style="height:1px;background:var(--borde);margin:16px 0;"></div>
+
+    <label class="form-label" style="color:var(--dorado);">⬆ Subir Nivel</label>
+    <p style="font-size:11px;color:var(--muted);margin-bottom:10px;font-style:italic;">Solo el Director puede subir el nivel de un personaje.</p>
+    <div style="display:flex;gap:8px;align-items:center;margin-bottom:4px;">
+      <span style="font-size:12px;color:var(--sec);">Nivel actual: <strong style="color:var(--texto);" id="dj-nivel-actual">—</strong></span>
+      <span style="font-size:12px;color:var(--muted);">→</span>
+      <span style="font-size:12px;color:var(--dorado);" id="dj-nivel-nuevo">—</span>
+    </div>
+    <button class="btn-accion-dj" style="background:rgba(201,168,76,0.15);border:1px solid var(--borde-d);color:var(--dorado);" onclick="subirNivel()">
+      <i class="ri-arrow-up-circle-line"></i> Subir de Nivel
+    </button>
+
+    <div class="form-sep" style="height:1px;background:var(--borde);margin:16px 0;"></div>
+
+    <label class="form-label" style="color:var(--verde);">⚖️ Gestión de Marcas</label>
+    <p style="font-size:11px;color:var(--muted);margin-bottom:10px;font-style:italic;">Solo el Director puede modificar las Marcas de los personajes.</p>
+    <div style="display:flex;gap:8px;margin-bottom:8px;">
+      <div style="flex:1;">
+        <label class="form-label">Cantidad</label>
+        <input class="form-input-vtt" type="number" id="marcas-cantidad" value="100" min="1">
+      </div>
+    </div>
+    <div style="display:flex;gap:8px;">
+      <button class="btn-accion-dj" style="flex:1;" onclick="modificarMarcas(1)">
+        <i class="ri-add-line"></i> Dar Marcas
+      </button>
+      <button class="btn-accion-dj" style="flex:1;background:rgba(192,57,43,0.15);border:1px solid var(--borde-r);color:#ff8080;" onclick="modificarMarcas(-1)">
+        <i class="ri-subtract-line"></i> Quitar Marcas
+      </button>
+    </div>
   </div>`;
 }
 
@@ -1108,7 +1154,7 @@ function renderTabInventario() {
     <div class="inv-tipo-selector">
       <button class="inv-tipo-btn active" onclick="setInvTipo('objeto',this)">Objeto</button>
       <button class="inv-tipo-btn" onclick="setInvTipo('arma',this)">Arma</button>
-      <button class="inv-tipo-btn" onclick="setInvTipo('dinero',this)">💰 Jenny</button>
+      <button class="inv-tipo-btn" onclick="setInvTipo('dinero',this)">⚖️ Marcas</button>
     </div>
     <div id="inv-form-objeto">
       <label class="form-label">Nombre del objeto</label>
@@ -1126,9 +1172,9 @@ function renderTabInventario() {
       <button class="btn-accion-dj" onclick="entregarArma()"><i class="ri-sword-line"></i> Entregar arma</button>
     </div>
     <div id="inv-form-dinero" style="display:none;">
-      <label class="form-label">Cantidad de Jenny</label>
+      <label class="form-label">Cantidad de Marcas</label>
       <input class="form-input-vtt" type="number" id="inv-jenny" value="100" min="1" style="margin-bottom:8px;">
-      <button class="btn-accion-dj" onclick="entregarDinero()"><i class="ri-money-dollar-circle-line"></i> Entregar Jenny</button>
+      <button class="btn-accion-dj" onclick="entregarDinero()"><i class="ri-money-dollar-circle-line"></i> Entregar Marcas</button>
     </div>
   </div>`;
 }
@@ -1346,7 +1392,7 @@ window.entregarDinero = async function() {
     autorId:ME.uid, autorNombre:(ME.displayName||'Director')+' [DJ]',
     tipo:'dinero', paraId:pId, paraName:pNom, cantidad:jenny, timestamp:serverTimestamp(),
   });
-  toast(`💰 ${jenny} Jenny entregados a ${pNom}`,'success');
+  toast(`⚖️ ${jenny} Marcas entregadas a ${pNom}`,'success');
 };
 
 window.enviarSusurro = async function() {
@@ -1372,6 +1418,83 @@ window.cambiarEstado = async function(personajeId, nuevoEstado, btn) {
     if(e===nuevoEstado) b.classList.add(`active-${nuevoEstado}`);
   });
   toast(`Estado: ${nuevoEstado}`,'success');
+};
+
+window.actualizarInfoPersonaje = function(sel) {
+  const pId = sel.value;
+  const p   = PERSONAJES_CAMPANA.find(x => x.id === pId);
+  if (!p) return;
+  const xpAct = (p.xpTotal||0) - (p.xpGastada||0);
+  const nivel  = parseInt(p.nivel||1);
+  document.getElementById('dj-xp-actual').textContent  = xpAct;
+  document.getElementById('dj-marcas').textContent      = p.dinero||0;
+  document.getElementById('dj-nivel-actual').textContent = nivel;
+  document.getElementById('dj-nivel-nuevo').textContent  = `Nivel ${nivel+1}`;
+};
+
+// Llamar al cargar la tab
+const _origRenderTabXP = renderTabXP;
+// Hook: actualizar info al abrir tab XP
+const _origSetTab = window.setTab;
+window.setTab = function(tab, el) {
+  _origSetTab(tab, el);
+  if (tab === 'xp') {
+    setTimeout(() => {
+      const sel = document.getElementById('xp-personaje');
+      if (sel && PERSONAJES_CAMPANA.length) actualizarInfoPersonaje(sel);
+    }, 50);
+  }
+};
+
+window.subirNivel = async function() {
+  const sel   = document.getElementById('xp-personaje');
+  const pId   = sel.value;
+  const pNom  = sel.options[sel.selectedIndex]?.dataset.nombre || '?';
+  const p     = PERSONAJES_CAMPANA.find(x => x.id === pId);
+  if (!p) return;
+  const nivelActual = parseInt(p.nivel||1);
+  const nivelNuevo  = nivelActual + 1;
+
+  if (!confirm(`¿Subir a ${pNom} al nivel ${nivelNuevo}?`)) return;
+
+  await updateDoc(doc(db,'personajes',pId), { nivel: nivelNuevo });
+
+  await addDoc(collection(db,'campanas',CAMPANA_ID,'mensajes'), {
+    autorId:ME.uid, autorNombre:(ME.displayName||'Director')+' [DJ]',
+    tipo:'sistema',
+    texto:`⬆ ${pNom} ha subido al Nivel ${nivelNuevo}!`,
+    timestamp:serverTimestamp(),
+  });
+
+  toast(`⬆ ${pNom} ahora es Nivel ${nivelNuevo}`, 'success');
+  document.getElementById('dj-nivel-actual').textContent = nivelNuevo;
+  document.getElementById('dj-nivel-nuevo').textContent  = `Nivel ${nivelNuevo+1}`;
+};
+
+window.modificarMarcas = async function(signo) {
+  const sel      = document.getElementById('xp-personaje');
+  const pId      = sel.value;
+  const pNom     = sel.options[sel.selectedIndex]?.dataset.nombre || '?';
+  const cantidad = parseInt(document.getElementById('marcas-cantidad').value)||0;
+  if (cantidad <= 0) { toast('Ingresa una cantidad válida.','error'); return; }
+
+  const pRef  = doc(db,'personajes',pId);
+  const pSnap = await getDoc(pRef);
+  const actual = pSnap.data().dinero||0;
+  const nuevo  = Math.max(0, actual + (signo * cantidad));
+
+  await updateDoc(pRef, { dinero: nuevo });
+
+  const accion = signo > 0 ? 'recibió' : 'perdió';
+  await addDoc(collection(db,'campanas',CAMPANA_ID,'mensajes'), {
+    autorId:ME.uid, autorNombre:(ME.displayName||'Director')+' [DJ]',
+    tipo:'dinero', paraId:pId, paraName:pNom,
+    cantidad: signo * cantidad,
+    timestamp:serverTimestamp(),
+  });
+
+  document.getElementById('dj-marcas').textContent = nuevo;
+  toast(`⚖️ ${pNom} ${accion} ${cantidad} Marcas. Total: ${nuevo}`, 'success');
 };
 
 window.guardarNotasDJ = () => localStorage.setItem(`notas-dj-${CAMPANA_ID}`, document.getElementById('notas-dj-area')?.value||'');
@@ -1427,7 +1550,7 @@ window.abrirFichaPersonaje = function(p) {
     </div>
     <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:4px;">
       <div style="background:var(--sup3);padding:10px;text-align:center;"><span style="font-family:'Cinzel',serif;font-size:20px;font-weight:800;color:var(--texto);display:block;">${init}</span><span style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:0.1em;color:var(--muted);">Iniciativa</span></div>
-      <div style="background:var(--sup3);padding:10px;text-align:center;"><span style="font-family:'Cinzel',serif;font-size:20px;font-weight:800;color:var(--dorado);display:block;">${p.xpTotal||0}</span><span style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:0.1em;color:var(--muted);">XP Total</span></div>
+      <div style="background:var(--sup3);padding:10px;text-align:center;"><span style="font-family:'Cinzel',serif;font-size:20px;font-weight:800;color:var(--dorado);display:block;">${(p.xpTotal||0)-(p.xpGastada||0)}</span><span style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:0.1em;color:var(--muted);">XP Actual</span></div>
     </div>
   </div>`;
 
@@ -1455,7 +1578,7 @@ window.abrirFichaPersonaje = function(p) {
   ].join('');
 
   const tabInv = `<div class="ficha-tab-body" id="ftab-inv">
-    <div class="jenny-display"><i class="ri-money-dollar-circle-line"></i><span class="jenny-val">${dinero}</span><span class="jenny-label">Jenny</span></div>
+    <div class="jenny-display"><i class="ri-money-dollar-circle-line"></i><span class="jenny-val">${dinero}</span><span class="jenny-label">Marcas</span></div>
     ${itemsHTML||`<div class="inv-empty"><i class="ri-inbox-line"></i>Sin objetos todavía.</div>`}
   </div>`;
 
