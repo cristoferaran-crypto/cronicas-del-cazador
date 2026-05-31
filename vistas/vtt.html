@@ -344,8 +344,8 @@
     .mapa-inactivo #canvas-draw{display:none;}
     .mapa-inactivo .mapa-tools{display:none;}
     .mapa-inactivo .color-picker-wrap{display:none!important;}
-    .mapa-overlay-msg{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;z-index:5;pointer-events:none;}
-    .mapa-overlay-msg span{background:rgba(0,0,0,0.6);border:1px solid var(--borde-d);color:var(--dorado);font-family:'Cinzel',serif;font-size:13px;font-weight:700;padding:10px 20px;letter-spacing:0.1em;}
+    /* Notificación mapa — esquina inferior derecha, desaparece sola */
+    #mapa-notif{position:fixed;bottom:72px;right:16px;z-index:998;padding:10px 16px;background:rgba(10,10,12,0.95);border-left:3px solid var(--dorado);font-family:'Raleway',sans-serif;font-size:12px;font-weight:600;color:var(--dorado);opacity:0;transition:opacity 0.4s;pointer-events:none;max-width:280px;}
 
     /* Toast */
     #toast{position:fixed;bottom:70px;right:16px;z-index:999;padding:10px 16px;border-left:3px solid;font-family:'Raleway',sans-serif;font-size:12px;font-weight:600;opacity:0;transition:opacity 0.3s;pointer-events:none;max-width:280px;}
@@ -399,10 +399,6 @@
         <button class="img-flotante-close" onclick="cerrarImgFlotante()"><i class="ri-close-line"></i></button>
       </div>
       <img id="img-flotante-src" src="" alt="">
-    </div>
-    <!-- Overlay mapa inactivo -->
-    <div class="mapa-overlay-msg" id="mapa-overlay-msg" style="display:none;">
-      <span>⏸ Mapa no disponible</span>
     </div>
     <!-- Herramientas -->
     <div class="mapa-tools">
@@ -511,6 +507,7 @@
   </div>
 </div>
 
+<div id="mapa-notif"></div>
 <div id="toast"></div>
 
 <script type="module">
@@ -732,29 +729,39 @@ function iniciarMapaRealtime() {
     }
 
     // ══ MAPA INTERACTIVO ══
-    window._mapaActivo   = data.mapaInteractivo   !== false;
-    window._dibujoActivo = data.dibujoHabilitado  !== false;
+    const mapaActivo    = data.mapaInteractivo   !== false;
+    const dibujoActivo  = data.dibujoHabilitado  !== false;
+    const mapaAnterior  = window._mapaActivo;
+    const dibujoAnterior = window._dibujoActivo;
+    window._mapaActivo   = mapaActivo;
+    window._dibujoActivo = dibujoActivo;
 
-    const mapaWrap   = document.querySelector('.mapa-wrap');
-    const overlayMsg = document.getElementById('mapa-overlay-msg');
-    if (window._mapaActivo) {
+    const mapaWrap = document.querySelector('.mapa-wrap');
+    if (mapaActivo) {
       mapaWrap?.classList.remove('mapa-inactivo');
-      if (overlayMsg) overlayMsg.style.display = 'none';
     } else {
       mapaWrap?.classList.add('mapa-inactivo');
-      if (overlayMsg) overlayMsg.style.display = 'flex';
     }
-    // Bloquear dibujo a jugadores si DJ lo desactivó
+
+    // Bloquear/habilitar dibujo jugadores
     const dc = document.getElementById('canvas-draw');
     if (dc && !ES_DIRECTOR) {
-      if (!window._mapaActivo || !window._dibujoActivo) {
-        dc.style.pointerEvents = 'none';
-        dc.style.cursor = 'default';
+      if (!mapaActivo || !dibujoActivo) {
+        dc.style.pointerEvents = 'none'; dc.style.cursor = 'default';
       } else {
-        dc.style.pointerEvents = herramienta==='lapiz' ? 'all' : 'none';
-        dc.style.cursor = herramienta==='lapiz' ? 'crosshair' : 'default';
+        dc.style.pointerEvents = herramienta==='lapiz'?'all':'none';
+        dc.style.cursor = herramienta==='lapiz'?'crosshair':'default';
       }
     }
+
+    // Mostrar notificación solo cuando cambia el estado
+    if (mapaAnterior !== undefined && mapaAnterior !== mapaActivo) {
+      notifMapa(mapaActivo ? '🗺️ Mapa interactivo activado' : '⏸ Mapa desactivado');
+    }
+    if (mapaAnterior !== undefined && dibujoAnterior !== dibujoActivo && mapaActivo) {
+      notifMapa(dibujoActivo ? '✏️ Dibujo libre habilitado' : '🚫 Dibujo bloqueado por el DJ');
+    }
+
     if (ES_DIRECTOR && tabActiva==='mapa') renderSeccion('mapa');
   });
 }
@@ -1619,65 +1626,83 @@ window.cambiarEstado = async function(personajeId, nuevoEstado, btn) {
   toast(`Estado: ${nuevoEstado}`,'success');
 };
 
+// ═══════════════════════════════════
+// NOTIFICACIÓN MAPA (esquina, desaparece)
+// ═══════════════════════════════════
+function notifMapa(msg) {
+  const el = document.getElementById('mapa-notif');
+  if (!el) return;
+  el.textContent = msg;
+  el.style.opacity = '1';
+  clearTimeout(el._t);
+  el._t = setTimeout(() => { el.style.opacity = '0'; }, 3000);
+}
+
+// ═══════════════════════════════════
+// PANEL MAPA DJ
+// ═══════════════════════════════════
 function renderTabMapaDJ() {
   const mapaActivo   = window._mapaActivo   !== false;
   const dibujoActivo = window._dibujoActivo !== false;
 
-  const toggleRow = (label, desc, activo, fn, colorOn='var(--dorado)', colorOff='var(--muted)') => `
-    <div style="display:flex;align-items:center;justify-content:space-between;padding:14px;background:var(--sup2);border:1px solid ${activo?'var(--borde-d)':'var(--borde)'};margin-bottom:8px;transition:border-color 0.2s;">
+  const fila = (icono, titulo, desc, activo, fn, color) => `
+    <div style="display:flex;align-items:center;justify-content:space-between;padding:14px;background:var(--sup2);border:1px solid ${activo?'var(--borde-d)':'var(--borde)'};margin-bottom:8px;transition:all 0.2s;">
       <div>
-        <div style="font-family:'Cinzel',serif;font-size:13px;font-weight:700;color:${activo?colorOn:colorOff};margin-bottom:3px;">${label}</div>
+        <div style="font-family:'Cinzel',serif;font-size:13px;font-weight:700;color:${activo?color:'var(--muted)'};margin-bottom:3px;">${icono} ${titulo}</div>
         <div style="font-size:11px;color:var(--muted);">${desc}</div>
       </div>
       <button onclick="${fn}()" style="padding:6px 16px;font-size:11px;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;cursor:pointer;border:1px solid;transition:all 0.15s;background:transparent;
-        ${activo?`border-color:${colorOn};color:${colorOn};background:${colorOn}18;`:'border-color:var(--borde);color:var(--muted);'}">
-        ${activo?'Activo':'Inactivo'}
+        ${activo?`border-color:${color};color:${color};background:${color}18;`:'border-color:var(--borde);color:var(--muted);'}">
+        ${activo ? 'Activo' : 'Inactivo'}
       </button>
     </div>`;
 
   return `
     <p style="font-size:11px;color:var(--muted);margin-bottom:16px;font-style:italic;">Controla qué ven y pueden hacer los jugadores en el mapa.</p>
 
-    ${toggleRow(
-      '🗺️ Mapa Interactivo',
-      'Muestra tokens y herramientas de dibujo a los jugadores.',
-      mapaActivo, 'toggleMapaInteractivo'
-    )}
-
-    ${toggleRow(
-      '✏️ Dibujo Libre',
-      'Permite a los jugadores dibujar en el mapa.',
-      dibujoActivo && mapaActivo, 'toggleDibujoJugadores',
-      '#639922', 'var(--muted)'
-    )}
+    ${fila('🗺️','Mapa Interactivo','Muestra tokens y herramientas a los jugadores.',mapaActivo,'toggleMapaInteractivo','var(--dorado)')}
+    ${fila('✏️','Dibujo Libre','Permite a los jugadores dibujar en el mapa.',dibujoActivo&&mapaActivo,'toggleDibujoJugadores','#639922')}
 
     <div style="height:1px;background:var(--borde);margin:16px 0;"></div>
-
-    <div style="font-family:'Cinzel',serif;font-size:12px;font-weight:700;color:var(--muted);letter-spacing:0.1em;text-transform:uppercase;margin-bottom:10px;">Estado actual</div>
     <div style="padding:12px 14px;background:rgba(255,255,255,0.02);border:1px solid var(--borde);font-size:12px;color:var(--sec);line-height:1.8;">
       ${mapaActivo
-        ? `🟢 Mapa visible — Los jugadores ven tokens${dibujoActivo?' y pueden dibujar':' pero no pueden dibujar'}.`
+        ? `🟢 Mapa visible — ${dibujoActivo?'Los jugadores pueden dibujar.':'Solo ven los tokens.'}`
         : `🔴 Mapa oculto — Los jugadores solo ven el fondo.`}
     </div>
 
     <div style="height:1px;background:var(--borde);margin:16px 0;"></div>
-
     <button class="btn-accion-dj" style="background:rgba(192,57,43,0.15);border:1px solid var(--borde-r);color:#ff8080;" onclick="borrarTodo()">
       <i class="ri-delete-bin-line"></i> Limpiar todos los trazos
-    </button>
-  `;
+    </button>`;
 }
 
 window.toggleMapaInteractivo = async function() {
   const actual = window._mapaActivo !== false;
   await updateDoc(doc(db,'campanas',CAMPANA_ID), { mapaInteractivo: !actual });
-  toast(!actual ? '🗺️ Mapa activado para todos.' : '⏸ Mapa desactivado.', 'success');
+  // Aviso en chat público
+  await addDoc(collection(db,'campanas',CAMPANA_ID,'mensajes'), {
+    autorId: ME.uid,
+    autorNombre: (ME.displayName||'Director') + ' [DJ]',
+    tipo: 'sistema',
+    texto: !actual
+      ? '🗺️ El Director ha activado el mapa interactivo.'
+      : '⏸ El Director ha desactivado el mapa interactivo.',
+    timestamp: serverTimestamp(),
+  });
 };
 
 window.toggleDibujoJugadores = async function() {
   const actual = window._dibujoActivo !== false;
   await updateDoc(doc(db,'campanas',CAMPANA_ID), { dibujoHabilitado: !actual });
-  toast(!actual ? '✏️ Dibujo habilitado para jugadores.' : '🚫 Dibujo bloqueado.', 'info');
+  await addDoc(collection(db,'campanas',CAMPANA_ID,'mensajes'), {
+    autorId: ME.uid,
+    autorNombre: (ME.displayName||'Director') + ' [DJ]',
+    tipo: 'sistema',
+    texto: !actual
+      ? '✏️ El Director ha habilitado el dibujo libre.'
+      : '🚫 El Director ha bloqueado el dibujo.',
+    timestamp: serverTimestamp(),
+  });
 };
 
 window.guardarNotasDJ = () => localStorage.setItem(`notas-dj-${CAMPANA_ID}`, document.getElementById('notas-dj-area')?.value||'');
@@ -1926,6 +1951,16 @@ window.toggleTiendaDJ = async function() {
   const actual = window._tiendaData?.tiendaActiva || false;
   await updateDoc(doc(db,'campanas',CAMPANA_ID), { tiendaActiva: !actual });
   toast(!actual?'🛒 Tienda abierta.':'🔒 Tienda cerrada.','success');
+  // Aviso en chat público
+  await addDoc(collection(db,'campanas',CAMPANA_ID,'mensajes'), {
+    autorId: ME.uid,
+    autorNombre: (ME.displayName||'Director') + ' [DJ]',
+    tipo: 'sistema',
+    texto: !actual
+      ? '🛒 El mercado está abierto — Los cazadores pueden comprar.'
+      : '🔒 El mercado ha cerrado sus puertas.',
+    timestamp: serverTimestamp(),
+  });
   if (tabActiva==='tienda') renderSeccion('tienda');
 };
 
