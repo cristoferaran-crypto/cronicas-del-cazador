@@ -503,7 +503,7 @@
 import { auth, db } from "../js/firebase-config.js";
 import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-auth.js";
 import {
-  doc, getDoc, addDoc, updateDoc, deleteDoc,
+  doc, getDoc, getDocs, addDoc, updateDoc, deleteDoc,
   collection, query, where, orderBy,
   onSnapshot, serverTimestamp, limit
 } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore.js";
@@ -615,7 +615,6 @@ async function cargarMiPersonaje() {
 }
 
 // getDocs necesita importarse también
-import { getDocs } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore.js";
 
 function iniciarPersonajesRealtime() {
   if (unsubPersonajes) unsubPersonajes();
