@@ -1040,9 +1040,16 @@ window.lanzarDados = async function() {
 // ═══════════════════════════════════
 function iniciarDibujoRealtime() {
   if (unsubDibujo) unsubDibujo();
-  const q = query(collection(db,'campanas',CAMPANA_ID,'trazos'), orderBy('creadoEn','asc'));
-  unsubDibujo = onSnapshot(q, snap => {
-    trazosRemotos = snap.docs.filter(d=>d.data().autorId!==ME.uid).map(d=>({...d.data(),firestoreId:d.id}));
+  // Sin orderBy para evitar requerir índice compuesto — ordenamos en cliente
+  unsubDibujo = onSnapshot(collection(db,'campanas',CAMPANA_ID,'trazos'), snap => {
+    trazosRemotos = snap.docs
+      .map(d => ({...d.data(), firestoreId:d.id}))
+      .filter(t => t.autorId !== ME.uid)
+      .sort((a,b) => {
+        const ta = a.creadoEn?.seconds || 0;
+        const tb = b.creadoEn?.seconds || 0;
+        return ta - tb;
+      });
     redibujarCanvas();
   });
 }
