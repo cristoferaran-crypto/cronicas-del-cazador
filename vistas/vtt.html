@@ -1722,10 +1722,12 @@ function renderTabInventarioFicha(p,esPropia){
   const inventario=p.inventario||[];
   const dinero=p.dinero||0;
   // Calcular pesos
+  // pesoEquipo = ropa/armas/contenedores equipados en el cuerpo
+  // pesoInv = todos los ítems en inventario general (están DENTRO de la mochila)
   let pesoEquipo=0, pesoInv=0;
-  RANURAS_EQUIPO.forEach(r=>{const it=equipado[r.id];if(it)pesoEquipo+=it.peso||0;});
-  RANURAS_CONTENEDOR.forEach(r=>{const it=equipado[r.id];if(it)pesoEquipo+=it.peso||0;});
-  inventario.forEach(it=>pesoInv+=((it.peso||0)*(it.cantidad||1)));
+  RANURAS_EQUIPO.forEach(r=>{const it=equipado[r.id];if(it)pesoEquipo+=parseFloat(it.peso)||0;});
+  RANURAS_CONTENEDOR.forEach(r=>{const it=equipado[r.id];if(it)pesoEquipo+=parseFloat(it.peso)||0;});
+  inventario.forEach(it=>pesoInv+=((parseFloat(it.peso)||0)*(it.cantidad||1)));
   const pesoTotal=pesoEquipo+pesoInv;
   const pct=Math.min(100,(pesoTotal/80)*100);
   const pesoClass=pct>75?'sobrecargado':pct>50?'cargado':'';
@@ -1794,7 +1796,7 @@ function renderTabInventarioFicha(p,esPropia){
     <div class="peso-bar">
       <div class="peso-col"><span class="peso-val" style="color:${espColor};">${espInfo.usados}/${espInfo.capacidad}</span><span class="peso-lbl">Espacios</span></div>
       <div class="peso-col"><span class="peso-val" style="color:${espColor};">${espInfo.libre<=0?'🔴 LLENO':espInfo.libre+' libre'+(espInfo.libre===1?'':'s')}</span><span class="peso-lbl">Disponible</span></div>
-      <div class="peso-col"><span class="peso-val">${pesoTotal.toFixed(1)} kg</span><span class="peso-lbl">Peso total</span></div>
+      <div class="peso-col"><span class="peso-val">${pesoTotal.toFixed(2)} kg</span><span class="peso-lbl" title="Equipo: ${pesoEquipo.toFixed(2)}kg + Carga: ${pesoInv.toFixed(2)}kg">Peso total</span></div>
       <div class="peso-barra-wrap"><div class="peso-barra-bg"><div class="peso-barra-fill ${espClass}" style="width:${pctEsp}%;background:${espColor};"></div></div></div>
     </div>
     ${espInfo.libre<=0?`<div style="padding:8px 12px;background:rgba(192,57,43,0.08);border:1px solid var(--borde-r);color:#ff8080;font-size:12px;margin-bottom:10px;">🎒 Mochila llena — equipa ítems o consigue un contenedor más grande.</div>`:''}
