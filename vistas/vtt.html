@@ -1406,6 +1406,8 @@ window.entregarObjeto=async function(){
   if(!nombre){toast('Escribe el nombre del objeto.','error');return;}
   const pRef=doc(db,'personajes',pId);const pSnap=await getDoc(pRef);
   const inventario=[...(pSnap.data().inventario||[])];
+  const espDJ=calcularEspacios({equipado:pSnap.data().equipado||{},inventario});
+  if(espDJ.libre<=0){toast(`¡${pNom} tiene la mochila llena!`,'error');return;}
   inventario.push({nombre,cantidad:cant,desc,tipo:'objeto',calidad:'Común',peso:0,espacios:1,equipable:false,ranura:'—',bono:'—'});
   await updateDoc(pRef,{inventario});
   await addDoc(collection(db,'campanas',CAMPANA_ID,'mensajes'),{autorId:ME.uid,autorNombre:(ME.displayName||'Director')+' [DJ]',tipo:'item',paraId:pId,paraName:pNom,item:nombre,cantidad:cant,timestamp:serverTimestamp()});
@@ -1417,6 +1419,8 @@ window.entregarArma=async function(){
   if(!nombre){toast('Escribe el nombre del arma.','error');return;}
   const pRef=doc(db,'personajes',pId);const pSnap=await getDoc(pRef);
   const inventario=[...(pSnap.data().inventario||[])];
+  const espDJ2=calcularEspacios({equipado:pSnap.data().equipado||{},inventario});
+  if(espDJ2.libre<=0){toast(`¡${pNom} tiene la mochila llena!`,'error');return;}
   inventario.push({nombre,cantidad:1,desc,tipo:'arma',calidad:'Común',peso:0,espacios:1,equipable:true,ranura:'Mano Derecha',bono:'+1 Armas C/C'});
   await updateDoc(pRef,{inventario});
   await addDoc(collection(db,'campanas',CAMPANA_ID,'mensajes'),{autorId:ME.uid,autorNombre:(ME.displayName||'Director')+' [DJ]',tipo:'item',paraId:pId,paraName:pNom,item:`⚔️ ${nombre}`,cantidad:1,timestamp:serverTimestamp()});
@@ -1554,6 +1558,30 @@ function renderTiendaOfertas(){
   document.getElementById('tienda-body').innerHTML=`<p style="font-size:12px;color:var(--muted);font-style:italic;margin-bottom:16px;">Packs con descuento. El director los activa según la narrativa.</p><div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:12px;">${html}</div>`;
 }
 
+
+// ══ ESPACIOS — helper ══
+function calcularEspacios(personaje) {
+  const equipado = personaje.equipado || {};
+  const inventario = personaje.inventario || [];
+  const ESPACIOS_BASE = 2; // bolsillos
+
+  // Capacidad total = suma de contenedores equipados + base si no hay ninguno
+  let capacidad = 0;
+  RANURAS_CONTENEDOR.forEach(r => {
+    const cont = equipado[r.id];
+    if (cont && cont.contenedor) capacidad += cont.contenedor;
+  });
+  if (capacidad === 0) capacidad = ESPACIOS_BASE;
+
+  // Espacios usados = ítems en inventario general (los equipados en cuerpo NO cuentan)
+  let usados = 0;
+  inventario.forEach(it => {
+    usados += (it.espacios || 1) * (it.cantidad || 1);
+  });
+
+  return { capacidad, usados, libre: capacidad - usados };
+}
+
 window.comprarProducto=async function(prodId,vendedor){
   if(!MI_PERSONAJE){toast('Sin personaje.','error');return;}
   const prod=(TIENDA_CACHE[vendedor]||[]).find(p=>p.id===prodId);if(!prod)return;
@@ -1561,6 +1589,9 @@ window.comprarProducto=async function(prodId,vendedor){
   if(saldoActual<prod.precio){toast('Marcas insuficientes.','error');return;}
   const pRef=doc(db,'personajes',MI_PERSONAJE.id);const pSnap=await getDoc(pRef);
   const inventario=[...(pSnap.data().inventario||[])];
+  // Chequeo de espacio ANTES de agregar
+  const espacios=calcularEspacios({equipado:pSnap.data().equipado||{},inventario});
+  if(espacios.libre<=0){toast('¡Tu mochila está llena! Equipa o descarta algo primero.','error');return;}
   const idx=inventario.findIndex(o=>o.nombre===prod.nombre);
   if(idx>=0)inventario[idx].cantidad=(inventario[idx].cantidad||1)+1;
   else inventario.push({nombre:prod.nombre,desc:prod.desc||'',cantidad:1,tipo:prod.tipo||'objeto',cat:prod.cat,calidad:prod.calidad||'Común',peso:prod.peso||0,espacios:prod.espacios||0,equipable:prod.equipable!==false,ranura:prod.ranura||'—',bono:prod.bono||'—',contenedor:prod.contenedor||0});
@@ -1578,11 +1609,39 @@ window.comprarPack=async function(packId){
   if(saldoActual<(pack.precio||0)){toast('Marcas insuficientes.','error');return;}
   const pRef=doc(db,'personajes',MI_PERSONAJE.id);const pSnap=await getDoc(pRef);
   const inventario=[...(pSnap.data().inventario||[])];
+  // Chequeo de espacio para el pack completo
+  const espaciosPack=calcularEspacios({equipado:pSnap.data().equipado||{},inventario});
+  const espaciosDelPack=(pack.items||[]).reduce((s,itemNombre)=>{
+    const nombre=itemNombre.replace(/ ×\d+$/,'').trim();
+    const cantMatch=itemNombre.match(/×(\d+)$/);const cantidad=cantMatch?parseInt(cantMatch[1]):1;
+    const prodReal=Object.values(TIENDA_CACHE).flat().find(p=>p.nombre===nombre);
+    return s+((prodReal?.espacios||1)*cantidad);
+  },0);
+  if(espaciosPack.libre<=0){toast('¡Tu mochila está llena! No puedes comprar este pack.','error');return;}
+  const todosLosProductos=Object.values(TIENDA_CACHE).flat();
   (pack.items||[]).forEach(itemNombre=>{
-    const nombre=itemNombre.replace(/ ×\d+$/,'');const cantMatch=itemNombre.match(/×(\d+)$/);const cantidad=cantMatch?parseInt(cantMatch[1]):1;
+    const nombre=itemNombre.replace(/ ×\d+$/,'').trim();
+    const cantMatch=itemNombre.match(/×(\d+)$/);
+    const cantidad=cantMatch?parseInt(cantMatch[1]):1;
+    const prodReal=todosLosProductos.find(p=>p.nombre===nombre);
     const idx=inventario.findIndex(o=>o.nombre===nombre);
-    if(idx>=0)inventario[idx].cantidad=(inventario[idx].cantidad||1)+cantidad;
-    else inventario.push({nombre,cantidad,desc:'Pack: '+pack.nombre,tipo:'objeto',calidad:'Común',peso:0,espacios:1,equipable:false,ranura:'—',bono:'—'});
+    if(idx>=0){
+      inventario[idx].cantidad=(inventario[idx].cantidad||1)+cantidad;
+    } else {
+      inventario.push(prodReal ? {
+        nombre:prodReal.nombre, cantidad,
+        desc:prodReal.desc||'', tipo:prodReal.tipo||'objeto',
+        cat:prodReal.cat||'', calidad:prodReal.calidad||'Común',
+        peso:prodReal.peso||0, espacios:prodReal.espacios||0,
+        equipable:prodReal.equipable!==false,
+        ranura:prodReal.ranura||'—', bono:prodReal.bono||'—',
+        contenedor:prodReal.contenedor||0,
+      } : {
+        nombre, cantidad, desc:'Pack: '+pack.nombre,
+        tipo:'objeto', calidad:'Común', peso:0,
+        espacios:1, equipable:false, ranura:'—', bono:'—', contenedor:0,
+      });
+    }
   });
   const nuevoSaldo=saldoActual-(pack.precio||0);
   await updateDoc(pRef,{inventario,dinero:nuevoSaldo});
@@ -1720,6 +1779,12 @@ function renderTabInventarioFicha(p,esPropia){
     </div>`;
   }).join(''):`<div style="text-align:center;padding:20px;color:var(--muted);font-size:13px;font-style:italic;"><i class="ri-inbox-line" style="font-size:24px;display:block;margin-bottom:8px;opacity:0.4;"></i>Sin ítems en el inventario.</div>`;
 
+  // Calcular espacios reales
+  const espInfo=calcularEspacios({equipado,inventario});
+  const pctEsp=Math.min(100,(espInfo.usados/espInfo.capacidad)*100);
+  const espClass=espInfo.libre<=0?'sobrecargado':pctEsp>75?'cargado':'';
+  const espColor=espInfo.libre<=0?'var(--rojo)':pctEsp>75?'var(--naranja)':'var(--dorado)';
+
   return`<div class="ficha-tab-body" id="ftab-inv">
     <div class="jenny-display"><i class="ri-money-dollar-circle-line" style="font-size:20px;color:var(--dorado);"></i><span class="jenny-val">${dinero.toLocaleString()}</span><span style="font-size:11px;color:var(--muted);margin-left:2px;">Marcas</span></div>
     <div class="inv-layout">
@@ -1727,11 +1792,12 @@ function renderTabInventarioFicha(p,esPropia){
       <div><div class="inv-col-titulo">🎒 Contenedores</div>${contHTML}</div>
     </div>
     <div class="peso-bar">
-      <div class="peso-col"><span class="peso-val">${pesoEquipo.toFixed(1)}</span><span class="peso-lbl">Equipo kg</span></div>
-      <div class="peso-col"><span class="peso-val">${pesoInv.toFixed(1)}</span><span class="peso-lbl">Carga kg</span></div>
-      <div class="peso-col"><span class="peso-val" style="${pesoClass==='sobrecargado'?'color:var(--rojo)':pesoClass==='cargado'?'color:var(--naranja)':''}">${pesoTotal.toFixed(1)}</span><span class="peso-lbl">Total kg</span></div>
-      <div class="peso-barra-wrap"><div class="peso-barra-bg"><div class="peso-barra-fill ${pesoClass}" style="width:${pct}%"></div></div></div>
+      <div class="peso-col"><span class="peso-val" style="color:${espColor};">${espInfo.usados}</span><span class="peso-lbl">Esp. usados</span></div>
+      <div class="peso-col"><span class="peso-val">${espInfo.capacidad}</span><span class="peso-lbl">Esp. total</span></div>
+      <div class="peso-col"><span class="peso-val" style="color:${espColor};">${espInfo.libre<=0?'🔴 LLENO':espInfo.libre+' libre'+(espInfo.libre===1?'':'s')}</span><span class="peso-lbl">Disponible</span></div>
+      <div class="peso-barra-wrap"><div class="peso-barra-bg"><div class="peso-barra-fill ${espClass}" style="width:${pctEsp}%;background:${espColor};"></div></div></div>
     </div>
+    ${espInfo.libre<=0?`<div style="padding:8px 12px;background:rgba(192,57,43,0.08);border:1px solid var(--borde-r);color:#ff8080;font-size:12px;margin-bottom:10px;">🎒 Mochila llena — equipa ítems o consigue un contenedor más grande.</div>`:''}
     <div class="inv-lista-titulo">📦 Inventario General</div>
     ${invHTML}
   </div>`;
