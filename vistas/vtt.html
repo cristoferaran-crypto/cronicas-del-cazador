@@ -1792,9 +1792,9 @@ function renderTabInventarioFicha(p,esPropia){
       <div><div class="inv-col-titulo">🎒 Contenedores</div>${contHTML}</div>
     </div>
     <div class="peso-bar">
-      <div class="peso-col"><span class="peso-val" style="color:${espColor};">${espInfo.usados}</span><span class="peso-lbl">Esp. usados</span></div>
-      <div class="peso-col"><span class="peso-val">${espInfo.capacidad}</span><span class="peso-lbl">Esp. total</span></div>
+      <div class="peso-col"><span class="peso-val" style="color:${espColor};">${espInfo.usados}/${espInfo.capacidad}</span><span class="peso-lbl">Espacios</span></div>
       <div class="peso-col"><span class="peso-val" style="color:${espColor};">${espInfo.libre<=0?'🔴 LLENO':espInfo.libre+' libre'+(espInfo.libre===1?'':'s')}</span><span class="peso-lbl">Disponible</span></div>
+      <div class="peso-col"><span class="peso-val">${pesoTotal.toFixed(1)} kg</span><span class="peso-lbl">Peso total</span></div>
       <div class="peso-barra-wrap"><div class="peso-barra-bg"><div class="peso-barra-fill ${espClass}" style="width:${pctEsp}%;background:${espColor};"></div></div></div>
     </div>
     ${espInfo.libre<=0?`<div style="padding:8px 12px;background:rgba(192,57,43,0.08);border:1px solid var(--borde-r);color:#ff8080;font-size:12px;margin-bottom:10px;">🎒 Mochila llena — equipa ítems o consigue un contenedor más grande.</div>`:''}
@@ -1811,7 +1811,19 @@ window.abrirModalEquipar=function(personajeId,idx){
   document.getElementById('equipar-titulo').textContent=`Equipar: ${item.nombre}`;
   document.getElementById('equipar-sub').textContent=`Selecciona la ranura donde va este ítem.`;
   const todasRanuras=[...RANURAS_EQUIPO,...RANURAS_CONTENEDOR];
-  const ranuraValidas=item.contenedor>0?RANURAS_CONTENEDOR:(RANURA_MAP[item.ranura]||[]).length?RANURAS_EQUIPO.filter(r=>(RANURA_MAP[item.ranura]||[]).includes(r.id)):RANURAS_EQUIPO;
+  // Ranuras válidas respetando la ranura del ítem aunque sea contenedor
+  let ranuraValidas;
+  if(item.contenedor>0){
+    // Filtrar solo el contenedor correspondiente a su ranura
+    const idsValidos=RANURA_MAP[item.ranura]||[];
+    ranuraValidas=idsValidos.length
+      ? RANURAS_CONTENEDOR.filter(r=>idsValidos.includes(r.id))
+      : RANURAS_CONTENEDOR;
+  } else if((RANURA_MAP[item.ranura]||[]).length){
+    ranuraValidas=RANURAS_EQUIPO.filter(r=>(RANURA_MAP[item.ranura]||[]).includes(r.id));
+  } else {
+    ranuraValidas=RANURAS_EQUIPO;
+  }
   const equipado=p.equipado||{};
   document.getElementById('equipar-ranuras').innerHTML=ranuraValidas.map(r=>{
     const actual=equipado[r.id];
