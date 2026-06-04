@@ -1318,6 +1318,8 @@ window.guardarProd=async function(){
 };
 
 // ══ MODAL IMPORTAR ══
+window.abrirModalImport=()=>document.getElementById('modal-import').classList.add('open');
+window.cerrarModalImport=()=>document.getElementById('modal-import').classList.remove('open');
 window.abrirModalImportPacks=()=>document.getElementById('modal-import-packs').classList.add('open');
 window.cerrarModalImportPacks=()=>document.getElementById('modal-import-packs').classList.remove('open');
 window.ejecutarImportPacks=async function(){
