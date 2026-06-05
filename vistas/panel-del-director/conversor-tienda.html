@@ -1,0 +1,837 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Conversor de Tienda | Crónicas del Cazador</title>
+  <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700;800&family=Raleway:wght@300;400;500;600&display=swap" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/remixicon@3.5.0/fonts/remixicon.css" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+  <style>
+    :root {
+      --rojo: #c0392b;
+      --dorado: #c9a84c;
+      --dorado-hover: #e2be6a;
+      --dorado-glow: rgba(201,168,76,0.3);
+      --verde: #2ecc71;
+      --negro: #0a0a0c;
+      --sup: #111117;
+      --sup2: #16161e;
+      --sup3: #1e1e28;
+      --borde: rgba(255,255,255,0.07);
+      --borde-d: rgba(201,168,76,0.35);
+      --borde-v: rgba(46,204,113,0.35);
+      --texto: #e8e2d9;
+      --muted: #8a8490;
+      --sec: #b0aab8;
+    }
+
+    *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+    body {
+      font-family: 'Raleway', sans-serif;
+      background: var(--negro);
+      color: var(--texto);
+      min-height: 100vh;
+    }
+
+    /* NAVBAR */
+    .navbar {
+      height: 56px;
+      background: rgba(10,10,12,0.98);
+      border-bottom: 1px solid var(--borde);
+      display: flex; align-items: center;
+      padding: 0 32px; gap: 14px;
+      position: sticky; top: 0; z-index: 50;
+    }
+    .nav-logo {
+      font-family: 'Cinzel', serif;
+      font-size: 13px; font-weight: 700;
+      color: var(--dorado); letter-spacing: 0.1em;
+      text-decoration: none; margin-right: auto;
+    }
+    .nav-logo span { color: var(--muted); font-weight: 400; }
+    .nav-badge {
+      padding: 3px 10px;
+      background: rgba(201,168,76,0.1);
+      border: 1px solid var(--borde-d);
+      font-size: 10px; font-weight: 700;
+      letter-spacing: 0.12em; text-transform: uppercase;
+      color: var(--dorado);
+    }
+
+    /* LAYOUT */
+    .layout {
+      max-width: 1100px;
+      margin: 0 auto;
+      padding: 40px 32px;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 24px;
+    }
+
+    .col-izq { display: flex; flex-direction: column; gap: 16px; }
+    .col-der { display: flex; flex-direction: column; gap: 16px; }
+
+    /* CARDS */
+    .card {
+      background: var(--sup2);
+      border: 1px solid var(--borde);
+      border-top: 2px solid transparent;
+      padding: 24px;
+    }
+    .card.dorada { border-top-color: var(--dorado); }
+    .card.verde { border-top-color: var(--verde); }
+    .card.roja { border-top-color: var(--rojo); }
+
+    .card-titulo {
+      font-family: 'Cinzel', serif;
+      font-size: 14px; font-weight: 700;
+      color: var(--dorado);
+      margin-bottom: 6px;
+      display: flex; align-items: center; gap: 8px;
+    }
+    .card-titulo.verde { color: var(--verde); }
+    .card-titulo.roja { color: #e74c3c; }
+    .card-desc {
+      font-size: 12px; color: var(--muted);
+      line-height: 1.6; margin-bottom: 16px;
+    }
+
+    /* ZONA DROP */
+    .drop-zona {
+      border: 2px dashed var(--borde-d);
+      padding: 36px 20px;
+      text-align: center;
+      cursor: pointer;
+      transition: border-color 0.2s, background 0.2s;
+      position: relative;
+    }
+    .drop-zona:hover, .drop-zona.drag-over {
+      border-color: var(--dorado);
+      background: rgba(201,168,76,0.04);
+    }
+    .drop-zona i {
+      font-size: 32px; color: var(--dorado);
+      display: block; margin-bottom: 10px;
+    }
+    .drop-zona p {
+      font-size: 13px; color: var(--sec); line-height: 1.6;
+    }
+    .drop-zona strong { color: var(--dorado); }
+    .drop-zona input {
+      position: absolute; inset: 0;
+      opacity: 0; cursor: pointer; width: 100%; height: 100%;
+    }
+
+    /* VENDEDOR SELECT */
+    .vendedor-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 8px;
+      margin-bottom: 16px;
+    }
+    .vendedor-btn {
+      padding: 10px 8px;
+      background: var(--sup3);
+      border: 1px solid var(--borde);
+      color: var(--muted);
+      font-family: 'Raleway', sans-serif;
+      font-size: 11px; font-weight: 700;
+      letter-spacing: 0.08em; text-transform: uppercase;
+      cursor: pointer;
+      transition: all 0.15s;
+      text-align: center;
+    }
+    .vendedor-btn:hover { border-color: var(--borde-d); color: var(--texto); }
+    .vendedor-btn.active {
+      border-color: var(--dorado);
+      color: var(--dorado);
+      background: rgba(201,168,76,0.08);
+    }
+
+    /* TIPO SELECTOR */
+    .tipo-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 8px;
+      margin-bottom: 16px;
+    }
+    .tipo-btn {
+      padding: 8px;
+      background: var(--sup3);
+      border: 1px solid var(--borde);
+      color: var(--muted);
+      font-size: 11px; font-weight: 700;
+      letter-spacing: 0.06em; text-transform: uppercase;
+      cursor: pointer; transition: all 0.15s; text-align: center;
+    }
+    .tipo-btn:hover { border-color: var(--borde-d); color: var(--dorado); }
+    .tipo-btn.active {
+      border-color: var(--dorado); color: var(--dorado);
+      background: rgba(201,168,76,0.06);
+    }
+
+    /* BOTONES */
+    .btn-primary {
+      width: 100%; height: 44px;
+      background: var(--dorado); border: none;
+      color: var(--negro);
+      font-family: 'Cinzel', serif;
+      font-size: 12px; font-weight: 700;
+      letter-spacing: 0.12em; text-transform: uppercase;
+      cursor: pointer;
+      transition: background 0.15s;
+      display: flex; align-items: center; justify-content: center; gap: 8px;
+    }
+    .btn-primary:hover { background: var(--dorado-hover); }
+    .btn-primary:disabled { opacity: 0.4; cursor: not-allowed; }
+
+    .btn-secondary {
+      width: 100%; height: 40px;
+      background: transparent;
+      border: 1px solid var(--borde-v);
+      color: var(--verde);
+      font-family: 'Cinzel', serif;
+      font-size: 11px; font-weight: 700;
+      letter-spacing: 0.1em; text-transform: uppercase;
+      cursor: pointer;
+      transition: all 0.15s;
+      display: flex; align-items: center; justify-content: center; gap: 8px;
+    }
+    .btn-secondary:hover { background: rgba(46,204,113,0.06); }
+    .btn-secondary:disabled { opacity: 0.4; cursor: not-allowed; }
+
+    .btn-copy {
+      width: 100%; height: 40px;
+      background: transparent;
+      border: 1px solid var(--borde-d);
+      color: var(--dorado);
+      font-size: 11px; font-weight: 700;
+      letter-spacing: 0.1em; text-transform: uppercase;
+      cursor: pointer;
+      transition: all 0.15s;
+      display: flex; align-items: center; justify-content: center; gap: 8px;
+      font-family: 'Cinzel', serif;
+    }
+    .btn-copy:hover { background: rgba(201,168,76,0.08); }
+
+    /* ESTADO */
+    .estado-archivo {
+      display: flex; align-items: center; gap: 10px;
+      padding: 10px 14px;
+      background: var(--sup3);
+      border: 1px solid var(--borde);
+      font-size: 12px; color: var(--sec);
+      margin-bottom: 12px;
+      display: none;
+    }
+    .estado-archivo.visible { display: flex; }
+    .estado-archivo i { font-size: 16px; color: var(--dorado); }
+    .estado-archivo .nombre { flex: 1; font-weight: 600; color: var(--texto); }
+    .estado-archivo .filas { color: var(--dorado); font-family: 'Cinzel', serif; font-weight: 700; }
+
+    /* PREVIEW */
+    .preview-wrap {
+      background: var(--sup3);
+      border: 1px solid var(--borde);
+      max-height: 320px;
+      overflow-y: auto;
+      margin-bottom: 12px;
+    }
+    .preview-wrap::-webkit-scrollbar { width: 3px; }
+    .preview-wrap::-webkit-scrollbar-thumb { background: var(--borde-d); }
+    .preview-item {
+      padding: 10px 14px;
+      border-bottom: 1px solid var(--borde);
+      display: flex; gap: 10px; align-items: flex-start;
+    }
+    .preview-item:last-child { border-bottom: none; }
+    .preview-num {
+      font-family: 'Cinzel', serif;
+      font-size: 10px; font-weight: 700;
+      color: var(--muted);
+      min-width: 24px; padding-top: 2px;
+    }
+    .preview-nombre {
+      font-family: 'Cinzel', serif;
+      font-size: 12px; font-weight: 700;
+      color: var(--texto); margin-bottom: 3px;
+    }
+    .preview-meta {
+      display: flex; gap: 8px; flex-wrap: wrap;
+      font-size: 10px; color: var(--muted);
+    }
+    .preview-meta .cal {
+      padding: 1px 6px; border: 1px solid;
+      font-weight: 700; font-size: 9px;
+    }
+    .preview-error {
+      padding: 3px 8px;
+      background: rgba(192,57,43,0.1);
+      border: 1px solid var(--borde-r, rgba(192,57,43,0.35));
+      color: #ff8080;
+      font-size: 10px;
+    }
+
+    /* JSON OUTPUT */
+    .json-output {
+      width: 100%;
+      min-height: 200px;
+      background: rgba(0,0,0,0.3);
+      border: 1px solid var(--borde);
+      color: #a8ff78;
+      font-family: 'Courier New', monospace;
+      font-size: 11px;
+      padding: 12px;
+      outline: none;
+      resize: vertical;
+      line-height: 1.6;
+    }
+    .json-output:focus { border-color: var(--borde-v); }
+
+    /* STATS BAR */
+    .stats-bar {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 8px;
+      margin-bottom: 16px;
+    }
+    .stat-box {
+      background: var(--sup3);
+      border: 1px solid var(--borde);
+      padding: 10px 8px;
+      text-align: center;
+    }
+    .stat-val {
+      font-family: 'Cinzel', serif;
+      font-size: 20px; font-weight: 800;
+      color: var(--dorado); display: block;
+    }
+    .stat-lbl {
+      font-size: 9px; font-weight: 700;
+      letter-spacing: 0.1em; text-transform: uppercase;
+      color: var(--muted);
+    }
+
+    /* INSTRUCCIONES */
+    .instruccion-item {
+      display: flex; gap: 12px; align-items: flex-start;
+      padding: 10px 0;
+      border-bottom: 1px solid var(--borde);
+      font-size: 12px; color: var(--sec); line-height: 1.5;
+    }
+    .instruccion-item:last-child { border-bottom: none; }
+    .instruccion-num {
+      width: 22px; height: 22px;
+      background: rgba(201,168,76,0.1);
+      border: 1px solid var(--borde-d);
+      display: flex; align-items: center; justify-content: center;
+      font-family: 'Cinzel', serif;
+      font-size: 10px; font-weight: 700;
+      color: var(--dorado); flex-shrink: 0;
+    }
+
+    /* ALERTA */
+    .alerta {
+      padding: 10px 14px;
+      background: rgba(46,204,113,0.06);
+      border: 1px solid var(--borde-v);
+      border-left: 3px solid var(--verde);
+      font-size: 12px; color: var(--sec);
+      line-height: 1.6; display: none;
+    }
+    .alerta.visible { display: block; }
+    .alerta.error {
+      background: rgba(192,57,43,0.06);
+      border-color: rgba(192,57,43,0.35);
+      border-left-color: var(--rojo);
+      color: #ff8080;
+    }
+
+    /* TOAST */
+    #toast {
+      position: fixed; bottom: 24px; right: 24px;
+      z-index: 999; padding: 10px 16px;
+      border-left: 3px solid var(--dorado);
+      background: rgba(10,10,12,0.96);
+      font-size: 12px; font-weight: 600;
+      color: var(--dorado); opacity: 0;
+      transition: opacity 0.3s; pointer-events: none;
+    }
+
+    /* LIMIT INFO */
+    .limit-info {
+      padding: 8px 12px;
+      background: rgba(192,57,43,0.06);
+      border: 1px solid rgba(192,57,43,0.2);
+      font-size: 11px; color: var(--muted);
+      margin-bottom: 12px; display: none;
+    }
+    .limit-info.visible { display: block; }
+    .limit-info strong { color: #ff8080; }
+
+    @media (max-width: 768px) {
+      .layout { grid-template-columns: 1fr; padding: 20px 16px; }
+      .stats-bar { grid-template-columns: repeat(2,1fr); }
+    }
+  </style>
+</head>
+<body>
+
+<nav class="navbar">
+  <a href="#" class="nav-logo">Crónicas del <span>Cazador</span></a>
+  <span class="nav-badge"><i class="ri-tools-line"></i> Conversor de Tienda</span>
+</nav>
+
+<div class="layout">
+
+  <!-- COLUMNA IZQUIERDA -->
+  <div class="col-izq">
+
+    <!-- PASO 1: SUBIR ARCHIVO -->
+    <div class="card dorada">
+      <div class="card-titulo"><i class="ri-file-excel-line"></i> Paso 1 — Subir Excel</div>
+      <div class="card-desc">Sube tu plantilla de tienda en formato .xlsx. Usa la plantilla oficial de CDC para asegurarte de que las columnas sean correctas.</div>
+
+      <a href="Plantilla_Tienda_CDC.xlsx" download style="display:flex;align-items:center;gap:8px;padding:10px 14px;background:rgba(201,168,76,0.06);border:1px solid var(--borde-d);color:var(--dorado);font-size:11px;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;text-decoration:none;margin-bottom:14px;transition:background 0.15s;" onmouseover="this.style.background='rgba(201,168,76,0.12)'" onmouseout="this.style.background='rgba(201,168,76,0.06)'">
+        <i class="ri-download-line" style="font-size:16px;"></i> Descargar Plantilla Oficial CDC
+      </a>
+
+      <div class="estado-archivo" id="estado-archivo">
+        <i class="ri-file-excel-2-line"></i>
+        <span class="nombre" id="archivo-nombre">—</span>
+        <span class="filas" id="archivo-filas">0 filas</span>
+      </div>
+
+      <div class="drop-zona" id="drop-zona">
+        <input type="file" accept=".xlsx,.xls" id="file-input" onchange="procesarArchivo(this.files[0])">
+        <i class="ri-upload-cloud-2-line"></i>
+        <p>Arrastra tu <strong>.xlsx</strong> aquí<br>o haz clic para seleccionar</p>
+      </div>
+    </div>
+
+    <!-- PASO 2: CONFIGURAR -->
+    <div class="card dorada">
+      <div class="card-titulo"><i class="ri-settings-3-line"></i> Paso 2 — Configurar</div>
+      <div class="card-desc">Selecciona la tienda destino y el tipo de contenido a convertir.</div>
+
+      <div style="margin-bottom:12px;">
+        <div style="font-size:10px;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;color:var(--muted);margin-bottom:8px;">Tienda destino</div>
+        <div class="vendedor-grid">
+          <button class="vendedor-btn active" onclick="setVendedor('bazar',this)">🛒 Bazar</button>
+          <button class="vendedor-btn" onclick="setVendedor('armero',this)">⚔️ Armería</button>
+          <button class="vendedor-btn" onclick="setVendedor('drogueria',this)">💊 Droguería</button>
+          <button class="vendedor-btn" onclick="setVendedor('mercado_negro',this)">🌑 Mercado Negro</button>
+        </div>
+      </div>
+
+      <div>
+        <div style="font-size:10px;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;color:var(--muted);margin-bottom:8px;">Tipo de contenido</div>
+        <div class="tipo-grid">
+          <button class="tipo-btn active" onclick="setTipo('items',this)">📦 Items</button>
+          <button class="tipo-btn" onclick="setTipo('packs',this)">✨ Packs</button>
+        </div>
+      </div>
+
+      <div class="limit-info" id="limit-info">
+        ⚠ Como Director, tienes un límite de <strong>50 items</strong> por tienda de campaña. Solo se convertirán los primeros 50.
+      </div>
+    </div>
+
+    <!-- INSTRUCCIONES -->
+    <div class="card">
+      <div class="card-titulo"><i class="ri-information-line"></i> Cómo usar</div>
+      <div class="instruccion-item">
+        <div class="instruccion-num">1</div>
+        <span>Descarga la <strong style="color:var(--dorado);">Plantilla Oficial CDC</strong> y completa tus items siguiendo el formato.</span>
+      </div>
+      <div class="instruccion-item">
+        <div class="instruccion-num">2</div>
+        <span>Sube el archivo .xlsx en el Paso 1 y selecciona la tienda destino.</span>
+      </div>
+      <div class="instruccion-item">
+        <div class="instruccion-num">3</div>
+        <span>Haz clic en <strong style="color:var(--dorado);">Convertir a JSON</strong> y revisa la previsualización.</span>
+      </div>
+      <div class="instruccion-item">
+        <div class="instruccion-num">4</div>
+        <span>Copia el JSON generado y pégalo en el <strong style="color:var(--dorado);">Panel DJ → Tienda → Importar JSON</strong>.</span>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- COLUMNA DERECHA -->
+  <div class="col-der">
+
+    <!-- PASO 3: CONVERTIR -->
+    <div class="card verde">
+      <div class="card-titulo verde"><i class="ri-refresh-line"></i> Paso 3 — Convertir</div>
+      <div class="card-desc">Convierte tu Excel al formato JSON que usa Firestore. Revisa la previsualización antes de copiar.</div>
+
+      <button class="btn-primary" id="btn-convertir" onclick="convertir()" disabled>
+        <i class="ri-magic-line"></i> Convertir a JSON
+      </button>
+    </div>
+
+    <!-- PREVISUALIZACIÓN -->
+    <div class="card" id="card-preview" style="display:none;">
+      <div class="card-titulo"><i class="ri-eye-line"></i> Previsualización</div>
+
+      <div class="stats-bar" id="stats-bar"></div>
+
+      <div class="alerta" id="alerta-ok">
+        <i class="ri-checkbox-circle-line"></i> <strong>Conversión exitosa.</strong> Revisa los items y copia el JSON.
+      </div>
+      <div class="alerta error" id="alerta-err"></div>
+
+      <div style="margin: 12px 0 6px; font-size:10px;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;color:var(--muted);">Items procesados</div>
+      <div class="preview-wrap" id="preview-lista"></div>
+    </div>
+
+    <!-- JSON OUTPUT -->
+    <div class="card verde" id="card-json" style="display:none;">
+      <div class="card-titulo verde"><i class="ri-code-box-line"></i> Paso 4 — JSON listo</div>
+      <div class="card-desc">Copia este JSON y pégalo en el Panel DJ → Tienda → Importar JSON.</div>
+
+      <textarea class="json-output" id="json-output" readonly></textarea>
+
+      <div style="display:flex;gap:8px;margin-top:12px;">
+        <button class="btn-copy" onclick="copiarJSON()">
+          <i class="ri-file-copy-line"></i> Copiar JSON
+        </button>
+        <button class="btn-secondary" onclick="descargarJSON()">
+          <i class="ri-download-line"></i> Descargar
+        </button>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<div id="toast"></div>
+
+<script>
+  // ══ ESTADO ══
+  let datosExcel = null;
+  let vendedorActivo = 'bazar';
+  let tipoActivo = 'items';
+  let jsonGenerado = null;
+  let esAdmin = false; // cambiar a true si es cuenta admin
+
+  const CALIDADES_COLORES = {
+    'Común':         '#9ca3af',
+    'Profesional':   '#4ade80',
+    'Reforzada':     '#60a5fa',
+    'Especializada': '#a78bfa',
+    'Obra de Arte':  '#c9a84c',
+    'Única':         '#f59e0b',
+  };
+
+  const LIMITE_DJ = 50;
+
+  // ══ DRAG & DROP ══
+  const dropZona = document.getElementById('drop-zona');
+  dropZona.addEventListener('dragover', e => { e.preventDefault(); dropZona.classList.add('drag-over'); });
+  dropZona.addEventListener('dragleave', () => dropZona.classList.remove('drag-over'));
+  dropZona.addEventListener('drop', e => {
+    e.preventDefault(); dropZona.classList.remove('drag-over');
+    const file = e.dataTransfer.files[0];
+    if (file) procesarArchivo(file);
+  });
+
+  // ══ PROCESAR ARCHIVO ══
+  window.procesarArchivo = function(file) {
+    if (!file) return;
+    const ext = file.name.split('.').pop().toLowerCase();
+    if (!['xlsx','xls'].includes(ext)) {
+      toast('Solo se aceptan archivos .xlsx o .xls', 'error'); return;
+    }
+
+    const reader = new FileReader();
+    reader.onload = function(e) {
+      try {
+        const data = new Uint8Array(e.target.result);
+        const wb = XLSX.read(data, { type: 'array' });
+        datosExcel = wb;
+
+        // Mostrar info del archivo
+        const hojaItems = wb.SheetNames.find(n => n.toLowerCase().includes('item') || n.toLowerCase().includes('bazar') || n.toLowerCase().includes('arm'));
+        const hoja = hojaItems || wb.SheetNames[0];
+        const ws = wb.Sheets[hoja];
+        const rows = XLSX.utils.sheet_to_json(ws, { defval: '' });
+        const filas = rows.filter(r => r['Nombre'] || r['nombre']).length;
+
+        document.getElementById('archivo-nombre').textContent = file.name;
+        document.getElementById('archivo-filas').textContent = `${filas} items`;
+        document.getElementById('estado-archivo').classList.add('visible');
+        document.getElementById('btn-convertir').disabled = false;
+
+        dropZona.querySelector('p').innerHTML = `<strong style="color:var(--verde);">✓ ${file.name}</strong> cargado correctamente`;
+        dropZona.querySelector('i').style.color = 'var(--verde)';
+        dropZona.querySelector('i').className = 'ri-checkbox-circle-line';
+
+        toast(`✓ ${file.name} cargado — ${filas} items detectados`, 'success');
+      } catch(err) {
+        toast('Error al leer el archivo: ' + err.message, 'error');
+      }
+    };
+    reader.readAsArrayBuffer(file);
+  };
+
+  // ══ VENDEDOR / TIPO ══
+  window.setVendedor = function(v, el) {
+    vendedorActivo = v;
+    document.querySelectorAll('.vendedor-btn').forEach(b => b.classList.remove('active'));
+    el.classList.add('active');
+  };
+
+  window.setTipo = function(t, el) {
+    tipoActivo = t;
+    document.querySelectorAll('.tipo-btn').forEach(b => b.classList.remove('active'));
+    el.classList.add('active');
+    const limitInfo = document.getElementById('limit-info');
+    limitInfo.classList.toggle('visible', t === 'items' && !esAdmin);
+  };
+
+  // ══ CONVERTIR ══
+  window.convertir = function() {
+    if (!datosExcel) { toast('Primero sube un archivo Excel.', 'error'); return; }
+
+    if (tipoActivo === 'items') convertirItems();
+    else convertirPacks();
+  };
+
+  function convertirItems() {
+    // Buscar la hoja correcta
+    const hojaName = datosExcel.SheetNames.find(n => {
+      const nl = n.toLowerCase();
+      return nl.includes('item') || nl.includes('bazar') || nl.includes('arm') || nl === datosExcel.SheetNames[0].toLowerCase();
+    }) || datosExcel.SheetNames[0];
+
+    const ws = datosExcel.Sheets[hojaName];
+    const rows = XLSX.utils.sheet_to_json(ws, { defval: '' });
+
+    const errores = [];
+    let convertidos = [];
+    let omitidos = 0;
+
+    rows.forEach((row, i) => {
+      const nombre = (row['Nombre'] || row['nombre'] || '').toString().trim();
+      if (!nombre || nombre === 'Nombre') return; // saltear cabeceras repetidas
+
+      const precio = parseInt((row['Precio'] || row['precio'] || '0').toString().replace(/[^0-9]/g, '')) || 0;
+      const cat = (row['Categoría'] || row['Categoria'] || row['categoria'] || '').toString().trim();
+
+      if (!cat) {
+        errores.push({ fila: i+2, nombre, error: 'Sin categoría' });
+      }
+
+      const item = {
+        nombre,
+        cat: cat || 'General',
+        desc: (row['Descripción'] || row['Descripcion'] || row['descripcion'] || '').toString().trim(),
+        precio,
+        calidad: (row['Calidad'] || row['calidad'] || 'Común').toString().trim(),
+        peso: parseFloat((row['Peso'] || row['peso'] || '0').toString().replace(',', '.')) || 0,
+        espacios: parseFloat((row['Espacios'] || row['espacios'] || '1').toString().replace(',', '.')) || 0,
+        equipable: normalizeBoolean(row['Equipable'] || row['equipable']),
+        ranura: (row['Ranura'] || row['ranura'] || '—').toString().trim() || '—',
+        bono: (row['Bono'] || row['bono'] || 'No Aplica').toString().trim() || '—',
+        contenedor: parseInt((row['Contenedor'] || row['contenedor'] || '0').toString()) || 0,
+        estadoAsociado: (row['Estado Asociado'] || row['estado_asociado'] || 'No Aplica').toString().trim(),
+        quitaCondicion: (row['Quita Condición'] || row['Quita Condicion'] || row['quita_condicion'] || 'No Aplica').toString().trim(),
+        disponibilidad: (row['Disponibilidad'] || row['disponibilidad'] || 'Común').toString().trim(),
+        activo: true,
+      };
+
+      // Limpiar "No Aplica" en ranura y bono para el formato interno
+      if (item.ranura === 'No Aplica' || item.ranura === 'Ninguna') item.ranura = '—';
+      if (item.bono === 'No Aplica') item.bono = '—';
+
+      convertidos.push(item);
+    });
+
+    // Aplicar límite si no es admin
+    if (!esAdmin && convertidos.length > LIMITE_DJ) {
+      omitidos = convertidos.length - LIMITE_DJ;
+      convertidos = convertidos.slice(0, LIMITE_DJ);
+    }
+
+    jsonGenerado = convertidos;
+    mostrarResultado(convertidos, errores, omitidos, 'items');
+  }
+
+  function convertirPacks() {
+    const hojaName = datosExcel.SheetNames.find(n => n.toLowerCase().includes('pack') || n.toLowerCase().includes('ofert')) || datosExcel.SheetNames[1] || datosExcel.SheetNames[0];
+    const ws = datosExcel.Sheets[hojaName];
+
+    if (!ws) { toast('No se encontró la hoja de Packs.', 'error'); return; }
+
+    const rows = XLSX.utils.sheet_to_json(ws, { defval: '' });
+    const errores = [];
+    const convertidos = [];
+
+    rows.forEach((row, i) => {
+      const nombre = (row['Nombre'] || row['nombre'] || '').toString().trim();
+      if (!nombre || nombre === 'Nombre') return;
+
+      const itemsRaw = (row['Items (ID x Cantidad)'] || row['Items'] || row['items'] || '').toString().trim();
+      const itemsArr = itemsRaw ? itemsRaw.split(',').map(s => s.trim()).filter(Boolean) : [];
+
+      const pack = {
+        nombre,
+        icono: '📦',
+        desc: (row['Descripción'] || row['Descripcion'] || row['descripcion'] || '').toString().trim(),
+        precio: parseInt((row['Precio Oferta'] || row['precio_oferta'] || row['Precio'] || '0').toString().replace(/[^0-9]/g, '')) || 0,
+        valorIndividual: parseInt((row['Precio Normal'] || row['precio_normal'] || '0').toString().replace(/[^0-9]/g, '')) || 0,
+        items: itemsArr,
+        pesoTotal: 0,
+        espacios: 0,
+        destacado: false,
+        activo: true,
+      };
+
+      convertidos.push(pack);
+    });
+
+    jsonGenerado = convertidos;
+    mostrarResultado(convertidos, errores, 0, 'packs');
+  }
+
+  function normalizeBoolean(val) {
+    if (typeof val === 'boolean') return val;
+    const s = (val || '').toString().trim().toLowerCase();
+    return s === 'sí' || s === 'si' || s === 'yes' || s === 'true' || s === '1';
+  }
+
+  // ══ MOSTRAR RESULTADO ══
+  function mostrarResultado(items, errores, omitidos, tipo) {
+    const cardPreview = document.getElementById('card-preview');
+    const cardJson = document.getElementById('card-json');
+    cardPreview.style.display = 'block';
+    cardJson.style.display = 'block';
+
+    // Stats
+    const statsBar = document.getElementById('stats-bar');
+    if (tipo === 'items') {
+      const equipables = items.filter(i => i.equipable).length;
+      const conBono = items.filter(i => i.bono && i.bono !== '—').length;
+      statsBar.innerHTML = `
+        <div class="stat-box"><span class="stat-val">${items.length}</span><span class="stat-lbl">Items</span></div>
+        <div class="stat-box"><span class="stat-val">${equipables}</span><span class="stat-lbl">Equipables</span></div>
+        <div class="stat-box"><span class="stat-val">${conBono}</span><span class="stat-lbl">Con Bono</span></div>
+        <div class="stat-box"><span class="stat-val" style="color:${errores.length?'var(--rojo)':'var(--verde);'}">${errores.length}</span><span class="stat-lbl">Errores</span></div>
+      `;
+    } else {
+      statsBar.innerHTML = `
+        <div class="stat-box"><span class="stat-val">${items.length}</span><span class="stat-lbl">Packs</span></div>
+        <div class="stat-box"><span class="stat-val">${errores.length}</span><span class="stat-lbl">Errores</span></div>
+        <div class="stat-box" style="grid-column:span 2;"><span class="stat-val" style="color:var(--verde);">Listos</span><span class="stat-lbl">Estado</span></div>
+      `;
+    }
+
+    // Alertas
+    const alertaOk = document.getElementById('alerta-ok');
+    const alertaErr = document.getElementById('alerta-err');
+
+    if (omitidos > 0) {
+      alertaErr.classList.add('visible');
+      alertaErr.innerHTML = `⚠ Límite de Director: se omitieron <strong>${omitidos} items</strong>. Solo se procesaron los primeros ${LIMITE_DJ}.`;
+    } else {
+      alertaErr.classList.remove('visible');
+    }
+
+    if (items.length > 0) {
+      alertaOk.classList.add('visible');
+      alertaOk.innerHTML = `<i class="ri-checkbox-circle-line"></i> <strong>${items.length} ${tipo === 'packs' ? 'packs' : 'items'} convertidos</strong> correctamente para <strong>${vendedorActivo}</strong>.`;
+    }
+
+    // Preview lista
+    const lista = document.getElementById('preview-lista');
+    if (tipo === 'items') {
+      lista.innerHTML = items.map((it, i) => {
+        const calColor = CALIDADES_COLORES[it.calidad] || '#9ca3af';
+        return `<div class="preview-item">
+          <span class="preview-num">${i+1}</span>
+          <div style="flex:1;">
+            <div class="preview-nombre">${it.nombre}</div>
+            <div class="preview-meta">
+              <span class="cal" style="color:${calColor};border-color:${calColor}44;">${it.calidad}</span>
+              <span>${it.cat}</span>
+              <span>⚖ ${it.peso}kg</span>
+              <span>${it.espacios} esp.</span>
+              <span style="color:var(--dorado);">${it.precio.toLocaleString()} Marcas</span>
+              ${it.bono !== '—' ? `<span style="color:#4ade80;">✦ ${it.bono}</span>` : ''}
+              ${it.equipable ? `<span style="color:var(--dorado);">📍 ${it.ranura}</span>` : ''}
+            </div>
+          </div>
+        </div>`;
+      }).join('');
+    } else {
+      lista.innerHTML = items.map((pk, i) => `
+        <div class="preview-item">
+          <span class="preview-num">${i+1}</span>
+          <div style="flex:1;">
+            <div class="preview-nombre">${pk.nombre}</div>
+            <div class="preview-meta">
+              <span style="color:var(--dorado);">${pk.precio.toLocaleString()} Marcas</span>
+              ${pk.valorIndividual ? `<span style="text-decoration:line-through;color:var(--muted);">${pk.valorIndividual.toLocaleString()}</span>` : ''}
+              <span>${pk.items.length} items</span>
+            </div>
+          </div>
+        </div>`).join('');
+    }
+
+    // JSON output
+    const jsonStr = JSON.stringify(items, null, 2);
+    document.getElementById('json-output').value = jsonStr;
+
+    // Scroll al resultado
+    cardPreview.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    toast(`✓ ${items.length} ${tipo} convertidos.`, 'success');
+  }
+
+  // ══ COPIAR / DESCARGAR ══
+  window.copiarJSON = function() {
+    const ta = document.getElementById('json-output');
+    ta.select();
+    document.execCommand('copy');
+    toast('✓ JSON copiado al portapapeles.', 'success');
+  };
+
+  window.descargarJSON = function() {
+    if (!jsonGenerado) return;
+    const blob = new Blob([JSON.stringify(jsonGenerado, null, 2)], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `tienda-${vendedorActivo}-${Date.now()}.json`;
+    a.click();
+    URL.revokeObjectURL(url);
+    toast('✓ JSON descargado.', 'success');
+  };
+
+  // ══ TOAST ══
+  function toast(msg, tipo) {
+    const t = document.getElementById('toast');
+    const colores = {
+      success: { bg: 'rgba(26,74,46,0.95)', border: '#2d7a4a', color: '#7ad49a' },
+      error:   { bg: 'rgba(80,19,19,0.95)', border: '#e74c3c', color: '#ff8080' },
+      info:    { bg: 'rgba(14,18,24,0.95)', border: 'var(--dorado)', color: 'var(--dorado)' },
+    }[tipo] || { bg: 'rgba(14,18,24,0.95)', border: 'var(--borde-d)', color: 'var(--sec)' };
+
+    Object.assign(t.style, {
+      background: colores.bg,
+      borderColor: colores.border,
+      color: colores.color,
+      opacity: '1'
+    });
+    t.textContent = msg;
+    clearTimeout(t._t);
+    t._t = setTimeout(() => { t.style.opacity = '0'; }, 3500);
+  }
+</script>
+</body>
+</html>
