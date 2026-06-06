@@ -950,13 +950,33 @@
             reader.readAsDataURL(input.files[0]);
         }
 
+        function abrirModalPersonajes() {
+            document.getElementById('modal-personajes').classList.add('open');
+            document.body.style.overflow = 'hidden';
+        }
+
+        function abrirModalCuenta() {
+            document.getElementById('confirmar-eliminar').value = '';
+            document.getElementById('modal-cuenta').classList.add('open');
+            document.body.style.overflow = 'hidden';
+        }
+
+        function cerrarModal(id) {
+            document.getElementById(id).classList.remove('open');
+            document.body.style.overflow = '';
+        }
+
+        function cerrarModalFuera(e, id) {
+            if (e.target.id === id) cerrarModal(id);
+        }
+
+        // ── Avatar Director ──
         async function cargarAvatarDirector(uid) {
             try {
                 const snap = await getDoc(doc(db,'usuarios',uid));
                 if(snap.exists() && snap.data().avatarDirectorUrl) {
                     mostrarAvatarDirector(snap.data().avatarDirectorUrl);
                 }
-                // Iniciar con inicial del nombre
                 const nombre = usuarioActual?.displayName || '?';
                 document.getElementById('avatar-dj-placeholder').textContent = nombre.charAt(0).toUpperCase();
             } catch(e) { console.error(e); }
@@ -984,44 +1004,23 @@
                 bar.style.width = '50%';
                 const res = await fetch(`https://api.cloudinary.com/v1_1/${CLOUD_NAME}/image/upload`, {method:'POST',body:fd});
                 const data = await res.json();
+                if(data.error){ throw new Error(data.error.message); }
                 bar.style.width = '80%';
-                // Guardar en Firestore bajo usuarios/{uid}
                 await setDoc(doc(db,'usuarios',usuarioActual.uid), { avatarDirectorUrl: data.secure_url }, { merge:true });
                 bar.style.width = '100%';
                 mostrarAvatarDirector(data.secure_url);
                 setTimeout(()=>{ prog.style.display='none'; bar.style.width='0%'; },600);
-                toast('✅ Avatar del Director guardado.', 'success');
+                toast('✅ Avatar guardado.', 'success');
             } catch(e) {
-                toast('Error al subir la imagen.', 'error');
+                toast('Error al subir: '+e.message, 'error');
                 prog.style.display = 'none';
                 console.error(e);
             }
             input.value='';
         };
 
-        function abrirModalPersonajes() {
-            document.getElementById('modal-personajes').classList.add('open');
-            document.body.style.overflow = 'hidden';
-        }
-
-        function abrirModalCuenta() {
-            document.getElementById('confirmar-eliminar').value = '';
-            document.getElementById('modal-cuenta').classList.add('open');
-            document.body.style.overflow = 'hidden';
-        }
-
-        function cerrarModal(id) {
-            document.getElementById(id).classList.remove('open');
-            document.body.style.overflow = '';
-        }
-
-        function cerrarModalFuera(e, id) {
-            if (e.target.id === id) cerrarModal(id);
-        }
-
         window.togglePass = togglePass;
         window.previewAvatar = previewAvatar;
-        window.cargarAvatarDirector = cargarAvatarDirector;
         window.abrirModalPersonajes = abrirModalPersonajes;
         window.abrirModalCuenta = abrirModalCuenta;
         window.cerrarModal = cerrarModal;
