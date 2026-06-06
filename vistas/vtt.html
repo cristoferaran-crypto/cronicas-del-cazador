@@ -1728,25 +1728,28 @@ window.actualizarInfoPersonaje=function(sel){
   const p=PERSONAJES_CAMPANA.find(x=>x.id===sel.value);if(!p)return;
   document.getElementById('dj-xp-actual').textContent=(p.xpTotal||0)-(p.xpGastada||0);
   document.getElementById('dj-marcas').textContent=p.dinero||0;
-  const nivelActual=p.nivel||1;
+  const nivelActual=parseInt(p.nivel)||1;
   document.getElementById('dj-nivel-actual').textContent=nivelActual;
   document.getElementById('dj-nivel-nuevo').textContent=nivelActual<20?`Nivel ${nivelActual+1}`:'Nivel Máximo (20)';
 };
 window.subirNivel=async function(){
   const sel=document.getElementById('xp-personaje');const pId=sel.value;const pNom=sel.options[sel.selectedIndex]?.dataset.nombre||'?';
   const p=PERSONAJES_CAMPANA.find(x=>x.id===pId);if(!p)return;
-  const nivelActual=p.nivel||1;
+  const nivelActual=parseInt(p.nivel)||1; // Forzar número para evitar concatenación string
   if(nivelActual>=20){toast(`${pNom} ya está en el nivel máximo (20).`,'info');return;}
-  const nivelNuevo=nivelActual+1;
-  if(!confirm(`¿Subir a ${pNom} del Nivel ${nivelActual} al Nivel ${nivelNuevo}?`))return;
+  // Pedir nivel destino con input
+  const input=prompt(`${pNom} está en Nivel ${nivelActual}.\n¿A qué nivel quieres subirlo? (${nivelActual+1} - 20)`);
+  if(input===null) return; // Canceló
+  const nivelNuevo=parseInt(input);
+  if(isNaN(nivelNuevo)||nivelNuevo<=nivelActual||nivelNuevo>20){
+    toast(`Nivel inválido. Debe ser entre ${nivelActual+1} y 20.`,'error');return;
+  }
   await updateDoc(doc(db,'personajes',pId),{nivel:nivelNuevo});
-  // Actualizar localmente para que el siguiente clic funcione sin recargar
   p.nivel=nivelNuevo;
   await addDoc(collection(db,'campanas',CAMPANA_ID,'mensajes'),{autorId:ME.uid,autorNombre:(ME.displayName||'Director')+' [DJ]',tipo:'sistema',texto:`⬆ ${pNom} ha subido al Nivel ${nivelNuevo}!`,timestamp:serverTimestamp()});
   toast(`⬆ ${pNom} ahora es Nivel ${nivelNuevo}`,'success');
   document.getElementById('dj-nivel-actual').textContent=nivelNuevo;
   document.getElementById('dj-nivel-nuevo').textContent=nivelNuevo<20?`Nivel ${nivelNuevo+1}`:'Nivel Máximo';
-  // Actualizar el select también
   if(sel.options[sel.selectedIndex]) sel.options[sel.selectedIndex].dataset.nivel=nivelNuevo;
 };
 window.modificarMarcas=async function(signo){
