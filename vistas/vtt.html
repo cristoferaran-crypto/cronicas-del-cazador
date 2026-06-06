@@ -1019,7 +1019,6 @@ function poblarSusurroSelect() {
   else sel.innerHTML=`<option value="${CAMPANA_DATA.directorId}">Director de Juego</option>`;
 }
 window.enviarMensaje = async function() {
-  console.log('DEBUG enviar:', {ES_DIRECTOR, MI_PERSONAJE, CAMPANA_ID, texto});
   const input=document.getElementById('chat-input'); const texto=input.value.trim();
   if(!texto) return;
   if(!ES_DIRECTOR&&!MI_PERSONAJE){toast('No tienes personaje.','error');return;}
