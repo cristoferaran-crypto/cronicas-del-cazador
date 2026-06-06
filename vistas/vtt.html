@@ -776,6 +776,8 @@ const VENDEDORES_LABELS = {
 
 // ══ ESTADO GLOBAL ══
 let ME=null, MI_PERSONAJE=null, ES_DIRECTOR=false, CAMPANA_ID=null, CAMPANA_DATA=null;
+let AVATAR_DIRECTOR_URL=null;
+let AVATARES_USUARIOS={};
 let PERSONAJES_CAMPANA=[];
 let drawColor='#e74c3c', brushSize=2, herramienta='lapiz';
 let misLineas=[], trazosRemotos=[], tokensData={};
@@ -825,6 +827,11 @@ onAuthStateChanged(auth, async (user) => {
     document.getElementById('tool-borrar-todo').style.display = 'flex';
     const btnLimpiar=document.getElementById('btn-limpiar-chat');if(btnLimpiar)btnLimpiar.style.display='block';
   }
+  // Cargar avatar del director desde Firestore
+  try {
+    const userSnap = await getDoc(doc(db,'usuarios',ME.uid));
+    if(userSnap.exists()) AVATAR_DIRECTOR_URL = userSnap.data().avatarDirectorUrl || null;
+  } catch(e) { console.error('avatar director:', e); }
   await cargarMiPersonaje();
   iniciarPersonajesRealtime();
   iniciarChatRealtime();
@@ -844,6 +851,15 @@ async function cargarMiPersonaje() {
   const q = query(collection(db,'personajes'),where('userId','==',ME.uid),where('campanaId','==',CAMPANA_ID),limit(1));
   const snap = await getDocs(q);
   if (!snap.empty) MI_PERSONAJE = {id:snap.docs[0].id,...snap.docs[0].data()};
+}
+
+async function cargarAvatarUsuario(userId) {
+  if(AVATARES_USUARIOS[userId]!==undefined) return;
+  AVATARES_USUARIOS[userId] = null;
+  try {
+    const snap = await getDoc(doc(db,'usuarios',userId));
+    if(snap.exists()) AVATARES_USUARIOS[userId] = snap.data().avatarUrl || null;
+  } catch(e) {}
 }
 
 function iniciarPersonajesRealtime() {
