@@ -14,7 +14,7 @@
       --borde:rgba(255,255,255,0.07); --borde-r:rgba(192,57,43,0.35); --borde-d:rgba(201,168,76,0.3);
       --texto:#e8e2d9; --muted:#8a8490; --sec:#b0aab8;
       --verde:#2ecc71; --amarillo:#f39c12; --naranja:#e67e22;
-      --chat-w:300px; --bar-h:60px; --nav-h:52px;
+      --chat-w:300px; --bar-h:60px; --nav-h:0px;
     }
     *,*::before,*::after{margin:0;padding:0;box-sizing:border-box;}
     html,body{height:100%;overflow:hidden;}
@@ -44,7 +44,7 @@
     .nav-btn.volver:hover{border-color:var(--dorado);background:rgba(201,168,76,0.06);}
 
     /* MAIN */
-    .main{flex:1;display:flex;overflow:hidden;height:calc(100vh - var(--nav-h) - var(--bar-h));}
+    .main{flex:1;display:flex;overflow:hidden;height:calc(100vh - var(--bar-h));}
 
     /* CHAT */
     .chat-panel{width:var(--chat-w);flex-shrink:0;background:var(--sup);border-right:1px solid var(--borde);display:flex;flex-direction:column;}
@@ -127,7 +127,7 @@
     .dado-anim{animation:dado-roll 0.4s ease;}
 
     /* PANEL DJ */
-    .panel-dj{position:fixed;top:var(--nav-h);right:0;bottom:var(--bar-h);width:460px;background:var(--sup);border-left:1px solid var(--borde-d);display:flex;flex-direction:column;z-index:40;transform:translateX(100%);transition:transform 0.3s ease;}
+    .panel-dj{position:fixed;top:0;right:0;bottom:var(--bar-h);width:460px;background:var(--sup);border-left:1px solid var(--borde-d);display:flex;flex-direction:column;z-index:40;transform:translateX(100%);transition:transform 0.3s ease;}
     .panel-dj.open{transform:translateX(0);}
     .panel-dj-header{padding:14px 16px;border-bottom:1px solid var(--borde);display:flex;align-items:center;justify-content:space-between;flex-shrink:0;background:rgba(201,168,76,0.04);}
     .panel-dj-titulo{font-family:'Cinzel',serif;font-size:14px;font-weight:700;color:var(--dorado);}
@@ -461,7 +461,7 @@
     .combat-add-row{display:flex;gap:6px;margin-bottom:10px;}
 
     /* BARRA DE PERSONAJES */
-    .party-bar{flex-shrink:0;background:rgba(10,10,12,0.95);border-bottom:1px solid var(--borde);padding:8px 10px;display:flex;gap:8px;overflow-x:auto;align-items:flex-start;}
+    .party-bar{flex-shrink:0;background:rgba(10,10,12,0.97);border-bottom:1px solid var(--borde);padding:6px 10px;display:flex;gap:6px;overflow-x:auto;align-items:center;}
     .party-bar.vertical{flex-direction:column;border-bottom:none;border-right:1px solid var(--borde);overflow-x:hidden;overflow-y:auto;width:80px;padding:8px 6px;}
     .party-bar::-webkit-scrollbar{height:3px;width:3px;}
     .party-bar::-webkit-scrollbar-thumb{background:var(--borde-r);}
@@ -499,20 +499,19 @@
 <body>
 
 <!-- NAVBAR -->
-<nav class="navbar">
-  <a href="../imagenes/logo.png" class="nav-logo" style="display:flex;align-items:center;text-decoration:none;">
-    <img src="../imagenes/logo.png" alt="CDC">
-  </a>
-  <span class="nav-campana">Campaña: <span id="nav-campana-nombre">Cargando...</span></span>
-
-
-</nav>
+<!-- navbar eliminada -->
 
 <!-- MAIN -->
 <div class="main">
   <!-- CHAT -->
   <div class="chat-panel">
-    <div class="chat-header"><span class="chat-header-titulo">💬 Chat de Campaña</span><button id="btn-limpiar-chat" onclick="limpiarChat()" style="display:none;background:transparent;border:1px solid var(--borde-r);color:var(--rojo);font-size:10px;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;padding:3px 8px;cursor:pointer;" title="Limpiar chat">🗑 Limpiar</button></div>
+    <div class="chat-header" style="flex-direction:column;align-items:flex-start;padding:8px 14px;gap:2px;">
+      <div style="display:flex;width:100%;align-items:center;justify-content:space-between;">
+        <span style="font-family:'Cinzel',serif;font-size:11px;font-weight:800;color:var(--dorado);letter-spacing:0.12em;text-transform:uppercase;" id="chat-campana-nombre">Cargando...</span>
+        <button id="btn-limpiar-chat" onclick="limpiarChat()" style="display:none;background:transparent;border:1px solid var(--borde-r);color:var(--rojo);font-size:10px;font-weight:700;padding:3px 8px;cursor:pointer;">🗑</button>
+      </div>
+      <span class="chat-header-titulo" style="font-size:10px;color:var(--muted);font-weight:600;letter-spacing:0.15em;">💬 CHAT</span>
+    </div>
     <div id="party-bar" class="party-bar"></div>
     <div id="chat-content" style="flex:1;display:flex;flex-direction:column;min-width:0;overflow:hidden;">
     <div class="chat-mensajes" id="chat-mensajes"></div>
@@ -589,6 +588,14 @@
   <button class="barra-btn dj" id="btn-panel-dj" onclick="togglePanelDJ()" style="display:none;">
     <i class="ri-settings-3-line"></i> Panel DJ
   </button>
+  <div class="menu-jugador-wrap" id="menu-jugador-wrap" style="display:none;position:relative;">
+    <button class="barra-btn" onclick="toggleMenuJugador()" style="gap:4px;"><i class="ri-menu-3-line"></i> Menú <i class="ri-arrow-up-s-line" style="font-size:11px;"></i></button>
+    <div id="menu-jugador-dropdown" style="display:none;position:absolute;bottom:calc(100% + 8px);right:0;background:var(--sup2);border:1px solid var(--borde);min-width:170px;z-index:200;box-shadow:0 -8px 24px rgba(0,0,0,0.6);">
+      <button onclick="volverPanel()" style="width:100%;padding:11px 14px;font-size:12px;font-weight:600;color:var(--rojo);cursor:pointer;display:flex;align-items:center;gap:8px;background:transparent;border:none;border-bottom:1px solid var(--borde);text-align:left;"><i class="ri-arrow-left-line"></i> Volver al Panel</button>
+      <button onclick="abrirFicha();toggleMenuJugador();" style="width:100%;padding:11px 14px;font-size:12px;font-weight:600;color:var(--sec);cursor:pointer;display:flex;align-items:center;gap:8px;background:transparent;border:none;border-bottom:1px solid var(--borde);text-align:left;transition:background 0.15s;" onmouseover="this.style.background='var(--sup3)'" onmouseout="this.style.background='transparent'"><i class="ri-file-user-line"></i> Mi Ficha</button>
+      <button onclick="abrirNotas();toggleMenuJugador();" style="width:100%;padding:11px 14px;font-size:12px;font-weight:600;color:var(--sec);cursor:pointer;display:flex;align-items:center;gap:8px;background:transparent;border:none;text-align:left;transition:background 0.15s;" onmouseover="this.style.background='var(--sup3)'" onmouseout="this.style.background='transparent'"><i class="ri-sticky-note-line"></i> Mis Notas</button>
+    </div>
+  </div>
   <div class="menu-jugador-wrap" id="menu-jugador-wrap" style="display:none;">
     <button class="menu-jugador-btn" onclick="toggleMenuJugador()">
       <i class="ri-menu-line"></i> Menú <i class="ri-arrow-up-s-line" style="font-size:12px;"></i>
@@ -840,12 +847,16 @@ onAuthStateChanged(auth, async (user) => {
   const campSnap = await getDoc(doc(db,'campanas',CAMPANA_ID));
   if (!campSnap.exists()) { toast('Campaña no encontrada.','error'); return; }
   CAMPANA_DATA = {id:campSnap.id,...campSnap.data()};
-  document.getElementById('nav-campana-nombre').textContent = CAMPANA_DATA.nombre;
+  try{document.getElementById('nav-campana-nombre').textContent = CAMPANA_DATA.nombre;}catch(e){}
+  const chatCampana=document.getElementById('chat-campana-nombre');if(chatCampana)chatCampana.textContent=CAMPANA_DATA.nombre;
   ES_DIRECTOR = ROL_PARAM==='director' ? true : ROL_PARAM==='jugador' ? false : CAMPANA_DATA.directorId===ME.uid;
   if (ES_DIRECTOR) {
     document.getElementById('btn-panel-dj').style.display = 'flex';
     document.getElementById('tool-borrar-todo').style.display = 'flex';
     const btnLimpiar=document.getElementById('btn-limpiar-chat');if(btnLimpiar)btnLimpiar.style.display='block';
+  } else {
+    const mj=document.getElementById('menu-jugador-wrap');
+    if(mj) mj.style.display='block';
   } else {
     const menuJugador=document.getElementById('menu-jugador-wrap');
     if(menuJugador) menuJugador.style.display='block';
