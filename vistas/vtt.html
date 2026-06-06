@@ -969,7 +969,7 @@ function iniciarTokenDrag() {
 // ══ CHAT ══
 function iniciarChatRealtime() {
   if (unsubChat) unsubChat();
-  const q = query(collection(db,'campanas',CAMPANA_ID,'mensajes'),orderBy('timestamp','asc'),limit(150));
+  const q = query(collection(db,'campanas',CAMPANA_ID,'mensajes'),orderBy('timestamp','asc'),limit(200));
   unsubChat = onSnapshot(q, snap => {
     const wrap = document.getElementById('chat-mensajes');
     wrap.innerHTML='';
