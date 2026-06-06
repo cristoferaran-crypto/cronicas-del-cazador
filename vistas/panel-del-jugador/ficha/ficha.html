@@ -280,7 +280,16 @@
       <div class="fc-header"><i class="ri-shield-flash-line" style="color:var(--muted);font-size:0.8rem;"></i><span class="fc-title">Estado</span></div>
       <div class="combat-top">
         <div class="big-stat red-stat"><span class="big-stat-lbl">Puntos de Aguante</span><span class="big-stat-val" id="pa-val">0</span></div>
-        <div class="big-stat"><span class="big-stat-lbl">Iniciativa</span><span class="big-stat-val" id="ini-val">0</span></div>
+        <div class="big-stat" id="ini-stat"
+          style="cursor:pointer;transition:all 0.2s;position:relative;"
+          onclick="lanzarIniciativa()"
+          onmouseover="this.style.borderColor='rgba(201,168,76,0.5)';this.style.background='rgba(201,168,76,0.06)'"
+          onmouseout="this.style.borderColor='';this.style.background=''"
+          title="Clic para lanzar iniciativa al chat">
+          <span class="big-stat-lbl">⚡ Iniciativa</span>
+          <span class="big-stat-val" id="ini-val">0</span>
+          <span style="font-family:var(--mono);font-size:0.52rem;letter-spacing:0.12em;text-transform:uppercase;color:var(--gold);display:block;margin-top:3px;">LANZAR</span>
+        </div>
       </div>
       <div class="combat-bottom">
         <span class="patemp-label">PA Temporales</span>
@@ -948,6 +957,39 @@ const _origSwitchTab = window.switchTab;
 window.switchTab = function(name, btn) {
   _origSwitchTab(name, btn);
   if (name === 'mejorar') renderMejorar();
+};
+
+window.lanzarIniciativa = function() {
+  const ini = parseInt(document.getElementById('ini-val').textContent) || 1;
+  const resultados = Array.from({length: ini}, () => Math.floor(Math.random() * 6) + 1);
+  let exitos = 0, cns = 0;
+  resultados.forEach(r => {
+    if (r === 1) cns++;
+    else if (r >= 4 && r <= 5) exitos++;
+    else if (r === 6) exitos += 2;
+  });
+
+  // Feedback visual
+  const stat = document.getElementById('ini-stat');
+  stat.style.borderColor = 'var(--red)';
+  stat.style.background = 'var(--red-dim)';
+  setTimeout(() => {
+    stat.style.borderColor = '';
+    stat.style.background = '';
+  }, 500);
+
+  // Guardar en localStorage para sincronizar con el VTT (base para tracker de combate)
+  localStorage.setItem('cdc-iniciativa-pendiente', JSON.stringify({
+    personajeId: charId,
+    nombre: p?.nombre || '?',
+    resultados,
+    exitos,
+    cns,
+    valor: ini,
+    timestamp: Date.now()
+  }));
+
+  showToast(`⚡ Iniciativa lanzada — ${ini}d6 · ${exitos} éxito${exitos !== 1 ? 's' : ''}${cns > 0 ? ` · ${cns} CN` : ''}`, 'success');
 };
 </script>
 </body>

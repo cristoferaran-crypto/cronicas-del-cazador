@@ -1111,10 +1111,43 @@ function renderTab(tab){renderSeccion(tab);}
 
 function renderTabJugadores(){
   if(!PERSONAJES_CAMPANA.length) return`<p style="color:var(--muted);font-size:13px;font-style:italic;">Ningún jugador se ha unido todavía.</p>`;
+
+  const ESTADO_COLORES={
+    sano:   {color:'var(--verde)',   bg:'rgba(46,204,113,0.1)'},
+    herido: {color:'var(--amarillo)',bg:'rgba(243,156,18,0.1)'},
+    grave:  {color:'var(--naranja)', bg:'rgba(230,126,34,0.1)'},
+    critico:{color:'var(--rojo)',    bg:'rgba(192,57,43,0.1)'},
+    ko:     {color:'var(--muted)',   bg:'rgba(255,255,255,0.04)'},
+  };
+
   return PERSONAJES_CAMPANA.map(p=>{
-    const estado=p.estadoSalud||'sano'; const ini=(p.nombre||'?').charAt(0).toUpperCase();
-    const pa=p.atributos?(p.atributos.resistencia||1)+3:'?';
-    return`<div class="jugador-ficha-card"><div class="jfc-header"><div class="jfc-avatar est-${estado}">${ini}</div><div class="jfc-info"><div class="jfc-nombre">${p.nombre||'Sin nombre'}</div><div class="jfc-sub">Nv.${p.nivel||1} · ${p.cultura||'—'} · ${p.camino||'—'}</div></div><button onclick="abrirFichaPersonaje(${JSON.stringify(p).replace(/"/g,'&quot;')})" style="background:transparent;border:1px solid var(--borde);color:var(--muted);width:28px;height:28px;cursor:pointer;font-size:13px;display:flex;align-items:center;justify-content:center;"><i class="ri-eye-line"></i></button></div><div class="jfc-stats"><div class="jfc-stat"><span class="jfc-stat-val">${p.paActual!==undefined?p.paActual:pa}/${pa}</span><span class="jfc-stat-lbl">PA</span></div><div class="jfc-stat"><span class="jfc-stat-val dorado">${p.xpTotal||0}</span><span class="jfc-stat-lbl">XP</span></div><div class="jfc-stat"><span class="jfc-stat-val" style="font-size:12px;">${estado}</span><span class="jfc-stat-lbl">Estado</span></div></div><div style="margin-top:8px;"><div class="form-label" style="margin-bottom:5px;">Estado:</div><div class="estado-selector">${['sano','herido','grave','critico','ko'].map(e=>`<button class="est-btn ${estado===e?'active-'+e:''}" onclick="cambiarEstado('${p.id}','${e}',this)">${e.charAt(0).toUpperCase()+e.slice(1)}</button>`).join('')}</div></div></div>`;
+    const estado=p.estadoSalud||'sano';
+    const ini=(p.nombre||'?').charAt(0).toUpperCase();
+    const paMax=p.atributos?(p.atributos.resistencia||1)+3:4;
+    const paAct=p.paActual!==undefined?p.paActual:paMax;
+    const col=ESTADO_COLORES[estado]||ESTADO_COLORES.sano;
+    const condiciones=p.condiciones||[];
+    const condBadges=condiciones.map(c=>`<span style="font-size:9px;padding:1px 5px;border:1px solid rgba(255,255,255,0.15);color:var(--sec);background:rgba(255,255,255,0.04);white-space:nowrap;">${c}</span>`).join('');
+    const estadoOpts=['sano','herido','grave','critico','ko'].map(e=>{
+      const ec=ESTADO_COLORES[e]; const activo=e===estado;
+      return`<button onclick="cambiarEstadoCompacto('${p.id}','${e}')" style="flex:1;padding:3px 2px;font-size:9px;font-weight:700;letter-spacing:0.04em;text-transform:uppercase;background:${activo?ec.bg:'transparent'};border:1px solid ${activo?ec.color:'var(--borde)'};color:${activo?ec.color:'var(--muted)'};cursor:pointer;transition:all 0.15s;">${e==='ko'?'KO':e.charAt(0).toUpperCase()+e.slice(1)}</button>`;
+    }).join('');
+
+    return`<div style="background:var(--sup2);border:1px solid var(--borde);border-left:3px solid ${col.color};padding:10px 12px;margin-bottom:8px;transition:border-color 0.2s;">
+      <div style="display:flex;align-items:center;gap:10px;margin-bottom:8px;">
+        <div onclick="abrirFichaPersonaje(${JSON.stringify(p).replace(/"/g,'&quot;')})"
+          style="width:34px;height:34px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-family:'Cinzel',serif;font-size:13px;font-weight:700;border:2px solid ${col.color};color:${col.color};cursor:pointer;flex-shrink:0;transition:transform 0.15s;background:${col.bg};"
+          onmouseover="this.style.transform='scale(1.1)'" onmouseout="this.style.transform='scale(1)'"
+          title="Ver ficha completa">${ini}</div>
+        <div style="flex:1;min-width:0;">
+          <div style="font-family:'Cinzel',serif;font-size:13px;font-weight:700;color:var(--texto);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${p.nombre||'Sin nombre'}</div>
+          <div style="font-size:10px;color:var(--muted);">Nv.${p.nivel||1} · PA <strong style="color:var(--texto);">${paAct}/${paMax}</strong></div>
+        </div>
+        ${condBadges?`<div style="display:flex;gap:3px;flex-wrap:wrap;justify-content:flex-end;max-width:110px;">${condBadges}</div>`:''}
+        <div style="padding:3px 8px;border:1px solid ${col.color};background:${col.bg};color:${col.color};font-size:9px;font-weight:700;letter-spacing:0.06em;text-transform:uppercase;flex-shrink:0;">● ${estado.toUpperCase()}</div>
+      </div>
+      <div style="display:flex;gap:3px;">${estadoOpts}</div>
+    </div>`;
   }).join('');
 }
 
@@ -1440,6 +1473,12 @@ window.enviarSusurro=async function(){
   await addDoc(collection(db,'campanas',CAMPANA_ID,'mensajes'),{autorId:ME.uid,autorNombre:(ME.displayName||'Director')+' [DJ]',tipo:'susurro',paraId,paraNombre:paraNom,texto,timestamp:serverTimestamp()});
   document.getElementById('sus-mensaje').value='';toast(`🔒 Susurro enviado a ${paraNom}`,'success');
 };
+window.cambiarEstadoCompacto=async function(personajeId,nuevoEstado){
+  await updateDoc(doc(db,'personajes',personajeId),{estadoSalud:nuevoEstado});
+  if(MI_PERSONAJE&&MI_PERSONAJE.id===personajeId)MI_PERSONAJE.estadoSalud=nuevoEstado;
+  toast('Estado: '+nuevoEstado,'success');
+  if(tabActiva==='jugadores')renderSeccion('jugadores');
+};
 window.cambiarEstado=async function(personajeId,nuevoEstado,btn){
   await updateDoc(doc(db,'personajes',personajeId),{estadoSalud:nuevoEstado});
   const card=btn.closest('.jugador-ficha-card');
@@ -1682,7 +1721,11 @@ window.abrirFichaPersonaje=function(p){
       <span class="pa-max">/ ${paMax}</span>
     </div>
     <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:4px;">
-      <div style="background:var(--sup3);padding:10px;text-align:center;"><span style="font-family:'Cinzel',serif;font-size:20px;font-weight:800;color:var(--texto);display:block;">${init}</span><span style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:0.1em;color:var(--muted);">Iniciativa</span></div>
+      <div onclick="${esPropia?`lanzarIniciativaVTT('${p.id}','${p.nombre||'?'}',${init})`:'void(0)'}" style="background:var(--sup3);padding:10px;text-align:center;${esPropia?'cursor:pointer;border:1px solid var(--borde);transition:all 0.2s;':''}position:relative;" ${esPropia?`onmouseover="this.style.borderColor='var(--borde-d)';this.style.background='rgba(201,168,76,0.06)'" onmouseout="this.style.borderColor='var(--borde)';this.style.background='var(--sup3)'"`:''} title="${esPropia?'Clic para lanzar iniciativa':''}">
+        <span style="font-family:'Cinzel',serif;font-size:20px;font-weight:800;color:var(--texto);display:block;">${init}</span>
+        <span style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:0.1em;color:var(--muted);">Iniciativa</span>
+        ${esPropia?`<span style="font-size:8px;color:var(--dorado);display:block;margin-top:2px;letter-spacing:0.1em;">⚡ LANZAR</span>`:''}
+      </div>
       <div style="background:var(--sup3);padding:10px;text-align:center;"><span style="font-family:'Cinzel',serif;font-size:20px;font-weight:800;color:var(--dorado);display:block;">${p.xpTotal||0}</span><span style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:0.1em;color:var(--muted);">XP Total</span></div>
     </div>
   </div>`;
@@ -1870,6 +1913,23 @@ window.jugadorUsarItem=async function(personajeId,idx){
   abrirFichaPersonaje({...data,inventario,id:personajeId});
 };
 window.switchFichaTab=function(tab,el){document.querySelectorAll('.ficha-tab').forEach(t=>t.classList.remove('active'));document.querySelectorAll('.ficha-tab-body').forEach(b=>b.classList.remove('active'));el.classList.add('active');document.getElementById('ftab-'+tab)?.classList.add('active');};
+window.lanzarIniciativaVTT=async function(personajeId,nombrePersonaje,valorIniciativa){
+  if(!valorIniciativa||valorIniciativa<1)return;
+  const dados=Array.from({length:valorIniciativa},()=>Math.floor(Math.random()*6)+1);
+  let exitos=0,cns=0;
+  dados.forEach(r=>{if(r===1)cns++;else if(r>=4&&r<=5)exitos++;else if(r===6)exitos+=2;});
+  await addDoc(collection(db,'campanas',CAMPANA_ID,'mensajes'),{
+    autorId:ME.uid,
+    autorNombre:nombrePersonaje,
+    tipo:'tirada',
+    cantidad:valorIniciativa,
+    resultados:dados,
+    esIniciativa:true,
+    timestamp:serverTimestamp()
+  });
+  toast(`⚡ Iniciativa de ${nombrePersonaje}: ${valorIniciativa}d6 — ${exitos} éxito${exitos!==1?'s':''}${cns>0?` · ${cns} CN`:''}`, 'success');
+  cerrarModal('modal-ficha');
+};
 window.jugadorCambiarEstado=async function(personajeId,nuevoEstado){
   await updateDoc(doc(db,'personajes',personajeId),{estadoSalud:nuevoEstado});
   document.querySelectorAll('.esj-btn').forEach(b=>{b.className='esj-btn';const e=b.textContent.replace('💀 ','').trim().toLowerCase();if(e===nuevoEstado)b.classList.add('active-'+nuevoEstado);});
