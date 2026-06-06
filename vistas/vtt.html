@@ -27,12 +27,12 @@
     .nav-campana span{color:var(--dorado);}
     .avatares-online{display:flex;gap:6px;align-items:center;}
     .avatar-pill{position:relative;cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:2px;}
-    .avatar-circle{width:32px;height:32px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-family:'Cinzel',serif;font-size:12px;font-weight:700;border:2px solid;flex-shrink:0;transition:transform 0.15s;}
+    .avatar-circle{width:44px;height:44px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-family:'Cinzel',serif;font-size:15px;font-weight:700;border:2px solid;flex-shrink:0;transition:transform 0.15s;overflow:hidden;}
     .avatar-circle:hover{transform:scale(1.1);}
     .avatar-tooltip{position:absolute;bottom:calc(100% + 6px);left:50%;transform:translateX(-50%);background:var(--sup2);border:1px solid var(--borde-d);padding:6px 10px;white-space:nowrap;font-size:11px;opacity:0;pointer-events:none;transition:opacity 0.2s;z-index:100;}
     .avatar-pill:hover .avatar-tooltip{opacity:1;}
-    .avatar-nombre{font-size:9px;color:var(--muted);font-weight:600;letter-spacing:0.05em;max-width:36px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
-    .avatar-penalty{position:absolute;top:-4px;right:-4px;background:var(--rojo);color:white;font-size:9px;font-weight:800;width:16px;height:16px;border-radius:50%;display:flex;align-items:center;justify-content:center;border:1px solid var(--negro);}
+    .avatar-nombre{font-size:10px;color:var(--muted);font-weight:600;letter-spacing:0.05em;max-width:48px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+    .avatar-penalty{position:absolute;top:-2px;right:-2px;background:var(--rojo);color:white;font-size:9px;font-weight:800;width:18px;height:18px;border-radius:50%;display:flex;align-items:center;justify-content:center;border:1px solid var(--negro);}
     .est-sano{border-color:var(--verde);color:var(--verde);}
     .est-herido{border-color:var(--amarillo);color:var(--amarillo);}
     .est-grave{border-color:var(--naranja);color:var(--naranja);}
@@ -827,15 +827,29 @@ async function cargarMiPersonaje() {
   if (!snap.empty) MI_PERSONAJE = {id:snap.docs[0].id,...snap.docs[0].data()};
 }
 
+// Cache de avatares de usuarios
+let AVATARES_USUARIOS = {};
+
+async function cargarAvatarUsuario(userId) {
+  if(AVATARES_USUARIOS[userId]!==undefined) return;
+  AVATARES_USUARIOS[userId] = null; // marcar como en proceso
+  try {
+    const snap = await getDoc(doc(db,'usuarios',userId));
+    if(snap.exists()) AVATARES_USUARIOS[userId] = snap.data().avatarUrl || null;
+  } catch(e) {}
+}
+
 function iniciarPersonajesRealtime() {
   if (unsubPersonajes) unsubPersonajes();
   const q = query(collection(db,'personajes'),where('campanaId','==',CAMPANA_ID));
-  unsubPersonajes = onSnapshot(q, snap => {
+  unsubPersonajes = onSnapshot(q, async snap => {
     PERSONAJES_CAMPANA = snap.docs.map(d=>({id:d.id,...d.data()}));
     if (MI_PERSONAJE) {
       const u = PERSONAJES_CAMPANA.find(p=>p.id===MI_PERSONAJE.id);
       if (u) MI_PERSONAJE = u;
     }
+    // Cargar avatares de usuarios que aún no tenemos
+    await Promise.all(PERSONAJES_CAMPANA.map(p => p.userId ? cargarAvatarUsuario(p.userId) : Promise.resolve()));
     renderizarAvatares();
     if (ES_DIRECTOR && tabActiva==='jugadores') renderTab('jugadores');
   });
@@ -859,7 +873,8 @@ function renderizarAvatares() {
     const paAct=p.paActual!==undefined?p.paActual:paMax;
     const esPropio=p.userId===ME.uid;
     const penHtml=pen<0?`<div class="avatar-penalty">${pen}</div>`:'';
-    const avatarInner=p.avatarUrl?`<img src="${p.avatarUrl}" style="width:100%;height:100%;object-fit:cover;border-radius:50%;">`:`${ini}`;
+    const avatarUrlPersonaje = p.avatarUrl || (p.userId ? AVATARES_USUARIOS[p.userId] : null);
+    const avatarInner=avatarUrlPersonaje?`<img src="${avatarUrlPersonaje}" style="width:100%;height:100%;object-fit:cover;border-radius:50%;">`:`${ini}`;
     return `<div class="avatar-pill" onclick="clickAvatar('${p.id}','${esPropio}')"><div style="position:relative;display:inline-block;"><div class="avatar-circle est-${estado}">${avatarInner}</div>${penHtml}</div><span class="avatar-nombre">${(p.nombre||'?').split(' ')[0]}</span><div class="avatar-tooltip"><strong>${p.nombre||'?'}</strong> · Nv.${p.nivel||1}<br>PA: ${paAct}/${paMax} · ${estado}${pen<0?`<br>Penalización: ${pen}`:''}</div></div>`;
   }).join('');
   wrap.innerHTML = html;
