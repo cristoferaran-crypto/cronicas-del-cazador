@@ -510,6 +510,24 @@
             .form-row { grid-template-columns: 1fr; }
             .peligro-item { flex-direction: column; align-items: flex-start; }
         }
+
+        /* AVATAR DIRECTOR */
+        .avatar-director-wrap { display:flex; flex-direction:column; align-items:center; gap:12px; padding:20px; background:rgba(201,168,76,0.04); border:1px solid rgba(201,168,76,0.2); margin-bottom:0; }
+        .avatar-director-frame { position:relative; width:110px; height:110px; cursor:pointer; }
+        .avatar-director-frame::before { content:''; position:absolute; inset:-4px; border:2px solid var(--dorado); border-radius:50%; animation:marcoAnim 3s linear infinite; }
+        .avatar-director-frame::after { content:''; position:absolute; inset:-8px; border:1px solid rgba(201,168,76,0.3); border-radius:50%; animation:marcoAnim 3s linear infinite reverse; }
+        @keyframes marcoAnim { 0%{transform:rotate(0deg);}100%{transform:rotate(360deg);} }
+        .avatar-director-img { width:110px; height:110px; border-radius:50%; object-fit:cover; border:3px solid var(--dorado); display:block; }
+        .avatar-director-placeholder { width:110px; height:110px; border-radius:50%; background:rgba(201,168,76,0.1); border:3px solid rgba(201,168,76,0.4); display:flex; align-items:center; justify-content:center; font-family:'Cinzel',serif; font-size:36px; font-weight:800; color:var(--dorado); }
+        .avatar-director-overlay { position:absolute; inset:0; border-radius:50%; background:rgba(0,0,0,0.6); display:flex; align-items:center; justify-content:center; opacity:0; transition:opacity 0.2s; }
+        .avatar-director-frame:hover .avatar-director-overlay { opacity:1; }
+        .avatar-director-overlay i { font-size:28px; color:var(--dorado); }
+        .avatar-director-titulo { font-family:'Cinzel',serif; font-size:14px; font-weight:700; color:var(--dorado); letter-spacing:0.1em; }
+        .avatar-director-sub { font-size:12px; color:var(--muted); text-align:center; line-height:1.5; }
+        .avatar-director-btn { padding:6px 18px; background:transparent; border:1px solid var(--dorado); color:var(--dorado); font-family:'Cinzel',serif; font-size:11px; font-weight:700; letter-spacing:0.1em; text-transform:uppercase; cursor:pointer; transition:all 0.2s; }
+        .avatar-director-btn:hover { background:rgba(201,168,76,0.1); }
+        .upload-progress { height:3px; background:rgba(255,255,255,0.1); margin-top:8px; width:100%; display:none; }
+        .upload-progress-bar { height:100%; background:var(--dorado); width:0%; transition:width 0.3s; }
     </style>
 </head>
 <body>
@@ -564,6 +582,32 @@
                         <div class="perfil-badges" id="perfil-badges">
                             <div class="badge badge-jugador"><i class="ri-sword-line"></i> Jugador</div>
                         </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ── AVATAR DIRECTOR ── -->
+        <div class="seccion">
+            <div class="seccion-header">
+                <i class="ri-user-star-line" style="color:var(--dorado);"></i>
+                <span class="seccion-titulo-texto" style="color:var(--dorado);">Avatar del Director de Juego</span>
+            </div>
+            <div class="seccion-body">
+                <div class="avatar-director-wrap">
+                    <div class="avatar-director-frame" onclick="document.getElementById('avatar-dj-input').click()">
+                        <div class="avatar-director-placeholder" id="avatar-dj-placeholder">?</div>
+                        <img id="avatar-dj-img" src="" alt="" style="display:none;" class="avatar-director-img">
+                        <div class="avatar-director-overlay"><i class="ri-camera-line"></i></div>
+                    </div>
+                    <input type="file" id="avatar-dj-input" accept="image/*" style="display:none" onchange="subirAvatarDirector(this)">
+                    <div class="avatar-director-titulo">✦ Director de Juego</div>
+                    <div class="avatar-director-sub">Esta imagen aparecerá en el VTT durante tus partidas.<br>Tus jugadores la verán en la barra de campaña.</div>
+                    <button class="avatar-director-btn" onclick="document.getElementById('avatar-dj-input').click()">
+                        <i class="ri-upload-cloud-line"></i> Cambiar imagen
+                    </button>
+                    <div class="upload-progress" id="dj-upload-progress">
+                        <div class="upload-progress-bar" id="dj-upload-bar"></div>
                     </div>
                 </div>
             </div>
@@ -734,8 +778,12 @@
             getAuth, onAuthStateChanged, updateProfile,
             updatePassword, deleteUser, signOut, reauthenticateWithCredential, EmailAuthProvider
         } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-auth.js";
+        import { getFirestore, doc, getDoc, setDoc, updateDoc } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore.js";
 
         const auth = getAuth(app);
+        const db = getFirestore(app);
+        const CLOUD_NAME = 'davwzigvs';
+        const UPLOAD_PRESET = 'cdc-assets';
         let usuarioActual = null;
 
         onAuthStateChanged(auth, (user) => {
@@ -743,6 +791,7 @@
             usuarioActual = user;
             cargarPerfil(user);
             cargarEstadisticas();
+            cargarAvatarDirector(user.uid);
         });
 
         function cargarPerfil(user) {
@@ -901,6 +950,55 @@
             reader.readAsDataURL(input.files[0]);
         }
 
+        async function cargarAvatarDirector(uid) {
+            try {
+                const snap = await getDoc(doc(db,'usuarios',uid));
+                if(snap.exists() && snap.data().avatarDirectorUrl) {
+                    mostrarAvatarDirector(snap.data().avatarDirectorUrl);
+                }
+                // Iniciar con inicial del nombre
+                const nombre = usuarioActual?.displayName || '?';
+                document.getElementById('avatar-dj-placeholder').textContent = nombre.charAt(0).toUpperCase();
+            } catch(e) { console.error(e); }
+        }
+
+        function mostrarAvatarDirector(url) {
+            const img = document.getElementById('avatar-dj-img');
+            const placeholder = document.getElementById('avatar-dj-placeholder');
+            img.src = url;
+            img.style.display = 'block';
+            placeholder.style.display = 'none';
+        }
+
+        window.subirAvatarDirector = async function(input) {
+            if(!input.files || !input.files[0]) return;
+            const file = input.files[0];
+            const prog = document.getElementById('dj-upload-progress');
+            const bar = document.getElementById('dj-upload-bar');
+            prog.style.display = 'block'; bar.style.width = '20%';
+            try {
+                const fd = new FormData();
+                fd.append('file', file);
+                fd.append('upload_preset', UPLOAD_PRESET);
+                fd.append('folder', 'cdc-assets/directores');
+                bar.style.width = '50%';
+                const res = await fetch(`https://api.cloudinary.com/v1_1/${CLOUD_NAME}/image/upload`, {method:'POST',body:fd});
+                const data = await res.json();
+                bar.style.width = '80%';
+                // Guardar en Firestore bajo usuarios/{uid}
+                await setDoc(doc(db,'usuarios',usuarioActual.uid), { avatarDirectorUrl: data.secure_url }, { merge:true });
+                bar.style.width = '100%';
+                mostrarAvatarDirector(data.secure_url);
+                setTimeout(()=>{ prog.style.display='none'; bar.style.width='0%'; },600);
+                toast('✅ Avatar del Director guardado.', 'success');
+            } catch(e) {
+                toast('Error al subir la imagen.', 'error');
+                prog.style.display = 'none';
+                console.error(e);
+            }
+            input.value='';
+        };
+
         function abrirModalPersonajes() {
             document.getElementById('modal-personajes').classList.add('open');
             document.body.style.overflow = 'hidden';
@@ -923,6 +1021,7 @@
 
         window.togglePass = togglePass;
         window.previewAvatar = previewAvatar;
+        window.cargarAvatarDirector = cargarAvatarDirector;
         window.abrirModalPersonajes = abrirModalPersonajes;
         window.abrirModalCuenta = abrirModalCuenta;
         window.cerrarModal = cerrarModal;
