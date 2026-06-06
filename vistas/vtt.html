@@ -805,6 +805,8 @@ onAuthStateChanged(auth, async (user) => {
     if(userSnap.exists()) AVATAR_DIRECTOR_URL = userSnap.data().avatarDirectorUrl || null;
   } catch(e) { console.error(e); }
   await cargarMiPersonaje();
+  // Re-render avatares después de cargar avatar director
+  setTimeout(()=>renderizarAvatares(), 500);
   iniciarPersonajesRealtime();
   iniciarChatRealtime();
   iniciarMapaRealtime();
