@@ -461,11 +461,11 @@
     .combat-add-row{display:flex;gap:6px;margin-bottom:10px;}
 
     /* BARRA DE PERSONAJES */
-    .party-bar{flex-shrink:0;background:rgba(10,10,12,0.97);border-bottom:1px solid var(--borde);padding:6px 10px;display:flex;gap:6px;overflow-x:auto;align-items:center;}
+    .party-bar{flex-shrink:0;background:rgba(10,10,12,0.97);border-bottom:1px solid var(--borde);padding:4px 8px;display:flex;gap:4px;overflow-x:auto;align-items:center;}
     .party-bar.vertical{flex-direction:column;border-bottom:none;border-right:1px solid var(--borde);overflow-x:hidden;overflow-y:auto;width:80px;padding:8px 6px;}
     .party-bar::-webkit-scrollbar{height:3px;width:3px;}
     .party-bar::-webkit-scrollbar-thumb{background:var(--borde-r);}
-    .party-card{display:flex;flex-direction:column;align-items:center;gap:4px;cursor:pointer;flex-shrink:0;width:70px;transition:transform 0.15s;}
+    .party-card{display:flex;flex-direction:column;align-items:center;gap:2px;cursor:pointer;flex-shrink:0;width:48px;transition:transform 0.15s;position:relative;}
     .party-bar.vertical .party-card{width:68px;}
     .party-card:hover{transform:translateY(-2px);}
     .party-bar.vertical .party-card:hover{transform:translateX(2px);}
@@ -476,7 +476,7 @@
     .party-pen{position:absolute;top:-3px;right:-3px;background:var(--rojo);color:white;font-size:9px;font-weight:800;width:18px;height:18px;border-radius:50%;display:flex;align-items:center;justify-content:center;border:1px solid var(--negro);}
     .party-tooltip{position:absolute;bottom:calc(100% + 8px);left:50%;transform:translateX(-50%);background:var(--sup2);border:1px solid var(--borde-d);padding:5px 9px;white-space:nowrap;font-size:11px;color:var(--texto);opacity:0;pointer-events:none;transition:opacity 0.2s;z-index:100;}
     .party-card:hover .party-tooltip{opacity:1;}
-    .party-pa-bar{width:44px;height:3px;background:rgba(255,255,255,0.08);border-radius:2px;overflow:hidden;}
+    .party-pa-bar{width:44px;height:2px;background:rgba(255,255,255,0.08);border-radius:2px;overflow:hidden;}
     .party-pa-fill{height:100%;background:var(--verde);border-radius:2px;transition:width 0.3s;}
     .party-pa-fill.herido{background:var(--amarillo);}
     .party-pa-fill.grave{background:var(--naranja);}
@@ -610,9 +610,8 @@
 
 <!-- PANEL DJ -->
 <div class="panel-dj" id="panel-dj">
-  <div class="panel-dj-header" style="gap:8px;">
-    <span class="panel-dj-titulo" style="flex:1;">✦ Panel del Director</span>
-    <button onclick="volverPanel()" style="background:transparent;border:1px solid var(--borde-r);color:var(--rojo);font-size:10px;font-weight:700;letter-spacing:0.06em;text-transform:uppercase;padding:4px 8px;cursor:pointer;display:flex;align-items:center;gap:4px;"><i class="ri-arrow-left-line"></i> Volver</button>
+  <div class="panel-dj-header">
+    <span class="panel-dj-titulo">✦ Panel del Director</span>
     <button class="panel-close" onclick="togglePanelDJ()"><i class="ri-close-line"></i></button>
   </div>
   <div class="panel-body">
@@ -626,6 +625,7 @@
       <div class="dj-dash-btn" onclick="abrirSeccionDJ('mapa')"><i class="ri-map-2-line"></i><span>Mapa</span><small>Tokens y dibujo</small></div>
       <div class="dj-dash-btn" onclick="abrirSeccionDJ('combat')" style="grid-column:span 3;border-color:rgba(192,57,43,0.4);"><i class="ri-sword-line"></i><span>Combat Tracker</span><small>Iniciativa y turnos</small></div>
       <div class="dj-dash-btn" onclick="abrirSeccionDJ('notas')" style="grid-column:span 3;"><i class="ri-sticky-note-line"></i><span>Notas DJ</span><small>Solo tú las ves</small></div>
+      <div onclick="volverPanel()" style="grid-column:span 3;padding:10px;display:flex;align-items:center;justify-content:center;gap:8px;border:1px solid var(--borde-r);color:var(--rojo);cursor:pointer;font-family:'Cinzel',serif;font-size:11px;font-weight:700;letter-spacing:0.12em;text-transform:uppercase;transition:background 0.2s;" onmouseover="this.style.background='rgba(192,57,43,0.1)'" onmouseout="this.style.background='transparent'"><i class="ri-logout-box-line"></i> Salir de la Campaña</div>
     </div>
     <div class="dj-seccion" id="dj-sec-jugadores"><div class="dj-seccion-header"><button class="dj-back-btn" onclick="volverDashboard()"><i class="ri-arrow-left-line"></i></button><span class="dj-seccion-titulo"><i class="ri-group-line"></i> Jugadores</span></div><div class="dj-seccion-body" id="body-jugadores"></div></div>
     <div class="dj-seccion" id="dj-sec-xp"><div class="dj-seccion-header"><button class="dj-back-btn" onclick="volverDashboard()"><i class="ri-arrow-left-line"></i></button><span class="dj-seccion-titulo"><i class="ri-star-line"></i> XP & Nivel & Marcas</span></div><div class="dj-seccion-body" id="body-xp"></div></div>
@@ -828,10 +828,10 @@ const CRITERIOS_XP=['Participó activamente en la sesión','Interpretó correcta
 window.volverPanel = function() {
   const params = new URLSearchParams(window.location.search);
   const rol = params.get('rol');
-  if (rol === 'director') {
-    window.location.href = './panel-del-director/panel-del-director.html';
+  if (rol === 'director' || ES_DIRECTOR) {
+    window.location.href = '../panel-del-director/panel-del-director.html';
   } else {
-    window.location.href = './panel-del-jugador/panel-del-jugador.html';
+    window.location.href = '../panel-del-jugador/panel-del-jugador.html';
   }
 };
 
