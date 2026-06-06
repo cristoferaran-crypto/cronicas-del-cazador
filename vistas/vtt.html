@@ -1553,7 +1553,16 @@ window.guardarProd=async function(){
   const nombre=document.getElementById('prod-nombre').value.trim();
   const cat=document.getElementById('prod-cat').value.trim();
   const precio=parseInt(document.getElementById('prod-precio').value)||0;
-  if(!nombre||!cat){toast('Nombre y categoría son obligatorios.','error');return;}
+  const equipable=document.getElementById('prod-equipable').value==='true';
+  const ranura=document.getElementById('prod-ranura').value.trim();
+  const bono=document.getElementById('prod-bono').value.trim();
+  // Validar parámetros faltantes
+  const faltantes=[];
+  if(!nombre) faltantes.push('Nombre');
+  if(!cat) faltantes.push('Categoría');
+  if(!precio) faltantes.push('Precio');
+  if(equipable && (!ranura||ranura==='—')) faltantes.push('Ranura (el ítem es equipable pero no tiene ranura)');
+  if(faltantes.length){toast('⚠ Faltan parámetros: '+faltantes.join(', '),'error');return;}
   const vendedor=document.getElementById('prod-vendedor').value;
   const data={
     nombre,cat,
@@ -1719,17 +1728,26 @@ window.actualizarInfoPersonaje=function(sel){
   const p=PERSONAJES_CAMPANA.find(x=>x.id===sel.value);if(!p)return;
   document.getElementById('dj-xp-actual').textContent=(p.xpTotal||0)-(p.xpGastada||0);
   document.getElementById('dj-marcas').textContent=p.dinero||0;
-  document.getElementById('dj-nivel-actual').textContent=p.nivel||1;
-  document.getElementById('dj-nivel-nuevo').textContent=`Nivel ${(p.nivel||1)+1}`;
+  const nivelActual=p.nivel||1;
+  document.getElementById('dj-nivel-actual').textContent=nivelActual;
+  document.getElementById('dj-nivel-nuevo').textContent=nivelActual<20?`Nivel ${nivelActual+1}`:'Nivel Máximo (20)';
 };
 window.subirNivel=async function(){
   const sel=document.getElementById('xp-personaje');const pId=sel.value;const pNom=sel.options[sel.selectedIndex]?.dataset.nombre||'?';
-  const p=PERSONAJES_CAMPANA.find(x=>x.id===pId);if(!p)return;const nivelNuevo=(p.nivel||1)+1;
-  if(!confirm(`¿Subir a ${pNom} al nivel ${nivelNuevo}?`))return;
+  const p=PERSONAJES_CAMPANA.find(x=>x.id===pId);if(!p)return;
+  const nivelActual=p.nivel||1;
+  if(nivelActual>=20){toast(`${pNom} ya está en el nivel máximo (20).`,'info');return;}
+  const nivelNuevo=nivelActual+1;
+  if(!confirm(`¿Subir a ${pNom} del Nivel ${nivelActual} al Nivel ${nivelNuevo}?`))return;
   await updateDoc(doc(db,'personajes',pId),{nivel:nivelNuevo});
+  // Actualizar localmente para que el siguiente clic funcione sin recargar
+  p.nivel=nivelNuevo;
   await addDoc(collection(db,'campanas',CAMPANA_ID,'mensajes'),{autorId:ME.uid,autorNombre:(ME.displayName||'Director')+' [DJ]',tipo:'sistema',texto:`⬆ ${pNom} ha subido al Nivel ${nivelNuevo}!`,timestamp:serverTimestamp()});
   toast(`⬆ ${pNom} ahora es Nivel ${nivelNuevo}`,'success');
-  document.getElementById('dj-nivel-actual').textContent=nivelNuevo;document.getElementById('dj-nivel-nuevo').textContent=`Nivel ${nivelNuevo+1}`;
+  document.getElementById('dj-nivel-actual').textContent=nivelNuevo;
+  document.getElementById('dj-nivel-nuevo').textContent=nivelNuevo<20?`Nivel ${nivelNuevo+1}`:'Nivel Máximo';
+  // Actualizar el select también
+  if(sel.options[sel.selectedIndex]) sel.options[sel.selectedIndex].dataset.nivel=nivelNuevo;
 };
 window.modificarMarcas=async function(signo){
   const sel=document.getElementById('xp-personaje');const pId=sel.value;const pNom=sel.options[sel.selectedIndex]?.dataset.nombre||'?';
@@ -1785,9 +1803,16 @@ function renderTiendaProductos(){
       <div class="prod-cat">${p.cat||''}</div>
       <div class="prod-desc">${p.desc||''}</div>
       ${ranuraInfo}<div style="margin-top:2px;">${bonoInfo}</div>
-      <div class="prod-footer">
-        <div class="prod-precio">${(p.precio||0).toLocaleString()} <span>Marcas</span></div>
-        ${!ES_DIRECTOR?`<button class="btn-comprar-prod ${esMN?'mercado-btn':''}" onclick="comprarProducto('${p.id}','${tiendaVendedorActivo}')" ${!puedePagar?'disabled':''}>${!puedePagar?'Sin fondos':'Comprar'}</button>`:`<span style="font-size:10px;color:var(--muted);">Vista DJ</span>`}
+      <div class="prod-footer" style="flex-direction:column;gap:8px;">
+        <div style="display:flex;justify-content:space-between;align-items:center;">
+          <div class="prod-precio">${(p.precio||0).toLocaleString()} <span>Marcas</span></div>
+          ${!ES_DIRECTOR?`<div style="display:flex;align-items:center;gap:6px;">
+            <button onclick="cambiarCantidadTienda('${p.id}','-1')" style="width:24px;height:24px;background:rgba(255,255,255,0.05);border:1px solid var(--borde);color:var(--texto);font-size:14px;font-weight:700;cursor:pointer;display:flex;align-items:center;justify-content:center;">−</button>
+            <span id="cant-${p.id}" style="font-family:'Cinzel',serif;font-size:14px;font-weight:800;color:var(--texto);min-width:20px;text-align:center;">1</span>
+            <button onclick="cambiarCantidadTienda('${p.id}','+1')" style="width:24px;height:24px;background:rgba(255,255,255,0.05);border:1px solid var(--borde);color:var(--texto);font-size:14px;font-weight:700;cursor:pointer;display:flex;align-items:center;justify-content:center;">+</button>
+          </div>`:''}
+        </div>
+        ${!ES_DIRECTOR?`<button class="btn-comprar-prod ${esMN?'mercado-btn':''}" style="width:100%;" onclick="comprarProducto('${p.id}','${tiendaVendedorActivo}')" ${!puedePagar?'disabled':''}>${!puedePagar?'Sin fondos':'Comprar'}</button>`:`<span style="font-size:10px;color:var(--muted);">Vista DJ</span>`}
       </div>
     </div>`;
   }).join('');
@@ -1851,6 +1876,15 @@ function calcularEspacios(personaje) {
   return { capacidad, usados, libre: capacidad - usados };
 }
 
+window.cambiarCantidadTienda=function(prodId,delta){
+  const el=document.getElementById('cant-'+prodId);
+  if(!el)return;
+  let val=parseInt(el.textContent)||1;
+  if(delta==='+1') val=Math.min(20,val+1);
+  else val=Math.max(1,val-1);
+  el.textContent=val;
+};
+
 window.comprarProducto=async function(prodId,vendedor){
   if(!MI_PERSONAJE){toast('Sin personaje.','error');return;}
   const prod=(TIENDA_CACHE[vendedor]||[]).find(p=>p.id===prodId);if(!prod)return;
@@ -1861,15 +1895,20 @@ window.comprarProducto=async function(prodId,vendedor){
   // Chequeo de espacio ANTES de agregar
   const espacios=calcularEspacios({equipado:pSnap.data().equipado||{},inventario});
   if(espacios.libre<=0){toast('¡Tu mochila está llena! Equipa o descarta algo primero.','error');return;}
+  const cantEl=document.getElementById('cant-'+prodId);
+  const cantidad=cantEl?parseInt(cantEl.textContent)||1:1;
+  const costoTotal=prod.precio*cantidad;
+  if(saldoActual<costoTotal){toast(`Marcas insuficientes. Necesitas ${costoTotal.toLocaleString()}.`,'error');return;}
+  if(espacios.libre<cantidad){toast(`Solo tienes ${espacios.libre} espacio${espacios.libre!==1?'s':''} libre${espacios.libre!==1?'s':''}.`,'error');return;}
   const idx=inventario.findIndex(o=>o.nombre===prod.nombre);
-  if(idx>=0)inventario[idx].cantidad=(inventario[idx].cantidad||1)+1;
-  else inventario.push({nombre:prod.nombre,desc:prod.desc||'',cantidad:1,tipo:prod.tipo||'objeto',cat:prod.cat,calidad:prod.calidad||'Común',peso:prod.peso||0,espacios:prod.espacios||0,equipable:prod.equipable!==false,ranura:prod.ranura||'—',bono:prod.bono||'—',contenedor:prod.contenedor||0});
-  const nuevoSaldo=saldoActual-prod.precio;
+  if(idx>=0)inventario[idx].cantidad=(inventario[idx].cantidad||1)+cantidad;
+  else inventario.push({nombre:prod.nombre,desc:prod.desc||'',cantidad,tipo:prod.tipo||'objeto',cat:prod.cat,calidad:prod.calidad||'Común',peso:prod.peso||0,espacios:prod.espacios||0,equipable:prod.equipable!==false,ranura:prod.ranura||'—',bono:prod.bono||'—',contenedor:prod.contenedor||0});
+  const nuevoSaldo=saldoActual-costoTotal;
   await updateDoc(pRef,{inventario,dinero:nuevoSaldo});
   MI_PERSONAJE.dinero=nuevoSaldo;MI_PERSONAJE.inventario=inventario;
   document.getElementById('tienda-saldo-val').textContent=nuevoSaldo.toLocaleString();
-  await addDoc(collection(db,'campanas',CAMPANA_ID,'mensajes'),{autorId:ME.uid,autorNombre:MI_PERSONAJE.nombre,tipo:'sistema',texto:`🛒 ${MI_PERSONAJE.nombre} compró ${prod.nombre} por ${prod.precio.toLocaleString()} Marcas.`,timestamp:serverTimestamp()});
-  toast(`✅ ${prod.nombre} comprado.`,'success');renderTiendaProductos();
+  await addDoc(collection(db,'campanas',CAMPANA_ID,'mensajes'),{autorId:ME.uid,autorNombre:MI_PERSONAJE.nombre,tipo:'sistema',texto:`🛒 ${MI_PERSONAJE.nombre} compró ${cantidad>1?cantidad+'x ':''} ${prod.nombre} por ${costoTotal.toLocaleString()} Marcas.`,timestamp:serverTimestamp()});
+  toast(`✅ ${cantidad>1?cantidad+'x ':''} ${prod.nombre} comprado.`,'success');renderTiendaProductos();
 };
 window.comprarPack=async function(packId){
   if(!MI_PERSONAJE){toast('Sin personaje.','error');return;}

@@ -250,6 +250,63 @@
         .cultura-habilidad { font-size:10px; font-weight:700; letter-spacing:0.1em; text-transform:uppercase; color:var(--dorado); margin-top:6px; display:block; }
 
         /* ══ FOOTER ══ */
+
+        /* ══ CHANGELOG / NOTAS DE VERSIÓN ══ */
+        .changelog-section {
+            background: var(--sup);
+            border-top: 1px solid var(--borde);
+            padding: 80px 48px;
+        }
+        .changelog-inner { max-width: 900px; margin: 0 auto; }
+        .changelog-header { text-align: center; margin-bottom: 48px; }
+        .changelog-eyebrow {
+            font-size: 11px; font-weight: 700; letter-spacing: 0.25em;
+            text-transform: uppercase; color: var(--dorado);
+            display: block; margin-bottom: 12px;
+        }
+        .changelog-titulo {
+            font-family: 'Cinzel', serif; font-size: 28px; font-weight: 800;
+            color: var(--texto); margin-bottom: 12px;
+        }
+        .changelog-sub { font-size: 14px; color: var(--muted); }
+        .version-block { margin-bottom: 36px; }
+        .version-header {
+            display: flex; align-items: center; gap: 16px;
+            margin-bottom: 16px; padding-bottom: 12px;
+            border-bottom: 1px solid var(--borde);
+        }
+        .version-badge {
+            font-family: 'Cinzel', serif; font-size: 12px; font-weight: 800;
+            color: var(--negro); background: var(--dorado);
+            padding: 4px 12px; letter-spacing: 0.1em;
+            white-space: nowrap;
+        }
+        .version-badge.latest {
+            background: var(--rojo); color: white;
+        }
+        .version-nombre {
+            font-family: 'Cinzel', serif; font-size: 16px; font-weight: 700;
+            color: var(--texto);
+        }
+        .version-fecha { font-size: 11px; color: var(--muted); margin-left: auto; }
+        .version-items { display: flex; flex-direction: column; gap: 8px; }
+        .version-item {
+            display: flex; align-items: flex-start; gap: 12px;
+            padding: 10px 14px;
+            background: var(--sup2); border: 1px solid var(--borde);
+        }
+        .vi-icon { font-size: 16px; flex-shrink: 0; margin-top: 1px; }
+        .vi-tipo {
+            font-size: 9px; font-weight: 800; letter-spacing: 0.12em;
+            text-transform: uppercase; padding: 2px 7px; border: 1px solid;
+            flex-shrink: 0; white-space: nowrap; margin-top: 2px;
+        }
+        .vi-tipo.nuevo { color: #2ecc71; border-color: rgba(46,204,113,0.4); }
+        .vi-tipo.fix { color: #f39c12; border-color: rgba(243,156,18,0.4); }
+        .vi-tipo.mejora { color: #3498db; border-color: rgba(52,152,219,0.4); }
+        .vi-tipo.sistema { color: var(--dorado); border-color: rgba(201,168,76,0.4); }
+        .vi-texto { font-size: 13px; color: var(--sec); line-height: 1.5; flex: 1; }
+        .vi-texto strong { color: var(--texto); }
         footer { background:var(--sup); border-top:1px solid var(--borde); padding:48px 48px 32px; }
         .footer-inner { max-width:900px; margin:0 auto; display:flex; flex-direction:column; align-items:center; gap:24px; }
         .footer-logo img { height:52px; width:auto; filter:invert(1) brightness(0.4); }
@@ -384,6 +441,81 @@
         </section>
 
     </div>
+
+
+    <!-- ══ NOTAS DE VERSIÓN ══ -->
+    <section class="changelog-section">
+        <div class="changelog-inner">
+            <div class="changelog-header">
+                <span class="changelog-eyebrow">✦ Registro de Cambios</span>
+                <h2 class="changelog-titulo">Notas de Versión</h2>
+                <p class="changelog-sub">Cada actualización forja una mejor experiencia para Cazadores y Directores.</p>
+            </div>
+
+            <!-- v0.4 -->
+            <div class="version-block">
+                <div class="version-header">
+                    <span class="version-badge latest">v0.4</span>
+                    <span class="version-nombre">La Gran Partida</span>
+                    <span class="version-fecha">Junio 2026</span>
+                </div>
+                <div class="version-items">
+                    <div class="version-item"><span class="vi-icon">⚔️</span><span class="vi-tipo nuevo">Nuevo</span><div class="vi-texto"><strong>Combat Tracker</strong> — El Director puede iniciar el sistema de turnos con un solo botón. Se lanzan iniciativas automáticamente y aparece un mensaje épico en el chat.</div></div>
+                    <div class="version-item"><span class="vi-icon">🚩</span><span class="vi-tipo nuevo">Nuevo</span><div class="vi-texto"><strong>Bandera de turno</strong> — Una bandera animada indica sobre el avatar de cada jugador quién tiene el turno activo, visible para todos en tiempo real.</div></div>
+                    <div class="version-item"><span class="vi-icon">🗑</span><span class="vi-tipo nuevo">Nuevo</span><div class="vi-texto"><strong>Limpiar chat</strong> — El Director puede limpiar el historial del chat entre sesiones desde el panel de campaña.</div></div>
+                    <div class="version-item"><span class="vi-icon">🛒</span><span class="vi-tipo mejora">Mejora</span><div class="vi-texto"><strong>Cantidad en tienda</strong> — Los jugadores ahora pueden seleccionar cuántas unidades comprar de un ítem sin tener que repetir la acción.</div></div>
+                    <div class="version-item"><span class="vi-icon">⚠️</span><span class="vi-tipo fix">Fix</span><div class="vi-texto"><strong>Validación de productos</strong> — Al crear ítems equipables en la tienda, el sistema ahora avisa si falta la ranura u otros parámetros obligatorios.</div></div>
+                    <div class="version-item"><span class="vi-icon">📸</span><span class="vi-tipo nuevo">Nuevo</span><div class="vi-texto"><strong>Avatar del Director</strong> — El Director puede subir su imagen de perfil desde Mi Cuenta. Aparece con marco dorado animado en el VTT.</div></div>
+                    <div class="version-item"><span class="vi-icon">⬆️</span><span class="vi-tipo fix">Fix</span><div class="vi-texto"><strong>Subir de nivel</strong> — Corregido para subir de 1 en 1 hasta el nivel 20, actualizando inmediatamente sin recargar.</div></div>
+                </div>
+            </div>
+
+            <!-- v0.3 -->
+            <div class="version-block">
+                <div class="version-header">
+                    <span class="version-badge">v0.3</span>
+                    <span class="version-nombre">El Mercado Abre</span>
+                    <span class="version-fecha">Mayo 2026</span>
+                </div>
+                <div class="version-items">
+                    <div class="version-item"><span class="vi-icon">🏪</span><span class="vi-tipo nuevo">Nuevo</span><div class="vi-texto"><strong>Sistema de Tienda</strong> — Bazar, Armero, Droguería y Mercado Negro. El Director controla qué está disponible en cada sesión.</div></div>
+                    <div class="version-item"><span class="vi-icon">🎒</span><span class="vi-tipo nuevo">Nuevo</span><div class="vi-texto"><strong>Inventario con ranuras</strong> — Sistema de equipamiento con silueta corporal, contenedores y cálculo de espacios y peso.</div></div>
+                    <div class="version-item"><span class="vi-icon">✨</span><span class="vi-tipo nuevo">Nuevo</span><div class="vi-texto"><strong>Packs de Ofertas</strong> — El Director puede activar bundles especiales con descuento durante la sesión.</div></div>
+                    <div class="version-item"><span class="vi-icon">🗺️</span><span class="vi-tipo mejora">Mejora</span><div class="vi-texto"><strong>Mapa interactivo</strong> — Dibujo libre en tiempo real, tokens arrastrables y biblioteca de imágenes por campaña.</div></div>
+                </div>
+            </div>
+
+            <!-- v0.2 -->
+            <div class="version-block">
+                <div class="version-header">
+                    <span class="version-badge">v0.2</span>
+                    <span class="version-nombre">El VTT Despierta</span>
+                    <span class="version-fecha">Abril 2026</span>
+                </div>
+                <div class="version-items">
+                    <div class="version-item"><span class="vi-icon">💬</span><span class="vi-tipo nuevo">Nuevo</span><div class="vi-texto"><strong>Chat en tiempo real</strong> — Mensajes generales, privados y susurros del DJ. Tiradas de dados con animación y desglose de éxitos.</div></div>
+                    <div class="version-item"><span class="vi-icon">🎲</span><span class="vi-tipo nuevo">Nuevo</span><div class="vi-texto"><strong>Sistema de dados</strong> — Lanzamiento de d6 con cálculo automático de éxitos, dobles éxitos y consecuencias negativas.</div></div>
+                    <div class="version-item"><span class="vi-icon">⭐</span><span class="vi-tipo nuevo">Nuevo</span><div class="vi-texto"><strong>Panel del Director</strong> — Gestión de XP con criterios de sesión, entrega de ítems y dinero, control de estado de salud.</div></div>
+                    <div class="version-item"><span class="vi-icon">📋</span><span class="vi-tipo nuevo">Nuevo</span><div class="vi-texto"><strong>Ficha en partida</strong> — Los jugadores pueden ver y editar su ficha, PA y estado de salud directamente desde el VTT.</div></div>
+                </div>
+            </div>
+
+            <!-- v0.1 -->
+            <div class="version-block">
+                <div class="version-header">
+                    <span class="version-badge">v0.1</span>
+                    <span class="version-nombre">Génesis</span>
+                    <span class="version-fecha">Marzo 2026</span>
+                </div>
+                <div class="version-items">
+                    <div class="version-item"><span class="vi-icon">🌐</span><span class="vi-tipo sistema">Sistema</span><div class="vi-texto"><strong>Lanzamiento inicial</strong> — Creador de personajes completo con culturas, atributos, habilidades y caminos.</div></div>
+                    <div class="version-item"><span class="vi-icon">🔐</span><span class="vi-tipo sistema">Sistema</span><div class="vi-texto"><strong>Autenticación Firebase</strong> — Registro, login y perfiles de jugador y director con paneles separados.</div></div>
+                    <div class="version-item"><span class="vi-icon">⚔️</span><span class="vi-tipo sistema">Sistema</span><div class="vi-texto"><strong>Sistema de campañas</strong> — Creación de campañas con código único CDC para que los jugadores se unan.</div></div>
+                </div>
+            </div>
+
+        </div>
+    </section>
 
     <footer>
         <div class="footer-inner">
