@@ -462,10 +462,13 @@
 
     /* BARRA DE PERSONAJES */
     .party-bar{flex-shrink:0;background:rgba(10,10,12,0.95);border-bottom:1px solid var(--borde);padding:8px 10px;display:flex;gap:8px;overflow-x:auto;align-items:flex-start;}
-    .party-bar::-webkit-scrollbar{height:3px;}
+    .party-bar.vertical{flex-direction:column;border-bottom:none;border-right:1px solid var(--borde);overflow-x:hidden;overflow-y:auto;width:80px;padding:8px 6px;}
+    .party-bar::-webkit-scrollbar{height:3px;width:3px;}
     .party-bar::-webkit-scrollbar-thumb{background:var(--borde-r);}
     .party-card{display:flex;flex-direction:column;align-items:center;gap:4px;cursor:pointer;flex-shrink:0;width:70px;transition:transform 0.15s;}
+    .party-bar.vertical .party-card{width:68px;}
     .party-card:hover{transform:translateY(-2px);}
+    .party-bar.vertical .party-card:hover{transform:translateX(2px);}
     .party-avatar-wrap{position:relative;}
     .party-avatar{width:60px;height:60px;border-radius:50%;border:2px solid;overflow:hidden;display:flex;align-items:center;justify-content:center;font-family:'Cinzel',serif;font-size:22px;font-weight:800;}
     .party-avatar img{width:100%;height:100%;object-fit:cover;}
@@ -490,7 +493,7 @@
     <img src="../imagenes/logo.png" alt="CDC">
   </a>
   <span class="nav-campana">Campaña: <span id="nav-campana-nombre">Cargando...</span></span>
-  <div class="avatares-online" id="avatares-online"></div>
+
   <button class="nav-btn volver" id="btn-volver" onclick="volverPanel()">
     <i class="ri-arrow-left-line"></i> Volver
   </button>
@@ -501,7 +504,8 @@
   <!-- CHAT -->
   <div class="chat-panel">
     <div class="chat-header"><span class="chat-header-titulo">💬 Chat de Campaña</span><button id="btn-limpiar-chat" onclick="limpiarChat()" style="display:none;background:transparent;border:1px solid var(--borde-r);color:var(--rojo);font-size:10px;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;padding:3px 8px;cursor:pointer;" title="Limpiar chat">🗑 Limpiar</button></div>
-    <div class="party-bar" id="party-bar"></div>
+    <div id="party-bar" class="party-bar"></div>
+    <div id="chat-content" style="flex:1;display:flex;flex-direction:column;min-width:0;overflow:hidden;">
     <div class="chat-mensajes" id="chat-mensajes"></div>
     <div class="chat-input-area">
       <div class="chat-destino-selector">
@@ -516,6 +520,7 @@
         <input class="chat-input" type="text" id="chat-input" placeholder="Escribe un mensaje..." onkeydown="if(event.key==='Enter')enviarMensaje()">
         <button class="chat-send" onclick="enviarMensaje()"><i class="ri-send-plane-fill"></i></button>
       </div>
+    </div>
     </div>
   </div>
 
@@ -850,7 +855,6 @@ function iniciarPersonajesRealtime() {
       const u = PERSONAJES_CAMPANA.find(p=>p.id===MI_PERSONAJE.id);
       if (u) MI_PERSONAJE = u;
     }
-    renderizarAvatares();
     renderPartyBar();
     if (ES_DIRECTOR && tabActiva==='jugadores') renderTab('jugadores');
   });
@@ -904,6 +908,16 @@ function renderPartyBar() {
     </div>`;
   });
   bar.innerHTML = html;
+  // Cambiar a vertical si hay más de 4 jugadores (+ DJ)
+  const total = PERSONAJES_CAMPANA.length + 1;
+  const chatPanel = document.querySelector('.chat-panel');
+  if(total > 5) {
+    bar.classList.add('vertical');
+    if(chatPanel) chatPanel.style.flexDirection='row';
+  } else {
+    bar.classList.remove('vertical');
+    if(chatPanel) chatPanel.style.flexDirection='column';
+  }
 }
 
 function renderizarAvatares() {
