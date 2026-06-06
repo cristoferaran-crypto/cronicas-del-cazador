@@ -1133,7 +1133,7 @@ window.togglePanelDJ=function(){const panel=document.getElementById('panel-dj');
 window.abrirSeccionDJ=function(seccion){tabActiva=seccion;document.getElementById('dj-dashboard').style.display='none';document.querySelectorAll('.dj-seccion').forEach(s=>s.classList.remove('active'));const sec=document.getElementById('dj-sec-'+seccion);if(sec)sec.classList.add('active');renderSeccion(seccion);if(seccion==='xp'){setTimeout(()=>{const sel=document.getElementById('xp-personaje');if(sel&&PERSONAJES_CAMPANA.length)actualizarInfoPersonaje(sel);},50);}};
 window.volverDashboard=function(){tabActiva='dashboard';document.getElementById('dj-dashboard').style.display='grid';document.querySelectorAll('.dj-seccion').forEach(s=>s.classList.remove('active'));};
 function renderSeccion(seccion){
-  const bodyMap={jugadores:'body-jugadores',xp:'body-xp',inventario:'body-inventario',biblioteca:'body-biblioteca',susurro:'body-susurro',tienda:'body-tienda',mapa:'body-mapa',notas:'body-notas'};
+  const bodyMap={jugadores:'body-jugadores',xp:'body-xp',inventario:'body-inventario',biblioteca:'body-biblioteca',susurro:'body-susurro',tienda:'body-tienda',mapa:'body-mapa',notas:'body-notas',combat:'body-combat'};
   const body=document.getElementById(bodyMap[seccion]);if(!body)return;
   if(seccion==='jugadores') body.innerHTML=renderTabJugadores();
   if(seccion==='xp') body.innerHTML=renderTabXP();
@@ -1270,7 +1270,7 @@ function renderBannerTurno() {
   } else if(banner) banner.remove();
 }
 
-function renderSeccionCombat() {
+window.renderSeccionCombat = function() {
   const body = document.getElementById('body-combat');
   if(!body) return;
   const actual = combatOrden[combatTurnoIdx];
