@@ -211,10 +211,18 @@
     }
 
     .panel-desc {
-      font-size: 13px; color: var(--muted);
-      font-style: italic; line-height: 1.6;
-      margin-bottom: 24px; padding-bottom: 20px;
-      border-bottom: 1px solid var(--borde);
+      font-size: 14px; color: #e8f5e9;
+      font-style: normal; line-height: 1.7;
+      margin-bottom: 24px; padding: 14px 18px;
+      background: rgba(46,125,50,0.12);
+      border: 1px solid rgba(46,204,113,0.35);
+      border-left: 4px solid #2ecc71;
+      border-radius: 2px;
+      font-weight: 500;
+    }
+    .panel-desc::before {
+      content: '💡 ';
+      font-style: normal;
     }
 
     /* Límite info badge */
@@ -414,23 +422,28 @@
     .pts-tracker {
       display: flex; justify-content: space-between; align-items: center;
       padding: 12px 20px; margin-bottom: 20px;
-      background: rgba(192,57,43,0.05);
+      background: rgba(192,57,43,0.08);
       border: 1px solid var(--borde-r);
+      position: sticky; top: 60px; z-index: 50;
+      backdrop-filter: blur(8px);
+      box-shadow: 0 4px 12px rgba(0,0,0,0.3);
     }
 
     .pts-tracker-label {
-      font-size: 12px; font-weight: 600;
+      font-size: 12px; font-weight: 700;
       letter-spacing: 0.1em; text-transform: uppercase;
-      color: var(--muted);
+      color: var(--texto);
     }
 
     .pts-tracker-val {
       font-family: 'Cinzel', serif;
-      font-size: 28px; font-weight: 800;
+      font-size: 32px; font-weight: 800;
       color: var(--rojo); line-height: 1;
     }
 
     .pts-tracker-val.agotado { color: var(--muted); }
+    .pts-tracker-val.urgente { color: #ff4444; animation: pulsePts 0.8s ease-in-out infinite alternate; }
+    @keyframes pulsePts { 0%{transform:scale(1);} 100%{transform:scale(1.1);} }
 
     /* ══════════════════════════
        ATRIBUTOS
@@ -1074,7 +1087,7 @@
       <div class="form-group" style="margin-top:16px;">
         <label class="form-label">Equipo inicial</label>
         <input class="form-input" type="text" id="char-equip" placeholder="Ej: Ropa de viaje, cuchillo, 200 Jenny...">
-        <p style="font-size:11px;color:var(--muted);font-style:italic;margin-top:6px;">Máximo 2 armas al inicio. El Director determinará el equipamiento final.</p>
+        <p style="font-size:13px;color:#e8f5e9;font-style:normal;margin-top:8px;padding:10px 14px;background:rgba(46,125,50,0.12);border:1px solid rgba(46,204,113,0.35);border-left:4px solid #2ecc71;font-weight:500;">💡 Máximo 2 armas al inicio. El Director determinará el equipamiento final.</p>
       </div>
       <div class="nav-btns">
         <button class="btn-prev" onclick="prevStep(6)">← Atrás</button>
@@ -1533,7 +1546,7 @@ function renderAtributos() {
 
   // Tracker
   document.getElementById('attr-pts-val').textContent = S.attrPts;
-  document.getElementById('attr-pts-val').className = 'pts-tracker-val' + (S.attrPts === 0 ? ' agotado' : '');
+  document.getElementById('attr-pts-val').className = 'pts-tracker-val' + (S.attrPts === 0 ? ' agotado' : S.attrPts === 1 ? ' urgente' : '');
 
   // Selector atributo especial
   const selWrap = document.getElementById('attr-especial-selector');
@@ -1635,7 +1648,7 @@ function renderHabilidades() {
       : `<i class="ri-information-line"></i> Máximo por habilidad: <strong>${lim.skillResto}</strong>`;
 
   document.getElementById('skill-pts-val').textContent = S.skillPts;
-  document.getElementById('skill-pts-val').className = 'pts-tracker-val' + (S.skillPts === 0 ? ' agotado' : '');
+  document.getElementById('skill-pts-val').className = 'pts-tracker-val' + (S.skillPts === 0 ? ' agotado' : S.skillPts === 1 ? ' urgente' : '');
 
   // Selector habilidad especial (solo nivel 6+)
   const espWrap = document.getElementById('skill-especial-wrap');
@@ -1806,7 +1819,7 @@ async function saveCharacter() {
   }
 
   const btn = document.querySelector('.btn-guardar-final');
-  if (btn) { btn.disabled = true; btn.textContent = 'Guardando...'; }
+  if (btn) { btn.disabled = true; btn.innerHTML = '<i class="ri-loader-4-line"></i> Guardando...'; }
 
   const ability = getAbilityActiva();
   const data = {
@@ -1838,15 +1851,29 @@ async function saveCharacter() {
     objetos:              [],
   };
 
-  try {
-    const { guardarPersonaje } = await import("../../js/personajes.js");
-    const id = await guardarPersonaje(data);
-    toast('¡Personaje guardado correctamente!', 'success');
-    setTimeout(() => { window.location.href = '../panel-del-jugador/panel-del-jugador.html'; }, 1500);
-  } catch (err) {
-    console.error(err);
-    toast('Error al guardar. Intenta de nuevo.', 'error');
-    if (btn) { btn.disabled = false; btn.innerHTML = '<i class="ri-save-line"></i> Guardar Personaje'; }
+  // Reintentar hasta 3 veces por si hay un problema de red transitorio
+  let intentos = 0;
+  const maxIntentos = 3;
+  while (intentos < maxIntentos) {
+    try {
+      const { guardarPersonaje } = await import("../../js/personajes.js");
+      const id = await guardarPersonaje(data);
+      if (btn) { btn.innerHTML = '<i class="ri-check-line"></i> ¡Guardado!'; }
+      toast('¡Personaje guardado correctamente!', 'success');
+      setTimeout(() => { window.location.href = '../panel-del-jugador/panel-del-jugador.html'; }, 1500);
+      return;
+    } catch (err) {
+      intentos++;
+      console.error(`Intento ${intentos} fallido:`, err);
+      if (intentos < maxIntentos) {
+        // Esperar un momento antes de reintentar
+        await new Promise(r => setTimeout(r, 1000));
+        if (btn) btn.innerHTML = `<i class="ri-loader-4-line"></i> Reintentando (${intentos}/${maxIntentos})...`;
+      } else {
+        toast('Error al guardar. Verifica tu conexión e intenta de nuevo.', 'error');
+        if (btn) { btn.disabled = false; btn.innerHTML = '<i class="ri-save-line"></i> Guardar Personaje'; }
+      }
+    }
   }
 }
 
