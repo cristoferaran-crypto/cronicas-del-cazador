@@ -857,9 +857,6 @@ onAuthStateChanged(auth, async (user) => {
   } else {
     const mj=document.getElementById('menu-jugador-wrap');
     if(mj) mj.style.display='block';
-  } else {
-    const menuJugador=document.getElementById('menu-jugador-wrap');
-    if(menuJugador) menuJugador.style.display='block';
   }
   // Cargar avatar del director desde Firestore
   try {
