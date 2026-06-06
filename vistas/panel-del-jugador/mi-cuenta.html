@@ -922,6 +922,54 @@
         }
 
         window.toast = toast;
+
+        // ── Avatar Director ──
+        async function cargarAvatarDirector(uid) {
+            try {
+                const snap = await getDoc(doc(db,'usuarios',uid));
+                if(snap.exists() && snap.data().avatarDirectorUrl) {
+                    const img = document.getElementById('avatar-dj-img');
+                    const ph = document.getElementById('avatar-dj-placeholder');
+                    img.src = snap.data().avatarDirectorUrl;
+                    img.style.display = 'block';
+                    ph.style.display = 'none';
+                }
+                const nombre = usuarioActual?.displayName || '?';
+                const ph2 = document.getElementById('avatar-dj-placeholder');
+                if(ph2 && ph2.style.display !== 'none') ph2.textContent = nombre.charAt(0).toUpperCase();
+            } catch(e) { console.error('cargarAvatarDirector:', e); }
+        }
+
+        window.subirAvatarDirector = async function(input) {
+            if(!input.files || !input.files[0]) return;
+            const file = input.files[0];
+            const prog = document.getElementById('dj-upload-progress');
+            const bar = document.getElementById('dj-upload-bar');
+            if(prog){ prog.style.display='block'; bar.style.width='20%'; }
+            try {
+                const fd = new FormData();
+                fd.append('file', file);
+                fd.append('upload_preset', 'cdc-assets');
+                fd.append('folder', 'cdc-assets/directores');
+                if(bar) bar.style.width='50%';
+                const res = await fetch('https://api.cloudinary.com/v1_1/davwzigvs/image/upload', {method:'POST',body:fd});
+                const data = await res.json();
+                if(data.error) throw new Error(data.error.message);
+                if(bar) bar.style.width='80%';
+                await setDoc(doc(db,'usuarios',usuarioActual.uid), { avatarDirectorUrl: data.secure_url }, { merge:true });
+                if(bar) bar.style.width='100%';
+                const img = document.getElementById('avatar-dj-img');
+                const ph = document.getElementById('avatar-dj-placeholder');
+                img.src=data.secure_url; img.style.display='block'; ph.style.display='none';
+                setTimeout(()=>{ if(prog){prog.style.display='none'; bar.style.width='0%';} },600);
+                toast('✅ Avatar del Director guardado.', 'success');
+            } catch(e) {
+                toast('Error al subir: '+e.message, 'error');
+                if(prog) prog.style.display='none';
+                console.error(e);
+            }
+            input.value='';
+        };
     </script>
 
     <script>
@@ -970,62 +1018,13 @@
             if (e.target.id === id) cerrarModal(id);
         }
 
-        // ── Avatar Director ──
-        async function cargarAvatarDirector(uid) {
-            try {
-                const snap = await getDoc(doc(db,'usuarios',uid));
-                if(snap.exists() && snap.data().avatarDirectorUrl) {
-                    mostrarAvatarDirector(snap.data().avatarDirectorUrl);
-                }
-                const nombre = usuarioActual?.displayName || '?';
-                document.getElementById('avatar-dj-placeholder').textContent = nombre.charAt(0).toUpperCase();
-            } catch(e) { console.error(e); }
-        }
-
-        function mostrarAvatarDirector(url) {
-            const img = document.getElementById('avatar-dj-img');
-            const placeholder = document.getElementById('avatar-dj-placeholder');
-            img.src = url;
-            img.style.display = 'block';
-            placeholder.style.display = 'none';
-        }
-
-        window.subirAvatarDirector = async function(input) {
-            if(!input.files || !input.files[0]) return;
-            const file = input.files[0];
-            const prog = document.getElementById('dj-upload-progress');
-            const bar = document.getElementById('dj-upload-bar');
-            prog.style.display = 'block'; bar.style.width = '20%';
-            try {
-                const fd = new FormData();
-                fd.append('file', file);
-                fd.append('upload_preset', UPLOAD_PRESET);
-                fd.append('folder', 'cdc-assets/directores');
-                bar.style.width = '50%';
-                const res = await fetch(`https://api.cloudinary.com/v1_1/${CLOUD_NAME}/image/upload`, {method:'POST',body:fd});
-                const data = await res.json();
-                if(data.error){ throw new Error(data.error.message); }
-                bar.style.width = '80%';
-                await setDoc(doc(db,'usuarios',usuarioActual.uid), { avatarDirectorUrl: data.secure_url }, { merge:true });
-                bar.style.width = '100%';
-                mostrarAvatarDirector(data.secure_url);
-                setTimeout(()=>{ prog.style.display='none'; bar.style.width='0%'; },600);
-                toast('✅ Avatar guardado.', 'success');
-            } catch(e) {
-                toast('Error al subir: '+e.message, 'error');
-                prog.style.display = 'none';
-                console.error(e);
-            }
-            input.value='';
-        };
-
         window.togglePass = togglePass;
         window.previewAvatar = previewAvatar;
         window.abrirModalPersonajes = abrirModalPersonajes;
         window.abrirModalCuenta = abrirModalCuenta;
         window.cerrarModal = cerrarModal;
         window.cerrarModalFuera = cerrarModalFuera;
-    </script>
+        </script>
 
 </body>
 </html>
