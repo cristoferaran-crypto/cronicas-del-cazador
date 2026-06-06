@@ -433,6 +433,32 @@
     /* NOTIF + TOAST */
     #mapa-notif{position:fixed;bottom:72px;right:16px;z-index:998;padding:10px 16px;background:rgba(10,10,12,0.95);border-left:3px solid var(--dorado);font-family:'Raleway',sans-serif;font-size:12px;font-weight:600;color:var(--dorado);opacity:0;transition:opacity 0.4s;pointer-events:none;max-width:280px;}
     #toast{position:fixed;bottom:70px;right:16px;z-index:999;padding:10px 16px;border-left:3px solid;font-family:'Raleway',sans-serif;font-size:12px;font-weight:600;opacity:0;transition:opacity 0.3s;pointer-events:none;max-width:280px;}
+
+    /* COMBAT TRACKER */
+    .combat-tracker{display:flex;flex-direction:column;gap:6px;}
+    .combat-row{display:flex;align-items:center;gap:8px;padding:8px 10px;background:var(--sup2);border:1px solid var(--borde);transition:all 0.2s;position:relative;}
+    .combat-row.activo{border-color:var(--rojo);background:rgba(192,57,43,0.08);box-shadow:0 0 12px rgba(192,57,43,0.2);}
+    .combat-row.activo::before{content:'⚔';position:absolute;left:-10px;font-size:14px;}
+    .combat-num{font-family:'Cinzel',serif;font-size:11px;font-weight:800;color:var(--muted);min-width:20px;text-align:center;}
+    .combat-avatar{width:32px;height:32px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-family:'Cinzel',serif;font-size:13px;font-weight:700;border:2px solid;flex-shrink:0;overflow:hidden;}
+    .combat-avatar img{width:100%;height:100%;object-fit:cover;}
+    .combat-info{flex:1;}
+    .combat-nombre{font-family:'Cinzel',serif;font-size:13px;font-weight:700;color:var(--texto);}
+    .combat-init{font-size:11px;color:var(--muted);}
+    .combat-bandera{font-size:18px;animation:banderaAnim 0.8s ease-in-out infinite alternate;}
+    @keyframes banderaAnim{0%{transform:rotate(-10deg) scale(1);}100%{transform:rotate(10deg) scale(1.2);}}
+    .combat-actions{display:flex;gap:4px;}
+    .combat-btn{width:26px;height:26px;background:transparent;border:1px solid var(--borde);color:var(--muted);cursor:pointer;font-size:12px;display:flex;align-items:center;justify-content:center;transition:all 0.15s;}
+    .combat-btn:hover{border-color:var(--borde-d);color:var(--dorado);}
+    .combat-btn.del:hover{border-color:var(--borde-r);color:var(--rojo);}
+    .combat-turno-banner{padding:10px 14px;background:rgba(192,57,43,0.1);border:1px solid var(--borde-r);display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;}
+    .combat-turno-nombre{font-family:'Cinzel',serif;font-size:14px;font-weight:800;color:var(--rojo);}
+    .combat-ronda{font-size:11px;color:var(--muted);}
+    .combat-controles{display:flex;gap:6px;margin-bottom:12px;}
+    .combat-ctrl-btn{flex:1;height:34px;background:transparent;border:1px solid var(--borde);color:var(--muted);font-family:'Raleway',sans-serif;font-size:11px;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;cursor:pointer;transition:all 0.15s;}
+    .combat-ctrl-btn:hover{border-color:var(--borde-r);color:var(--texto);}
+    .combat-ctrl-btn.primary{background:var(--rojo);border-color:var(--rojo);color:white;}
+    .combat-add-row{display:flex;gap:6px;margin-bottom:10px;}
   </style>
 </head>
 <body>
@@ -453,7 +479,7 @@
 <div class="main">
   <!-- CHAT -->
   <div class="chat-panel">
-    <div class="chat-header"><span class="chat-header-titulo">💬 Chat de Campaña</span></div>
+    <div class="chat-header"><span class="chat-header-titulo">💬 Chat de Campaña</span><button id="btn-limpiar-chat" onclick="limpiarChat()" style="display:none;background:transparent;border:1px solid var(--borde-r);color:var(--rojo);font-size:10px;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;padding:3px 8px;cursor:pointer;" title="Limpiar chat">🗑 Limpiar</button></div>
     <div class="chat-mensajes" id="chat-mensajes"></div>
     <div class="chat-input-area">
       <div class="chat-destino-selector">
@@ -544,7 +570,8 @@
       <div class="dj-dash-btn" onclick="abrirSeccionDJ('susurro')"><i class="ri-message-3-line"></i><span>Susurro</span><small>Mensaje privado</small></div>
       <div class="dj-dash-btn" onclick="abrirSeccionDJ('tienda')"><i class="ri-store-2-line"></i><span>Tienda</span><small>Gestionar productos</small></div>
       <div class="dj-dash-btn" onclick="abrirSeccionDJ('mapa')"><i class="ri-map-2-line"></i><span>Mapa</span><small>Tokens y dibujo</small></div>
-      <div class="dj-dash-btn" onclick="abrirSeccionDJ('notas')" style="grid-column:span 2;"><i class="ri-sticky-note-line"></i><span>Notas DJ</span><small>Solo tú las ves</small></div>
+      <div class="dj-dash-btn" onclick="abrirSeccionDJ('combat')" style="grid-column:span 3;border-color:rgba(192,57,43,0.4);"><i class="ri-sword-line"></i><span>Combat Tracker</span><small>Iniciativa y turnos</small></div>
+      <div class="dj-dash-btn" onclick="abrirSeccionDJ('notas')" style="grid-column:span 3;"><i class="ri-sticky-note-line"></i><span>Notas DJ</span><small>Solo tú las ves</small></div>
     </div>
     <div class="dj-seccion" id="dj-sec-jugadores"><div class="dj-seccion-header"><button class="dj-back-btn" onclick="volverDashboard()"><i class="ri-arrow-left-line"></i></button><span class="dj-seccion-titulo"><i class="ri-group-line"></i> Jugadores</span></div><div class="dj-seccion-body" id="body-jugadores"></div></div>
     <div class="dj-seccion" id="dj-sec-xp"><div class="dj-seccion-header"><button class="dj-back-btn" onclick="volverDashboard()"><i class="ri-arrow-left-line"></i></button><span class="dj-seccion-titulo"><i class="ri-star-line"></i> XP & Nivel & Marcas</span></div><div class="dj-seccion-body" id="body-xp"></div></div>
@@ -553,6 +580,7 @@
     <div class="dj-seccion" id="dj-sec-susurro"><div class="dj-seccion-header"><button class="dj-back-btn" onclick="volverDashboard()"><i class="ri-arrow-left-line"></i></button><span class="dj-seccion-titulo"><i class="ri-message-3-line"></i> Susurro</span></div><div class="dj-seccion-body" id="body-susurro"></div></div>
     <div class="dj-seccion" id="dj-sec-tienda"><div class="dj-seccion-header"><button class="dj-back-btn" onclick="volverDashboard()"><i class="ri-arrow-left-line"></i></button><span class="dj-seccion-titulo"><i class="ri-store-2-line"></i> Gestión de Tienda</span></div><div class="dj-seccion-body" id="body-tienda"></div></div>
     <div class="dj-seccion" id="dj-sec-mapa"><div class="dj-seccion-header"><button class="dj-back-btn" onclick="volverDashboard()"><i class="ri-arrow-left-line"></i></button><span class="dj-seccion-titulo"><i class="ri-map-2-line"></i> Control de Mapa</span></div><div class="dj-seccion-body" id="body-mapa"></div></div>
+    <div class="dj-seccion" id="dj-sec-combat"><div class="dj-seccion-header"><button class="dj-back-btn" onclick="volverDashboard()"><i class="ri-arrow-left-line"></i></button><span class="dj-seccion-titulo"><i class="ri-sword-line"></i> Combat Tracker</span></div><div class="dj-seccion-body" id="body-combat"></div></div>
     <div class="dj-seccion" id="dj-sec-notas"><div class="dj-seccion-header"><button class="dj-back-btn" onclick="volverDashboard()"><i class="ri-arrow-left-line"></i></button><span class="dj-seccion-titulo"><i class="ri-sticky-note-line"></i> Notas DJ</span></div><div class="dj-seccion-body" id="body-notas"></div></div>
   </div>
 </div>
@@ -768,6 +796,7 @@ onAuthStateChanged(auth, async (user) => {
   if (ES_DIRECTOR) {
     document.getElementById('btn-panel-dj').style.display = 'flex';
     document.getElementById('tool-borrar-todo').style.display = 'flex';
+    const btnLimpiar=document.getElementById('btn-limpiar-chat');if(btnLimpiar)btnLimpiar.style.display='block';
   }
   await cargarMiPersonaje();
   iniciarPersonajesRealtime();
@@ -775,6 +804,7 @@ onAuthStateChanged(auth, async (user) => {
   iniciarMapaRealtime();
   iniciarDibujoRealtime();
   iniciarTiendaRealtime();
+  iniciarCombatRealtime();
   iniciarCanvas();
   cargarNotasJugador();
   poblarSusurroSelect();
@@ -818,7 +848,8 @@ function renderizarAvatares() {
     const paAct=p.paActual!==undefined?p.paActual:paMax;
     const esPropio=p.userId===ME.uid;
     const penHtml=pen<0?`<div class="avatar-penalty">${pen}</div>`:'';
-    return `<div class="avatar-pill" onclick="clickAvatar('${p.id}','${esPropio}')"><div style="position:relative;display:inline-block;"><div class="avatar-circle est-${estado}">${ini}</div>${penHtml}</div><span class="avatar-nombre">${(p.nombre||'?').split(' ')[0]}</span><div class="avatar-tooltip"><strong>${p.nombre||'?'}</strong> · Nv.${p.nivel||1}<br>PA: ${paAct}/${paMax} · ${estado}${pen<0?`<br>Penalización: ${pen}`:''}</div></div>`;
+    const avatarInner=p.avatarUrl?`<img src="${p.avatarUrl}" style="width:100%;height:100%;object-fit:cover;border-radius:50%;">`:`${ini}`;
+    return `<div class="avatar-pill" onclick="clickAvatar('${p.id}','${esPropio}')"><div style="position:relative;display:inline-block;"><div class="avatar-circle est-${estado}">${avatarInner}</div>${penHtml}</div><span class="avatar-nombre">${(p.nombre||'?').split(' ')[0]}</span><div class="avatar-tooltip"><strong>${p.nombre||'?'}</strong> · Nv.${p.nivel||1}<br>PA: ${paAct}/${paMax} · ${estado}${pen<0?`<br>Penalización: ${pen}`:''}</div></div>`;
   }).join('');
   wrap.innerHTML = html;
 }
@@ -969,11 +1000,12 @@ function iniciarTokenDrag() {
 // ══ CHAT ══
 function iniciarChatRealtime() {
   if (unsubChat) unsubChat();
-  const q = query(collection(db,'campanas',CAMPANA_ID,'mensajes'),orderBy('timestamp','asc'),limit(500));
+  const q = query(collection(db,'campanas',CAMPANA_ID,'mensajes'),orderBy('timestamp','desc'),limit(50));
   unsubChat = onSnapshot(q, snap => {
     const wrap = document.getElementById('chat-mensajes');
     wrap.innerHTML='';
-    snap.docs.forEach(d => {
+    const docs=[...snap.docs].reverse();
+    docs.forEach(d => {
       const msg=d.data();
       if ((msg.tipo==='privado'||msg.tipo==='susurro')&&!ES_DIRECTOR) { if(msg.paraId!==ME.uid&&msg.autorId!==ME.uid) return; }
       wrap.appendChild(renderMensaje(msg));
@@ -981,6 +1013,12 @@ function iniciarChatRealtime() {
     wrap.scrollTop=wrap.scrollHeight;
   });
 }
+window.limpiarChat=async function(){
+  if(!confirm('¿Limpiar el historial del chat? Esto borrará todos los mensajes.')) return;
+  const snap=await getDocs(collection(db,'campanas',CAMPANA_ID,'mensajes'));
+  await Promise.all(snap.docs.map(d=>deleteDoc(doc(db,'campanas',CAMPANA_ID,'mensajes',d.id))));
+  toast('Chat limpiado.','info');
+};
 function renderMensaje(msg) {
   const div=document.createElement('div'); div.className='msg';
   const hora=msg.timestamp?.toDate?msg.timestamp.toDate().toLocaleTimeString('es-CL',{hour:'2-digit',minute:'2-digit'}):'';
@@ -1031,7 +1069,6 @@ window.enviarMensaje = async function() {
 
 // ══ DADOS ══
 window.lanzarDados = async function() {
-console.log('DEBUG lanzar:', {ES_DIRECTOR, MI_PERSONAJE, CAMPANA_ID});
   if(!ES_DIRECTOR&&!MI_PERSONAJE){toast('No tienes personaje.','error');return;}
   const cantidad=Math.min(20,Math.max(1,parseInt(document.getElementById('dado-cantidad').value)||1));
   const resultados=Array.from({length:cantidad},()=>Math.floor(Math.random()*6)+1);
@@ -1106,6 +1143,7 @@ function renderSeccion(seccion){
   if(seccion==='tienda') body.innerHTML=renderTabTiendaDJ();
   if(seccion==='mapa') body.innerHTML=renderTabMapaDJ();
   if(seccion==='notas') body.innerHTML=renderTabNotas();
+  if(seccion==='combat') renderSeccionCombat();
 }
 window.setTab=function(tab){abrirSeccionDJ(tab);};
 function renderTab(tab){renderSeccion(tab);}
@@ -1196,6 +1234,197 @@ function renderTabNotas(){
   const guardadas=localStorage.getItem(`notas-dj-${CAMPANA_ID}`)||'';
   return`<div><p style="font-size:11px;color:var(--muted);margin-bottom:10px;">Solo tú puedes ver estas notas.</p><textarea class="notas-dj-area" id="notas-dj-area" placeholder="Notas de sesión, secretos, PNJs..." oninput="guardarNotasDJ()">${guardadas}</textarea></div>`;
 }
+
+// ══ COMBAT TRACKER ══
+let combatOrden = []; // [{id, nombre, avatarUrl, init, color, esNPC}]
+let combatTurnoIdx = 0;
+let combatRonda = 1;
+let unsubCombat = null;
+
+function iniciarCombatRealtime() {
+  if(unsubCombat) unsubCombat();
+  unsubCombat = onSnapshot(doc(db,'campanas',CAMPANA_ID), snap => {
+    if(!snap.exists()) return;
+    const data = snap.data();
+    if(data.combat) {
+      combatOrden = data.combat.orden || [];
+      combatTurnoIdx = data.combat.turnoIdx || 0;
+      combatRonda = data.combat.ronda || 1;
+    }
+    if(ES_DIRECTOR && tabActiva==='combat') renderSeccion('combat');
+    // Mostrar banner turno actual a todos
+    renderBannerTurno();
+  });
+}
+
+function renderBannerTurno() {
+  // Si hay combate activo, mostrar quién tiene el turno en el chat header
+  const actual = combatOrden[combatTurnoIdx];
+  const header = document.getElementById('chat-mensajes');
+  if(!header) return;
+  let banner = document.getElementById('combat-banner-chat');
+  if(combatOrden.length > 0 && actual) {
+    if(!banner) { banner = document.createElement('div'); banner.id='combat-banner-chat'; header.parentElement.insertBefore(banner, header); }
+    banner.style.cssText='padding:6px 10px;background:rgba(192,57,43,0.1);border-bottom:1px solid var(--borde-r);display:flex;align-items:center;gap:8px;flex-shrink:0;';
+    banner.innerHTML=`<span style="font-size:14px;">⚔️</span><span style="font-family:\'Cinzel\',serif;font-size:12px;font-weight:700;color:var(--rojo);">Turno: ${actual.nombre}</span><span style="font-size:10px;color:var(--muted);">Ronda ${combatRonda}</span>`;
+  } else if(banner) banner.remove();
+}
+
+function renderSeccionCombat() {
+  const body = document.getElementById('body-combat');
+  if(!body) return;
+  const actual = combatOrden[combatTurnoIdx];
+
+  const bannerHTML = combatOrden.length > 0 ? `
+    <div class="combat-turno-banner">
+      <div>
+        <div style="font-size:10px;color:var(--muted);letter-spacing:0.1em;text-transform:uppercase;margin-bottom:2px;">Turno actual</div>
+        <div class="combat-turno-nombre">⚔️ ${actual?.nombre || '—'}</div>
+      </div>
+      <span class="combat-ronda">Ronda ${combatRonda}</span>
+    </div>` : '';
+
+  const controlesHTML = `
+    <div class="combat-controles">
+      <button class="combat-ctrl-btn primary" onclick="combatSiguienteTurno()"><i class="ri-arrow-right-line"></i> Siguiente</button>
+      <button class="combat-ctrl-btn" onclick="combatReiniciar()"><i class="ri-restart-line"></i> Reiniciar</button>
+      <button class="combat-ctrl-btn" onclick="combatTerminar()" style="border-color:var(--borde-r);color:var(--rojo);">Terminar</button>
+    </div>`;
+
+  const addHTML = `
+    <div style="font-size:10px;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;color:var(--muted);margin-bottom:6px;">+ Agregar al tracker</div>
+    <div class="combat-add-row">
+      <select class="form-select" id="combat-add-select" style="flex:1;height:34px;font-size:12px;">
+        ${PERSONAJES_CAMPANA.map(p=>`<option value="${p.id}">${p.nombre}</option>`).join('')}
+        <option value="__npc__">— NPC personalizado —</option>
+      </select>
+      <button class="combat-ctrl-btn" style="width:auto;padding:0 12px;" onclick="combatAgregarPersonaje()">Agregar</button>
+    </div>
+    <div id="combat-npc-row" style="display:none;gap:6px;" class="combat-add-row">
+      <input class="form-input-vtt" id="combat-npc-nombre" placeholder="Nombre NPC" style="flex:1;height:34px;">
+      <input class="form-input-vtt" id="combat-npc-init" type="number" placeholder="Init" style="width:60px;height:34px;" value="0">
+      <button class="combat-ctrl-btn" style="width:auto;padding:0 12px;" onclick="combatAgregarNPC()">OK</button>
+    </div>
+    <div style="margin-top:4px;">
+      <button class="combat-ctrl-btn" style="width:100%;margin-bottom:6px;" onclick="combatAgregarTodos()"><i class="ri-group-line"></i> Agregar todos los jugadores</button>
+    </div>`;
+
+  const listaHTML = combatOrden.length === 0 
+    ? `<div style="text-align:center;padding:20px;color:var(--muted);font-size:12px;font-style:italic;">Sin combatientes. Agrega personajes arriba.</div>`
+    : `<div class="combat-tracker">${combatOrden.map((c,i) => {
+        const esActivo = i === combatTurnoIdx;
+        const avatarHTML = c.avatarUrl 
+          ? `<div class="combat-avatar" style="border-color:${c.color||'var(--borde)'}"><img src="${c.avatarUrl}" alt="${c.nombre}"></div>`
+          : `<div class="combat-avatar" style="border-color:${c.color||'var(--borde)'};color:${c.color||'var(--muted)'};">${(c.nombre||'?').charAt(0).toUpperCase()}</div>`;
+        return `<div class="combat-row ${esActivo?'activo':''}">
+          <span class="combat-num">${i+1}</span>
+          ${avatarHTML}
+          <div class="combat-info">
+            <div class="combat-nombre">${c.nombre}</div>
+            <div class="combat-init">Iniciativa: <strong>${c.init||0}</strong>${c.esNPC?' · NPC':''}</div>
+          </div>
+          ${esActivo ? '<span class="combat-bandera">🚩</span>' : ''}
+          <div class="combat-actions">
+            <button class="combat-btn" onclick="combatMover(${i},-1)" title="Subir">▲</button>
+            <button class="combat-btn" onclick="combatMover(${i},1)" title="Bajar">▼</button>
+            <button class="combat-btn del" onclick="combatEliminar(${i})" title="Eliminar">✕</button>
+          </div>
+        </div>`;
+      }).join('')}</div>`;
+
+  body.innerHTML = bannerHTML + controlesHTML + addHTML + listaHTML;
+
+  // Mostrar/ocultar fila NPC
+  document.getElementById('combat-add-select')?.addEventListener('change', function(){
+    document.getElementById('combat-npc-row').style.display = this.value==='__npc__'?'flex':'none';
+  });
+}
+
+async function guardarCombat() {
+  await updateDoc(doc(db,'campanas',CAMPANA_ID), {
+    combat: { orden: combatOrden, turnoIdx: combatTurnoIdx, ronda: combatRonda }
+  });
+}
+
+window.combatAgregarPersonaje = async function() {
+  const sel = document.getElementById('combat-add-select');
+  if(!sel || sel.value==='__npc__') return;
+  const p = PERSONAJES_CAMPANA.find(x=>x.id===sel.value);
+  if(!p) return;
+  if(combatOrden.find(x=>x.id===p.id)) { toast('Ya está en el tracker.','info'); return; }
+  const init = p.atributos ? (p.atributos.percepcion||1)+(p.habilidades?.['Alerta']||0) : 1;
+  const colores=['#c0392b','#2980b9','#27ae60','#8e44ad','#e67e22','#16a085'];
+  combatOrden.push({ id:p.id, nombre:p.nombre, avatarUrl:p.avatarUrl||null, init, color:colores[combatOrden.length%6], esNPC:false });
+  combatOrden.sort((a,b)=>b.init-a.init);
+  await guardarCombat();
+  toast(`${p.nombre} agregado.`,'success');
+};
+
+window.combatAgregarTodos = async function() {
+  const colores=['#c0392b','#2980b9','#27ae60','#8e44ad','#e67e22','#16a085'];
+  PERSONAJES_CAMPANA.forEach((p,i) => {
+    if(combatOrden.find(x=>x.id===p.id)) return;
+    const init = p.atributos ? (p.atributos.percepcion||1)+(p.habilidades?.['Alerta']||0) : 1;
+    combatOrden.push({ id:p.id, nombre:p.nombre, avatarUrl:p.avatarUrl||null, init, color:colores[i%6], esNPC:false });
+  });
+  combatOrden.sort((a,b)=>b.init-a.init);
+  await guardarCombat();
+  toast('Todos agregados.','success');
+};
+
+window.combatAgregarNPC = async function() {
+  const nombre = document.getElementById('combat-npc-nombre')?.value.trim();
+  const init = parseInt(document.getElementById('combat-npc-init')?.value)||0;
+  if(!nombre) { toast('Escribe un nombre.','error'); return; }
+  combatOrden.push({ id:'npc_'+Date.now(), nombre, avatarUrl:null, init, color:'#7f8c8d', esNPC:true });
+  combatOrden.sort((a,b)=>b.init-a.init);
+  await guardarCombat();
+  toast(`${nombre} (NPC) agregado.`,'success');
+};
+
+window.combatSiguienteTurno = async function() {
+  combatTurnoIdx = (combatTurnoIdx+1) % combatOrden.length;
+  if(combatTurnoIdx===0) combatRonda++;
+  const actual = combatOrden[combatTurnoIdx];
+  await guardarCombat();
+  await addDoc(collection(db,'campanas',CAMPANA_ID,'mensajes'), {
+    autorId: ME.uid, autorNombre: (ME.displayName||'Director')+' [DJ]',
+    tipo:'sistema', texto:`⚔️ Turno de ${actual?.nombre||'?'} — Ronda ${combatRonda}`, timestamp:serverTimestamp()
+  });
+};
+
+window.combatReiniciar = async function() {
+  combatTurnoIdx=0; combatRonda=1;
+  await guardarCombat();
+  toast('Combate reiniciado.','info');
+};
+
+window.combatTerminar = async function() {
+  if(!confirm('¿Terminar el combate y limpiar el tracker?')) return;
+  combatOrden=[]; combatTurnoIdx=0; combatRonda=1;
+  await guardarCombat();
+  await addDoc(collection(db,'campanas',CAMPANA_ID,'mensajes'), {
+    autorId:ME.uid, autorNombre:(ME.displayName||'Director')+' [DJ]',
+    tipo:'sistema', texto:'🏁 El combate ha terminado.', timestamp:serverTimestamp()
+  });
+  toast('Combate terminado.','info');
+};
+
+window.combatMover = async function(idx, dir) {
+  const newIdx = idx+dir;
+  if(newIdx<0||newIdx>=combatOrden.length) return;
+  [combatOrden[idx],combatOrden[newIdx]]=[combatOrden[newIdx],combatOrden[idx]];
+  if(combatTurnoIdx===idx) combatTurnoIdx=newIdx;
+  else if(combatTurnoIdx===newIdx) combatTurnoIdx=idx;
+  await guardarCombat();
+};
+
+window.combatEliminar = async function(idx) {
+  combatOrden.splice(idx,1);
+  if(combatTurnoIdx>=combatOrden.length) combatTurnoIdx=0;
+  await guardarCombat();
+};
+
 window.guardarNotasDJ=()=>localStorage.setItem(`notas-dj-${CAMPANA_ID}`,document.getElementById('notas-dj-area')?.value||'');
 
 // ══ TIENDA DJ — PANEL ADMIN ══
