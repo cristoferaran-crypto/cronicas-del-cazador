@@ -487,6 +487,28 @@
     .menu-jugador-item:hover{background:var(--sup3);color:var(--texto);}
     .menu-jugador-item.danger{color:var(--rojo);}
     .menu-jugador-item.danger:hover{background:rgba(192,57,43,0.1);}
+
+    .msg-body.escena{
+      border-left-color:var(--dorado);
+      background:rgba(201,168,76,0.06);
+      color:var(--texto);
+      font-style:italic;
+      line-height:1.8;
+      white-space:pre-wrap;
+      border-top:1px solid rgba(201,168,76,0.2);
+      border-bottom:1px solid rgba(201,168,76,0.2);
+      padding:12px 14px;
+    }
+    .msg-escena-titulo{
+      font-family:'Cinzel',serif;
+      font-size:10px;
+      font-weight:800;
+      letter-spacing:0.2em;
+      text-transform:uppercase;
+      color:var(--dorado);
+      margin-bottom:6px;
+      display:block;
+    }
   </style>
 </head>
 <body>
@@ -1150,6 +1172,7 @@ function renderMensaje(msg) {
   else if(tipo==='dinero') contenido=`💰 <strong>${msg.paraName}</strong> recibió <strong>${msg.cantidad} Marcas</strong>`;
   else if(tipo==='privado') contenido=`🔒 <em>(Privado al DJ)</em> ${msg.texto}`;
   else if(tipo==='susurro') contenido=`🔒 <em>(Susurro de DJ)</em> ${msg.texto}`;
+  else if(tipo==='escena') contenido=`<span class="msg-escena-titulo">📜 Descripción de Escena</span>${msg.texto}`;
   else if(tipo==='sistema') contenido=msg.texto;
   else contenido=msg.texto;
   div.innerHTML=`<div class="msg-header"><span class="msg-autor">${msg.autorNombre||'?'}</span><span class="msg-hora">${hora}</span></div><div class="msg-body ${tipo}">${contenido}</div>`;
@@ -1342,7 +1365,19 @@ function renderTabSusurro(){
 
 function renderTabNotas(){
   const guardadas=localStorage.getItem(`notas-dj-${CAMPANA_ID}`)||'';
-  return`<div><p style="font-size:11px;color:var(--muted);margin-bottom:10px;">Solo tú puedes ver estas notas.</p><textarea class="notas-dj-area" id="notas-dj-area" placeholder="Notas de sesión, secretos, PNJs..." oninput="guardarNotasDJ()">${guardadas}</textarea></div>`;
+  return`<div>
+    <div style="background:rgba(201,168,76,0.06);border:1px solid var(--borde-d);border-left:3px solid var(--dorado);padding:14px;margin-bottom:16px;">
+      <div style="font-family:'Cinzel',serif;font-size:12px;font-weight:700;color:var(--dorado);letter-spacing:0.1em;text-transform:uppercase;margin-bottom:8px;">📜 Descripción de Escena</div>
+      <p style="font-size:11px;color:var(--muted);margin-bottom:8px;line-height:1.5;">Escribe la ambientación o descripción de la escena actual. Al publicar, todos los jugadores la verán en el chat.</p>
+      <textarea id="escena-texto" style="width:100%;min-height:90px;background:rgba(255,255,255,0.02);border:1px solid var(--borde-d);color:var(--texto);font-family:'Raleway',sans-serif;font-size:13px;padding:10px;outline:none;resize:vertical;line-height:1.6;font-style:italic;margin-bottom:8px;" placeholder="Describe la escena, el ambiente, lo que los jugadores perciben..."></textarea>
+      <button onclick="publicarEscena()" style="width:100%;height:38px;background:var(--dorado);border:none;color:var(--negro);font-family:'Cinzel',serif;font-size:11px;font-weight:700;letter-spacing:0.12em;text-transform:uppercase;cursor:pointer;transition:background 0.15s;" onmouseover="this.style.background='#e2be6a'" onmouseout="this.style.background='var(--dorado)'">
+        <i class="ri-send-plane-fill"></i> Publicar en el Chat
+      </button>
+    </div>
+    <div style="height:1px;background:var(--borde);margin-bottom:14px;"></div>
+    <p style="font-size:11px;color:var(--muted);margin-bottom:10px;">Notas privadas — solo tú las ves.</p>
+    <textarea class="notas-dj-area" id="notas-dj-area" placeholder="Notas de sesión, secretos, PNJs..." oninput="guardarNotasDJ()">${guardadas}</textarea>
+  </div>`;
 }
 
 // ══ COMBAT TRACKER ══
@@ -1536,6 +1571,19 @@ window.combatEliminar = async function(idx) {
 };
 
 window.guardarNotasDJ=()=>localStorage.setItem(`notas-dj-${CAMPANA_ID}`,document.getElementById('notas-dj-area')?.value||'');
+window.publicarEscena=async function(){
+  const texto=document.getElementById('escena-texto')?.value.trim();
+  if(!texto){toast('Escribe una descripción primero.','error');return;}
+  await addDoc(collection(db,'campanas',CAMPANA_ID,'mensajes'),{
+    autorId:ME.uid,
+    autorNombre:(ME.displayName||'Director')+' [DJ]',
+    tipo:'escena',
+    texto,
+    timestamp:serverTimestamp()
+  });
+  document.getElementById('escena-texto').value='';
+  toast('📜 Escena publicada en el chat.','success');
+};
 
 // ══ TIENDA DJ — PANEL ADMIN ══
 function renderTabTiendaDJ(){
