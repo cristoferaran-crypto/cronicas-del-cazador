@@ -517,6 +517,17 @@
     .cond-selector{display:flex;flex-wrap:wrap;gap:4px;margin-top:8px;}
     .cond-toggle{padding:3px 8px;font-size:9px;font-weight:700;letter-spacing:0.06em;text-transform:uppercase;background:transparent;border:1px solid;border-radius:3px;cursor:pointer;transition:all 0.15s;opacity:0.5;}
     .cond-toggle.activa{opacity:1;}
+    /* POPUP CONDICIONES */
+    .cond-popup{position:absolute;right:0;top:calc(100% + 4px);background:var(--sup2);border:1px solid var(--borde-d);border-top:2px solid var(--dorado);padding:10px;z-index:200;width:260px;box-shadow:0 8px 24px rgba(0,0,0,0.6);display:none;}
+    .cond-popup.open{display:block;}
+    .cond-popup-titulo{font-family:'Cinzel',serif;font-size:10px;font-weight:700;letter-spacing:0.15em;text-transform:uppercase;color:var(--dorado);margin-bottom:8px;display:flex;justify-content:space-between;align-items:center;}
+    .cond-popup-grid{display:flex;flex-wrap:wrap;gap:4px;}
+    .cond-pill{padding:4px 9px;font-size:10px;font-weight:700;letter-spacing:0.05em;border:1px solid;border-radius:3px;cursor:pointer;transition:all 0.15s;background:transparent;}
+    .cond-pill.activa{color:white!important;}
+    .cond-btn-trigger{padding:3px 8px;font-size:10px;font-weight:700;letter-spacing:0.06em;text-transform:uppercase;background:transparent;border:1px solid var(--borde-d);color:var(--dorado);cursor:pointer;transition:all 0.15s;position:relative;}
+    .cond-btn-trigger:hover{background:rgba(201,168,76,0.1);}
+    .cond-limpiar{width:100%;margin-top:8px;padding:5px;font-size:10px;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;background:transparent;border:1px solid var(--borde-r);color:var(--muted);cursor:pointer;transition:all 0.15s;}
+    .cond-limpiar:hover{color:var(--rojo);border-color:var(--rojo);}
     .cond-token-badge{position:absolute;top:-6px;left:50%;transform:translateX(-50%);font-size:8px;font-weight:800;padding:1px 4px;border-radius:2px;white-space:nowrap;color:white;pointer-events:none;z-index:5;max-width:48px;overflow:hidden;text-overflow:ellipsis;}
   </style>
 </head>
@@ -1335,21 +1346,29 @@ function renderTabJugadores(){
     const paAct=p.paActual!==undefined?p.paActual:paMax;
     const col=ESTADO_COLORES[estado]||ESTADO_COLORES.sano;
     const condiciones=p.condiciones||[];
+
+    // Badges condiciones activas (con X para quitar)
     const condBadges=condiciones.map(c=>{
       const def=CONDICIONES.find(x=>x.nombre===c)||{color:'#7f8c8d',nombre:c};
       return`<span class="cond-badge removible" style="color:${def.color};border-color:${def.color};background:${def.color}22;" onclick="quitarCondicionDJ('${p.id}','${c}')" title="Clic para quitar">${c} ✕</span>`;
     }).join('');
+
+    // Botones estado salud
     const estadoOpts=['sano','herido','grave','critico','ko'].map(e=>{
       const ec=ESTADO_COLORES[e]; const activo=e===estado;
       return`<button onclick="cambiarEstadoCompacto('${p.id}','${e}')" style="flex:1;padding:3px 2px;font-size:9px;font-weight:700;letter-spacing:0.04em;text-transform:uppercase;background:${activo?ec.bg:'transparent'};border:1px solid ${activo?ec.color:'var(--borde)'};color:${activo?ec.color:'var(--muted)'};cursor:pointer;transition:all 0.15s;">${e==='ko'?'KO':e.charAt(0).toUpperCase()+e.slice(1)}</button>`;
     }).join('');
 
-    const condSelectorHTML = CONDICIONES.map(c=>{
+    // Pills condiciones para el popup
+    const condPills=CONDICIONES.map(c=>{
       const tieneC=condiciones.includes(c.nombre);
-      return`<button class="cond-toggle ${tieneC?'activa':''}" style="color:${c.color};border-color:${c.color};background:${tieneC?c.color+'22':'transparent'};" onclick="toggleCondicionDJ('${p.id}','${c.nombre}')">${c.nombre}</button>`;
+      return`<button class="cond-pill ${tieneC?'activa':''}" style="color:${tieneC?'white':c.color};border-color:${c.color};background:${tieneC?c.color:'transparent'};" onclick="toggleCondicionDJ('${p.id}','${c.nombre}')">${c.nombre}</button>`;
     }).join('');
+
+    const popupId=`cond-popup-${p.id}`;
     return`<div style="background:var(--sup2);border:1px solid var(--borde);border-left:3px solid ${col.color};padding:10px 12px;margin-bottom:8px;">
-      <div style="display:flex;align-items:center;gap:10px;margin-bottom:8px;">
+      <!-- Fila principal -->
+      <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px;">
         <div onclick="abrirFichaPersonaje(${JSON.stringify(p).replace(/"/g,'&quot;')})"
           style="width:34px;height:34px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-family:'Cinzel',serif;font-size:13px;font-weight:700;border:2px solid ${col.color};color:${col.color};cursor:pointer;flex-shrink:0;background:${col.bg};"
           title="Ver ficha">${ini}</div>
@@ -1357,14 +1376,27 @@ function renderTabJugadores(){
           <div style="font-family:'Cinzel',serif;font-size:13px;font-weight:700;color:var(--texto);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${p.nombre||'Sin nombre'}</div>
           <div style="font-size:10px;color:var(--muted);">Nv.${p.nivel||1} · PA <strong style="color:var(--texto);">${paAct}/${paMax}</strong></div>
         </div>
+        <!-- Badge estado salud -->
         <div style="padding:3px 8px;border:1px solid ${col.color};background:${col.bg};color:${col.color};font-size:9px;font-weight:700;letter-spacing:0.06em;text-transform:uppercase;flex-shrink:0;">● ${estado.toUpperCase()}</div>
+        <!-- Botón condiciones con popup -->
+        <div style="position:relative;flex-shrink:0;">
+          <button class="cond-btn-trigger" onclick="toggleCondPopup('${popupId}')" title="Gestionar condiciones">
+            ⚡ ${condiciones.length>0?condiciones.length+' cond.':'Condic.'}
+          </button>
+          <div class="cond-popup" id="${popupId}">
+            <div class="cond-popup-titulo">
+              <span>⚡ Condiciones</span>
+              <button onclick="toggleCondPopup('${popupId}')" style="background:transparent;border:none;color:var(--muted);cursor:pointer;font-size:14px;">✕</button>
+            </div>
+            <div class="cond-popup-grid">${condPills}</div>
+            ${condiciones.length>0?`<button class="cond-limpiar" onclick="limpiarCondicionesDJ('${p.id}')">✕ Limpiar todas</button>`:''}
+          </div>
+        </div>
       </div>
-      ${condBadges?`<div style="display:flex;gap:3px;flex-wrap:wrap;margin-bottom:8px;">${condBadges}</div>`:''}
-      <div style="display:flex;gap:3px;margin-bottom:6px;">${estadoOpts}</div>
-      <div style="border-top:1px solid var(--borde);padding-top:6px;margin-top:2px;">
-        <div style="font-size:9px;color:var(--muted);font-weight:700;letter-spacing:0.1em;text-transform:uppercase;margin-bottom:4px;">Condiciones:</div>
-        <div class="cond-selector">${condSelectorHTML}</div>
-      </div>
+      <!-- Badges condiciones activas -->
+      ${condBadges?`<div style="display:flex;gap:3px;flex-wrap:wrap;margin-bottom:6px;">${condBadges}</div>`:''}
+      <!-- Estado salud -->
+      <div style="display:flex;gap:3px;">${estadoOpts}</div>
     </div>`;
   }).join('');
 }
@@ -1916,6 +1948,26 @@ window.enviarSusurro=async function(){
   await addDoc(collection(db,'campanas',CAMPANA_ID,'mensajes'),{autorId:ME.uid,autorNombre:(ME.displayName||'Director')+' [DJ]',tipo:'susurro',paraId,paraNombre:paraNom,texto,timestamp:serverTimestamp()});
   document.getElementById('sus-mensaje').value='';toast(`🔒 Susurro enviado a ${paraNom}`,'success');
 };
+window.toggleCondPopup=function(popupId){
+  // Cerrar todos los demás popups primero
+  document.querySelectorAll('.cond-popup.open').forEach(p=>{if(p.id!==popupId)p.classList.remove('open');});
+  const popup=document.getElementById(popupId);
+  if(popup) popup.classList.toggle('open');
+};
+document.addEventListener('click',function(e){
+  if(!e.target.closest('.cond-btn-trigger')&&!e.target.closest('.cond-popup')){
+    document.querySelectorAll('.cond-popup.open').forEach(p=>p.classList.remove('open'));
+  }
+});
+
+window.limpiarCondicionesDJ=async function(personajeId){
+  await updateDoc(doc(db,'personajes',personajeId),{condiciones:[]});
+  const p=PERSONAJES_CAMPANA.find(x=>x.id===personajeId);
+  if(p) p.condiciones=[];
+  if(tabActiva==='jugadores') renderSeccion('jugadores');
+  toast('Condiciones limpiadas.','info');
+};
+
 window.toggleCondicionDJ=async function(personajeId, condNombre){
   const p=PERSONAJES_CAMPANA.find(x=>x.id===personajeId);if(!p)return;
   const condiciones=[...(p.condiciones||[])];
@@ -1941,10 +1993,16 @@ window.cambiarEstadoCompacto=async function(personajeId,nuevoEstado){
   const p=PERSONAJES_CAMPANA.find(x=>x.id===personajeId);
   const condActuales=[...(p?.condiciones||[])];
   // Condiciones automáticas
-  if(nuevoEstado==='critico' && !condActuales.includes('Fatiga')) condActuales.push('Fatiga');
-  if(nuevoEstado==='ko' && !condActuales.includes('Inmovilizado')) condActuales.push('Inmovilizado');
+  if(nuevoEstado==='critico' && !condActuales.includes('Fatiga')) {
+    condActuales.push('Fatiga');
+    toast('⚠ Fatiga aplicada automáticamente.','info');
+  }
+  if(nuevoEstado==='ko' && !condActuales.includes('Inmovilizado')) {
+    condActuales.push('Inmovilizado');
+    toast('⚠ Inmovilizado aplicado automáticamente.','info');
+  }
   await updateDoc(doc(db,'personajes',personajeId),{estadoSalud:nuevoEstado,condiciones:condActuales});
-  if(p) p.condiciones=condActuales;
+  if(p){p.estadoSalud=nuevoEstado;p.condiciones=condActuales;}
   if(MI_PERSONAJE&&MI_PERSONAJE.id===personajeId){MI_PERSONAJE.estadoSalud=nuevoEstado;MI_PERSONAJE.condiciones=condActuales;}
   toast('Estado: '+nuevoEstado,'success');
   if(tabActiva==='jugadores')renderSeccion('jugadores');
