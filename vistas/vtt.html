@@ -2422,7 +2422,7 @@ window.comprarProducto=async function(prodId,vendedor){
   if(espacios.libre<cantidad){toast(`Solo tienes ${espacios.libre} espacio${espacios.libre!==1?'s':''} libre${espacios.libre!==1?'s':''}.`,'error');return;}
   const idx=inventario.findIndex(o=>o.nombre===prod.nombre);
   if(idx>=0)inventario[idx].cantidad=(inventario[idx].cantidad||1)+cantidad;
-  else inventario.push({nombre:prod.nombre,desc:prod.desc||'',cantidad,tipo:prod.tipo||'objeto',cat:prod.cat,calidad:prod.calidad||'Común',peso:prod.peso||0,espacios:prod.espacios||0,equipable:prod.equipable!==false,ranura:prod.ranura||'—',bono:prod.bono||'—',contenedor:prod.contenedor||0});
+  else inventario.push({nombre:prod.nombre,desc:prod.desc||'',cantidad,tipo:prod.tipo||'objeto',cat:prod.cat,calidad:prod.calidad||'Común',peso:prod.peso||0,espacios:prod.espacios||0,equipable:prod.equipable!==false,ranura:prod.ranura||'—',bono:prod.bono||'—',contenedor:prod.contenedor||0,quitaCondicion:prod.quitaCondicion||null});
   const nuevoSaldo=saldoActual-costoTotal;
   await updateDoc(pRef,{inventario,dinero:nuevoSaldo});
   MI_PERSONAJE.dinero=nuevoSaldo;MI_PERSONAJE.inventario=inventario;
@@ -2463,7 +2463,7 @@ window.comprarPack=async function(packId){
         peso:prodReal.peso||0, espacios:prodReal.espacios||0,
         equipable:prodReal.equipable!==false,
         ranura:prodReal.ranura||'—', bono:prodReal.bono||'—',
-        contenedor:prodReal.contenedor||0,
+        contenedor:prodReal.contenedor||0, quitaCondicion:prodReal.quitaCondicion||null,
       } : {
         nombre, cantidad, desc:'Pack: '+pack.nombre,
         tipo:'objeto', calidad:'Común', peso:0,
@@ -2706,14 +2706,32 @@ window.cerrarModalEquipar=function(){document.getElementById('modal-equipar').cl
 window.jugadorUsarItem=async function(personajeId,idx){
   const pRef=doc(db,'personajes',personajeId);const pSnap=await getDoc(pRef);const data=pSnap.data();
   const inventario=[...(data.inventario||[])];if(!inventario[idx])return;
-  const nombre=inventario[idx].nombre;
+  const item=inventario[idx];
+  const nombre=item.nombre;
+  const condAQuitar=item.quitaCondicion&&item.quitaCondicion!=='No Aplica'?item.quitaCondicion:null;
   inventario[idx].cantidad=(inventario[idx].cantidad||1)-1;
-  if(inventario[idx].cantidad<=0){inventario.splice(idx,1);toast(`${nombre} agotado.`,'info');}
-  else toast(`${nombre} usado.`,'success');
-  await updateDoc(pRef,{inventario});
-  if(MI_PERSONAJE&&MI_PERSONAJE.id===personajeId)MI_PERSONAJE.inventario=inventario;
-  await addDoc(collection(db,'campanas',CAMPANA_ID,'mensajes'),{autorId:ME.uid,autorNombre:MI_PERSONAJE?.nombre||'Jugador',tipo:'sistema',texto:`🎒 ${MI_PERSONAJE?.nombre||'Jugador'} usó ${nombre}.`,timestamp:serverTimestamp()});
-  abrirFichaPersonaje({...data,inventario,id:personajeId});
+  if(inventario[idx].cantidad<=0){inventario.splice(idx,1);}
+  // Quitar condición si el ítem la tiene
+  let condiciones=[...(data.condiciones||[])];
+  let condQuitada=null;
+  if(condAQuitar){
+    const condDef=CONDICIONES.find(c=>c.id===condAQuitar||c.nombre===condAQuitar);
+    const condNombre=condDef?condDef.nombre:condAQuitar;
+    if(condiciones.includes(condNombre)){condiciones=condiciones.filter(c=>c!==condNombre);condQuitada=condNombre;}
+  }
+  const updateData={inventario};
+  if(condQuitada)updateData.condiciones=condiciones;
+  await updateDoc(pRef,updateData);
+  if(MI_PERSONAJE&&MI_PERSONAJE.id===personajeId){MI_PERSONAJE.inventario=inventario;if(condQuitada)MI_PERSONAJE.condiciones=condiciones;}
+  if(condQuitada){
+    toast(`${nombre} usado — condición ${condQuitada} eliminada.`,'success');
+    await addDoc(collection(db,'campanas',CAMPANA_ID,'mensajes'),{autorId:ME.uid,autorNombre:MI_PERSONAJE?.nombre||'Jugador',tipo:'sistema',texto:`🎒 ${MI_PERSONAJE?.nombre||'Jugador'} usó ${nombre} y eliminó la condición: ${condQuitada}.`,timestamp:serverTimestamp()});
+  } else {
+    toast(`${nombre} usado.`,'success');
+    await addDoc(collection(db,'campanas',CAMPANA_ID,'mensajes'),{autorId:ME.uid,autorNombre:MI_PERSONAJE?.nombre||'Jugador',tipo:'sistema',texto:`🎒 ${MI_PERSONAJE?.nombre||'Jugador'} usó ${nombre}.`,timestamp:serverTimestamp()});
+  }
+  if(inventario[idx]===undefined)toast(`${nombre} agotado.`,'info');
+  abrirFichaPersonaje({...data,inventario,condiciones,id:personajeId});
 };
 window.switchFichaTab=function(tab,el){document.querySelectorAll('.ficha-tab').forEach(t=>t.classList.remove('active'));document.querySelectorAll('.ficha-tab-body').forEach(b=>b.classList.remove('active'));el.classList.add('active');document.getElementById('ftab-'+tab)?.classList.add('active');};
 window.lanzarIniciativaVTT=async function(personajeId,nombrePersonaje,valorIniciativa){
