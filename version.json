@@ -1,0 +1,68 @@
+{
+  "versiones": [
+    {
+      "version": "0.5",
+      "nombre": "El Mundo se Conecta",
+      "fecha": "Junio 2026",
+      "latest": true,
+      "items": [
+        { "icono": "📬", "tipo": "nuevo",   "titulo": "Bandeja de entrada",              "texto": "Sistema de mensajería interna. Los jugadores pueden enviarse mensajes entre sí y recibir notificaciones del sistema en todas las páginas." },
+        { "icono": "🔒", "tipo": "nuevo",   "titulo": "Gestión de jugadores",            "texto": "El Director puede liberar personajes de la campaña o bloquear jugadores directamente desde el panel. Los jugadores pueden abandonar cuando quieran." },
+        { "icono": "💊", "tipo": "nuevo",   "titulo": "Ítems que remueven condiciones",  "texto": "Al usar un consumible con condición asignada, esta se elimina automáticamente del personaje y se notifica en el chat." },
+        { "icono": "🚫", "tipo": "nuevo",   "titulo": "Lista negra de nombres",          "texto": "El creador de personajes valida que el nombre no sea una palabra reservada del sistema ni esté en la lista de nombres prohibidos." },
+        { "icono": "🗂",  "tipo": "mejora", "titulo": "Tab Equipo en ficha",             "texto": "La ficha del personaje ahora muestra el inventario real del VTT: ranuras de equipamiento, contenedores, peso y espacios en tiempo real." },
+        { "icono": "🔧", "tipo": "fix",     "titulo": "Rutas de navegación",             "texto": "Corregidas las rutas relativas en mis-personajes y otras páginas que generaban errores 404 al navegar." }
+      ]
+    },
+    {
+      "version": "0.4",
+      "nombre": "La Gran Partida",
+      "fecha": "Junio 2026",
+      "latest": false,
+      "items": [
+        { "icono": "⚔️", "tipo": "nuevo",   "titulo": "Combat Tracker",      "texto": "El Director puede iniciar el sistema de turnos con un solo botón. Se lanzan iniciativas automáticamente y aparece un mensaje épico en el chat." },
+        { "icono": "🚩", "tipo": "nuevo",   "titulo": "Bandera de turno",    "texto": "Una bandera animada indica sobre el avatar de cada jugador quién tiene el turno activo, visible para todos en tiempo real." },
+        { "icono": "🗑",  "tipo": "nuevo",   "titulo": "Limpiar chat",        "texto": "El Director puede limpiar el historial del chat entre sesiones desde el panel de campaña." },
+        { "icono": "🛒", "tipo": "mejora", "titulo": "Cantidad en tienda",  "texto": "Los jugadores ahora pueden seleccionar cuántas unidades comprar de un ítem sin tener que repetir la acción." },
+        { "icono": "⚠️", "tipo": "fix",     "titulo": "Validación de productos", "texto": "Al crear ítems equipables en la tienda, el sistema ahora avisa si falta la ranura u otros parámetros obligatorios." },
+        { "icono": "📸", "tipo": "nuevo",   "titulo": "Avatar del Director", "texto": "El Director puede subir su imagen de perfil desde Mi Cuenta. Aparece con marco dorado animado en el VTT." },
+        { "icono": "⬆️", "tipo": "fix",     "titulo": "Subir de nivel",      "texto": "Corregido para subir de 1 en 1 hasta el nivel 20, actualizando inmediatamente sin recargar." }
+      ]
+    },
+    {
+      "version": "0.3",
+      "nombre": "El Mercado Abre",
+      "fecha": "Mayo 2026",
+      "latest": false,
+      "items": [
+        { "icono": "🏪", "tipo": "nuevo",   "titulo": "Sistema de Tienda",    "texto": "Bazar, Armero, Droguería y Mercado Negro. El Director controla qué está disponible en cada sesión." },
+        { "icono": "🎒", "tipo": "nuevo",   "titulo": "Inventario con ranuras","texto": "Sistema de equipamiento con silueta corporal, contenedores y cálculo de espacios y peso." },
+        { "icono": "✨", "tipo": "nuevo",   "titulo": "Packs de Ofertas",     "texto": "El Director puede activar bundles especiales con descuento durante la sesión." },
+        { "icono": "🗺️", "tipo": "mejora", "titulo": "Mapa interactivo",     "texto": "Dibujo libre en tiempo real, tokens arrastrables y biblioteca de imágenes por campaña." }
+      ]
+    },
+    {
+      "version": "0.2",
+      "nombre": "El VTT Despierta",
+      "fecha": "Abril 2026",
+      "latest": false,
+      "items": [
+        { "icono": "💬", "tipo": "nuevo",   "titulo": "Chat en tiempo real", "texto": "Mensajes generales, privados y susurros del DJ. Tiradas de dados con animación y desglose de éxitos." },
+        { "icono": "🎲", "tipo": "nuevo",   "titulo": "Sistema de dados",    "texto": "Lanzamiento de d6 con cálculo automático de éxitos, dobles éxitos y consecuencias negativas." },
+        { "icono": "⭐", "tipo": "nuevo",   "titulo": "Panel del Director",  "texto": "Gestión de XP con criterios de sesión, entrega de ítems y dinero, control de estado de salud." },
+        { "icono": "📋", "tipo": "nuevo",   "titulo": "Ficha en partida",    "texto": "Los jugadores pueden ver y editar su ficha, PA y estado de salud directamente desde el VTT." }
+      ]
+    },
+    {
+      "version": "0.1",
+      "nombre": "Génesis",
+      "fecha": "Marzo 2026",
+      "latest": false,
+      "items": [
+        { "icono": "🌐", "tipo": "sistema", "titulo": "Lanzamiento inicial",      "texto": "Creador de personajes completo con culturas, atributos, habilidades y caminos." },
+        { "icono": "🔐", "tipo": "sistema", "titulo": "Autenticación Firebase",   "texto": "Registro, login y perfiles de jugador y director con paneles separados." },
+        { "icono": "⚔️", "tipo": "sistema", "titulo": "Sistema de campañas",      "texto": "Creación de campañas con código único CDC para que los jugadores se unan." }
+      ]
+    }
+  ]
+}
