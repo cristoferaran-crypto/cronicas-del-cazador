@@ -1117,41 +1117,87 @@ function hacerArrastrable(el, handle) {
 }
 
 // ══ TOKENS ══
-function renderTokensCanvas(tokens) {
+
+// Cache de imágenes para tokens
+const TOKEN_IMG_CACHE = {};
+function cargarImagenToken(url) {
+  if(!url) return Promise.resolve(null);
+  if(TOKEN_IMG_CACHE[url]) return Promise.resolve(TOKEN_IMG_CACHE[url]);
+  return new Promise(resolve => {
+    const img = new Image();
+    img.crossOrigin = 'anonymous';
+    img.onload = () => { TOKEN_IMG_CACHE[url] = img; resolve(img); };
+    img.onerror = () => resolve(null);
+    img.src = url;
+  });
+}
+
+async function renderTokensCanvas(tokens) {
   tokensData = tokens||{};
   const canvas = document.getElementById('canvas-tokens');
   const ctx = canvas.getContext('2d');
   ctx.clearRect(0,0,canvas.width,canvas.height);
-  Object.values(tokensData).forEach(t => {
-    const x=t.x*canvas.width, y=t.y*canvas.height, r=22;
-    ctx.shadowColor=t.color||'#c0392b'; ctx.shadowBlur=8;
-    ctx.beginPath(); ctx.arc(x,y,r,0,Math.PI*2); ctx.fillStyle=t.color||'#c0392b'; ctx.fill();
-    ctx.strokeStyle='white'; ctx.lineWidth=2; ctx.stroke(); ctx.shadowBlur=0;
-    ctx.fillStyle='white'; ctx.font=`bold 16px 'Cinzel',serif`; ctx.textAlign='center'; ctx.textBaseline='middle';
-    ctx.fillText(t.inicial||'?',x,y);
-    ctx.fillStyle='rgba(255,255,255,0.9)'; ctx.font='10px Raleway,sans-serif';
-    ctx.fillText(t.nombre||'',x,y+r+10);
-    // Condiciones: badge de color sobre el token
+
+  for(const t of Object.values(tokensData)) {
+    const x=t.x*canvas.width, y=t.y*canvas.height, r=26;
+    const color=t.color||'#c0392b';
+
+    // Buscar avatar del personaje
+    const pj = PERSONAJES_CAMPANA.find(p=>p.id===t.id);
+    const avatarUrl = pj?.avatar || pj?.avatarUrl || null;
+    const img = avatarUrl ? await cargarImagenToken(avatarUrl) : null;
+
+    // Sombra exterior
+    ctx.shadowColor=color; ctx.shadowBlur=10;
+
+    // Fondo token cuadrado redondeado
+    const size=r*2;
+    ctx.beginPath();
+    ctx.roundRect(x-r,y-r,size,size,8);
+    ctx.fillStyle=img?'transparent':color+'33';
+    ctx.fill();
+    ctx.strokeStyle=color; ctx.lineWidth=2.5; ctx.stroke();
+    ctx.shadowBlur=0;
+
+    // Avatar o inicial
+    if(img){
+      ctx.save();
+      ctx.beginPath(); ctx.roundRect(x-r,y-r,size,size,8); ctx.clip();
+      ctx.drawImage(img,x-r,y-r,size,size);
+      ctx.restore();
+      // Overlay sutil con color del estado
+      ctx.fillStyle=color+'33';
+      ctx.beginPath(); ctx.roundRect(x-r,y-r,size,size,8); ctx.fill();
+    } else {
+      ctx.fillStyle='white';
+      ctx.font=`bold 18px 'Cinzel',serif`;
+      ctx.textAlign='center'; ctx.textBaseline='middle';
+      ctx.fillText(t.inicial||'?',x,y);
+    }
+
+    // Nombre debajo
+    ctx.fillStyle='rgba(255,255,255,0.9)';
+    ctx.font='bold 10px Raleway,sans-serif';
+    ctx.textAlign='center'; ctx.textBaseline='top';
+    ctx.fillText(t.nombre||'',x,y+r+4);
+
+    // Condición: badge arriba con color
     if(t.condiciones&&t.condiciones.length>0){
       const firstCond=CONDICIONES.find(c=>c.nombre===t.condiciones[0]);
       if(firstCond){
-        const badgeW=Math.min(t.condiciones[0].length*5.5+8,52);
-        ctx.fillStyle=firstCond.color+'cc';
+        const txt=t.condiciones.length>1?`${t.condiciones[0]} +${t.condiciones.length-1}`:t.condiciones[0];
+        const badgeW=Math.min(txt.length*5.5+10,60);
+        ctx.fillStyle=firstCond.color+'ee';
         ctx.beginPath();
         ctx.roundRect(x-badgeW/2,y-r-18,badgeW,14,4);
         ctx.fill();
         ctx.fillStyle='white';
         ctx.font='bold 8px Raleway,sans-serif';
-        ctx.textAlign='center';ctx.textBaseline='middle';
-        ctx.fillText(t.condiciones[0],x,y-r-11);
-        if(t.condiciones.length>1){
-          ctx.fillStyle='rgba(255,255,255,0.6)';
-          ctx.font='7px Raleway,sans-serif';
-          ctx.fillText(`+${t.condiciones.length-1}`,x+badgeW/2-4,y-r-18);
-        }
+        ctx.textAlign='center'; ctx.textBaseline='middle';
+        ctx.fillText(txt,x,y-r-11);
       }
     }
-  });
+  }
 }
 async function inicializarTokens() {
   const campSnap = await getDoc(doc(db,'campanas',CAMPANA_ID));
@@ -2301,7 +2347,7 @@ window.abrirFichaPersonaje=function(p){
       </div>
       ${esPropia?`<div style="position:relative;display:inline-block;">
         <button class="cond-btn-trigger" onclick="toggleCondPopup('ficha-cond-popup-${p.id}')">⚡ ${(p.condiciones||[]).length>0?(p.condiciones||[]).length+' activa'+((p.condiciones||[]).length>1?'s':''):'Agregar condición'}</button>
-        <div class="cond-popup" id="ficha-cond-popup-${p.id}">
+        <div class="cond-popup" id="ficha-cond-popup-${p.id}" style="top:auto;bottom:calc(100% + 4px);left:0;right:auto;">
           <div class="cond-popup-titulo"><span>⚡ Condiciones</span><button onclick="toggleCondPopup('ficha-cond-popup-${p.id}')" style="background:transparent;border:none;color:var(--muted);cursor:pointer;font-size:14px;">✕</button></div>
           <div class="cond-popup-grid">${CONDICIONES.map(c=>{const tieneC=(p.condiciones||[]).includes(c.nombre);return`<button class="cond-pill ${tieneC?'activa':''}" style="color:${tieneC?'white':c.color};border-color:${c.color};background:${tieneC?c.color:'transparent'};" onclick="jugadorToggleCondicion('${p.id}','${c.nombre}',${tieneC})">${c.nombre}</button>`;}).join('')}</div>
           <p style="font-size:10px;color:var(--muted);margin-top:8px;font-style:italic;">Solo el Director puede quitar condiciones.</p>
