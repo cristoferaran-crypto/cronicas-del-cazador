@@ -1,0 +1,977 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Panel Admin | Crónicas del Cazador</title>
+<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700;800&family=Raleway:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link href="https://cdn.jsdelivr.net/npm/remixicon@3.5.0/fonts/remixicon.css" rel="stylesheet">
+<style>
+:root {
+  --negro:    #07070a;
+  --sup1:     #0d1117;
+  --sup2:     #111827;
+  --sup3:     #1a2234;
+  --rojo:     #c0392b;
+  --rojo-v:   #e74c3c;
+  --dorado:   #c9a84c;
+  --dorado-d: #a07830;
+  --verde:    #2ecc71;
+  --azul:     #3498db;
+  --morado:   #9b59b6;
+  --naranja:  #e67e22;
+  --borde:    rgba(255,255,255,0.06);
+  --borde-r:  rgba(192,57,43,0.35);
+  --texto:    #e2ddd6;
+  --muted:    #6e6878;
+  --sec:      #a8a2b0;
+  --mono:     'JetBrains Mono', monospace;
+  --serif:    'Cinzel', serif;
+  --sans:     'Raleway', sans-serif;
+}
+*,*::before,*::after{margin:0;padding:0;box-sizing:border-box;}
+html,body{height:100%;background:var(--negro);color:var(--texto);font-family:var(--sans);}
+
+/* ── ACCESO BLOQUEADO ── */
+#acceso-bloqueado{position:fixed;inset:0;background:var(--negro);z-index:9999;display:flex;align-items:center;justify-content:center;flex-direction:column;gap:16px;}
+#acceso-bloqueado .lock-icon{font-size:48px;color:var(--rojo);}
+#acceso-bloqueado p{font-family:var(--serif);font-size:14px;color:var(--muted);letter-spacing:0.1em;}
+
+/* ── LAYOUT ── */
+.admin-wrap{display:flex;height:100vh;overflow:hidden;}
+
+/* ── SIDEBAR ── */
+.sidebar{width:220px;flex-shrink:0;background:var(--sup1);border-right:1px solid var(--borde);display:flex;flex-direction:column;overflow-y:auto;}
+.sidebar-logo{padding:20px 18px 16px;border-bottom:1px solid var(--borde);display:flex;align-items:center;gap:10px;}
+.sidebar-logo img{height:28px;filter:invert(1) brightness(0.8);}
+.sidebar-badge{font-family:var(--mono);font-size:8px;background:var(--rojo);color:#fff;padding:2px 6px;letter-spacing:0.1em;margin-left:auto;}
+.sidebar-nav{flex:1;padding:12px 0;}
+.nav-section{padding:8px 18px 4px;font-family:var(--mono);font-size:9px;letter-spacing:0.2em;text-transform:uppercase;color:var(--muted);}
+.nav-item{display:flex;align-items:center;gap:10px;padding:9px 18px;cursor:pointer;transition:all 0.15s;color:var(--sec);font-size:12px;font-weight:500;letter-spacing:0.03em;border-left:2px solid transparent;position:relative;}
+.nav-item:hover{color:var(--texto);background:rgba(255,255,255,0.03);}
+.nav-item.active{color:var(--dorado);border-left-color:var(--dorado);background:rgba(201,168,76,0.05);}
+.nav-item i{font-size:15px;width:18px;text-align:center;}
+.nav-badge{margin-left:auto;min-width:16px;height:16px;background:var(--rojo);color:#fff;font-family:var(--mono);font-size:9px;border-radius:8px;display:flex;align-items:center;justify-content:center;padding:0 4px;}
+.sidebar-footer{padding:14px 18px;border-top:1px solid var(--borde);}
+.sidebar-user{font-size:11px;color:var(--muted);margin-bottom:10px;font-family:var(--mono);}
+.btn-logout-admin{width:100%;height:30px;background:transparent;border:1px solid var(--borde-r);color:var(--rojo);font-family:var(--sans);font-size:10px;font-weight:600;letter-spacing:0.1em;text-transform:uppercase;cursor:pointer;transition:all 0.2s;}
+.btn-logout-admin:hover{background:rgba(192,57,43,0.1);}
+
+/* ── MAIN ── */
+.main{flex:1;overflow-y:auto;background:var(--negro);}
+.main::-webkit-scrollbar{width:5px;}
+.main::-webkit-scrollbar-thumb{background:rgba(255,255,255,0.08);}
+
+/* ── TOPBAR ── */
+.topbar{position:sticky;top:0;z-index:100;padding:0 28px;height:52px;background:rgba(7,7,10,0.95);border-bottom:1px solid var(--borde);backdrop-filter:blur(12px);display:flex;align-items:center;gap:12px;}
+.topbar-title{font-family:var(--serif);font-size:14px;font-weight:700;color:var(--texto);letter-spacing:0.08em;}
+.topbar-sub{font-size:11px;color:var(--muted);margin-left:4px;}
+.topbar-right{margin-left:auto;display:flex;align-items:center;gap:10px;}
+.topbar-stat{font-family:var(--mono);font-size:10px;color:var(--muted);}
+.topbar-stat span{color:var(--dorado);}
+
+/* ── SECCIONES ── */
+.seccion{display:none;padding:28px;}
+.seccion.active{display:block;}
+.sec-header{margin-bottom:24px;}
+.sec-titulo{font-family:var(--serif);font-size:20px;font-weight:700;color:var(--texto);margin-bottom:4px;}
+.sec-desc{font-size:12px;color:var(--muted);}
+
+/* ── CARDS STATS ── */
+.stats-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:14px;margin-bottom:28px;}
+.stat-card{background:var(--sup1);border:1px solid var(--borde);padding:18px;position:relative;overflow:hidden;}
+.stat-card::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;}
+.stat-card.azul::before{background:var(--azul);}
+.stat-card.verde::before{background:var(--verde);}
+.stat-card.dorado::before{background:var(--dorado);}
+.stat-card.rojo::before{background:var(--rojo);}
+.stat-card.morado::before{background:var(--morado);}
+.stat-card.naranja::before{background:var(--naranja);}
+.stat-icon{font-size:22px;margin-bottom:10px;}
+.stat-val{font-family:var(--serif);font-size:28px;font-weight:800;color:var(--texto);line-height:1;}
+.stat-lbl{font-family:var(--mono);font-size:9px;letter-spacing:0.15em;text-transform:uppercase;color:var(--muted);margin-top:6px;}
+
+/* ── TABLA ── */
+.admin-table-wrap{background:var(--sup1);border:1px solid var(--borde);overflow:hidden;margin-bottom:20px;}
+.admin-table-header{padding:12px 16px;border-bottom:1px solid var(--borde);display:flex;align-items:center;gap:10px;}
+.admin-table-title{font-family:var(--serif);font-size:12px;font-weight:700;color:var(--texto);letter-spacing:0.06em;}
+.admin-search{margin-left:auto;background:rgba(255,255,255,0.03);border:1px solid var(--borde);color:var(--texto);font-family:var(--sans);font-size:12px;padding:5px 10px;outline:none;width:200px;transition:border-color 0.2s;}
+.admin-search:focus{border-color:rgba(201,168,76,0.4);}
+.admin-table{width:100%;border-collapse:collapse;}
+.admin-table th{padding:9px 14px;text-align:left;font-family:var(--mono);font-size:9px;letter-spacing:0.15em;text-transform:uppercase;color:var(--muted);border-bottom:1px solid var(--borde);background:rgba(255,255,255,0.01);}
+.admin-table td{padding:10px 14px;border-bottom:1px solid rgba(255,255,255,0.03);font-size:12px;color:var(--sec);vertical-align:middle;}
+.admin-table tr:last-child td{border-bottom:none;}
+.admin-table tr:hover td{background:rgba(255,255,255,0.02);color:var(--texto);}
+.admin-table .nombre{color:var(--texto);font-weight:600;}
+.admin-table .email{font-family:var(--mono);font-size:10px;color:var(--muted);}
+
+/* ── BADGES ── */
+.badge{display:inline-flex;align-items:center;padding:2px 8px;font-family:var(--mono);font-size:9px;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;border:1px solid;}
+.badge.jugador{color:#60a5fa;border-color:rgba(96,165,250,0.3);background:rgba(96,165,250,0.08);}
+.badge.director{color:var(--dorado);border-color:rgba(201,168,76,0.3);background:rgba(201,168,76,0.08);}
+.badge.admin{color:var(--rojo);border-color:var(--borde-r);background:rgba(192,57,43,0.08);}
+.badge.activo{color:var(--verde);border-color:rgba(46,204,113,0.3);background:rgba(46,204,113,0.08);}
+.badge.bloqueado{color:var(--rojo);border-color:var(--borde-r);background:rgba(192,57,43,0.08);}
+.badge.pendiente{color:var(--naranja);border-color:rgba(230,126,34,0.3);background:rgba(230,126,34,0.08);}
+
+/* ── BOTONES DE ACCIÓN ── */
+.btn-accion{padding:4px 10px;background:transparent;border:1px solid var(--borde);color:var(--muted);font-family:var(--sans);font-size:10px;font-weight:600;letter-spacing:0.06em;cursor:pointer;transition:all 0.15s;margin-right:4px;}
+.btn-accion:hover{border-color:rgba(255,255,255,0.2);color:var(--texto);}
+.btn-accion.danger{border-color:var(--borde-r);color:var(--rojo);}
+.btn-accion.danger:hover{background:rgba(192,57,43,0.1);}
+.btn-accion.success{border-color:rgba(46,204,113,0.3);color:var(--verde);}
+.btn-accion.success:hover{background:rgba(46,204,113,0.08);}
+.btn-accion.primary{border-color:rgba(201,168,76,0.4);color:var(--dorado);}
+.btn-accion.primary:hover{background:rgba(201,168,76,0.08);}
+
+/* ── FORMULARIOS ADMIN ── */
+.admin-form{background:var(--sup1);border:1px solid var(--borde);padding:20px;margin-bottom:20px;}
+.admin-form-title{font-family:var(--serif);font-size:13px;font-weight:700;color:var(--texto);margin-bottom:16px;padding-bottom:10px;border-bottom:1px solid var(--borde);}
+.form-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
+.form-grid.one{grid-template-columns:1fr;}
+.form-grid.three{grid-template-columns:1fr 1fr 1fr;}
+.admin-label{font-family:var(--mono);font-size:9px;letter-spacing:0.15em;text-transform:uppercase;color:var(--muted);display:block;margin-bottom:6px;}
+.admin-input{width:100%;background:rgba(255,255,255,0.03);border:1px solid var(--borde);color:var(--texto);font-family:var(--sans);font-size:13px;padding:8px 10px;outline:none;transition:border-color 0.2s;}
+.admin-input:focus{border-color:rgba(201,168,76,0.4);}
+.admin-select{width:100%;background:var(--sup2);border:1px solid var(--borde);color:var(--texto);font-family:var(--sans);font-size:13px;padding:8px 10px;outline:none;cursor:pointer;}
+.admin-textarea{width:100%;background:rgba(255,255,255,0.03);border:1px solid var(--borde);color:var(--texto);font-family:var(--sans);font-size:13px;padding:8px 10px;outline:none;resize:vertical;min-height:80px;transition:border-color 0.2s;}
+.admin-textarea:focus{border-color:rgba(201,168,76,0.4);}
+.btn-guardar{height:36px;padding:0 20px;background:var(--dorado);border:none;color:#000;font-family:var(--serif);font-size:11px;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;cursor:pointer;transition:background 0.2s;}
+.btn-guardar:hover{background:var(--dorado-d);}
+.btn-guardar.rojo{background:var(--rojo);color:#fff;}
+.btn-guardar.rojo:hover{background:var(--rojo-v);}
+
+/* ── TAGS (nombres prohibidos) ── */
+.tags-wrap{display:flex;flex-wrap:wrap;gap:8px;padding:12px;background:rgba(255,255,255,0.02);border:1px solid var(--borde);min-height:60px;margin-bottom:12px;}
+.tag-item{display:flex;align-items:center;gap:6px;padding:4px 10px;background:rgba(192,57,43,0.1);border:1px solid var(--borde-r);font-family:var(--mono);font-size:11px;color:var(--rojo);}
+.tag-del{background:transparent;border:none;color:var(--rojo);cursor:pointer;font-size:12px;padding:0;opacity:0.6;transition:opacity 0.15s;}
+.tag-del:hover{opacity:1;}
+
+/* ── ANUNCIO BANNER ── */
+.anuncio-preview{padding:12px 16px;background:rgba(201,168,76,0.08);border:1px solid rgba(201,168,76,0.25);margin-bottom:16px;font-size:13px;color:var(--dorado);display:none;}
+.anuncio-preview.visible{display:block;}
+.toggle-wrap{display:flex;align-items:center;gap:10px;margin-bottom:16px;}
+.toggle{position:relative;width:40px;height:22px;flex-shrink:0;}
+.toggle input{opacity:0;width:0;height:0;}
+.toggle-slider{position:absolute;inset:0;background:rgba(255,255,255,0.1);cursor:pointer;transition:0.3s;border-radius:11px;}
+.toggle-slider::before{content:'';position:absolute;width:16px;height:16px;left:3px;bottom:3px;background:#fff;transition:0.3s;border-radius:50%;}
+.toggle input:checked + .toggle-slider{background:var(--dorado);}
+.toggle input:checked + .toggle-slider::before{transform:translateX(18px);}
+.toggle-label{font-size:12px;color:var(--sec);}
+
+/* ── VERSION EDITOR ── */
+.version-editor-list{display:flex;flex-direction:column;gap:10px;margin-bottom:16px;}
+.version-editor-item{background:var(--sup2);border:1px solid var(--borde);padding:14px;display:flex;align-items:center;gap:12px;}
+.version-editor-num{font-family:var(--serif);font-size:13px;font-weight:700;color:var(--dorado);}
+.version-editor-name{font-size:12px;color:var(--sec);flex:1;}
+.version-editor-fecha{font-family:var(--mono);font-size:10px;color:var(--muted);}
+.version-latest-badge{font-family:var(--mono);font-size:8px;padding:2px 6px;background:var(--rojo);color:#fff;letter-spacing:0.08em;}
+
+/* ── MODAL ADMIN ── */
+.admin-modal{position:fixed;inset:0;z-index:1000;background:rgba(0,0,0,0.8);display:none;align-items:center;justify-content:center;}
+.admin-modal.open{display:flex;}
+.admin-modal-box{background:var(--sup1);border:1px solid var(--borde-r);width:480px;max-width:95vw;max-height:90vh;overflow-y:auto;}
+.admin-modal-header{padding:14px 18px;border-bottom:1px solid var(--borde);display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;background:var(--sup1);z-index:1;}
+.admin-modal-titulo{font-family:var(--serif);font-size:13px;font-weight:700;color:var(--texto);}
+.admin-modal-close{background:transparent;border:none;color:var(--muted);cursor:pointer;font-size:18px;transition:color 0.15s;}
+.admin-modal-close:hover{color:var(--texto);}
+.admin-modal-body{padding:20px;}
+.admin-modal-footer{padding:14px 20px;border-top:1px solid var(--borde);display:flex;gap:8px;justify-content:flex-end;}
+
+/* ── ITEM MUNDO ── */
+.item-mundo-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:14px;margin-bottom:20px;}
+.item-mundo-card{background:var(--sup1);border:1px solid var(--borde);padding:14px;transition:border-color 0.15s;}
+.item-mundo-card:hover{border-color:rgba(201,168,76,0.25);}
+.item-mundo-nombre{font-family:var(--serif);font-size:13px;font-weight:700;color:var(--texto);margin-bottom:4px;}
+.item-mundo-meta{font-family:var(--mono);font-size:9px;color:var(--muted);margin-bottom:10px;}
+.item-mundo-desc{font-size:11px;color:var(--sec);line-height:1.5;margin-bottom:10px;overflow:hidden;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;}
+
+/* ── EMPTY STATE ── */
+.empty-state{padding:40px;text-align:center;color:var(--muted);font-size:12px;font-style:italic;}
+.empty-state i{font-size:28px;display:block;margin-bottom:10px;opacity:0.4;}
+
+/* ── CAMPAÑA CARD ── */
+.campana-row{display:flex;align-items:center;gap:12px;padding:12px 16px;border-bottom:1px solid rgba(255,255,255,0.03);}
+.campana-row:last-child{border-bottom:none;}
+.campana-nombre{font-size:13px;font-weight:600;color:var(--texto);flex:1;}
+.campana-codigo{font-family:var(--mono);font-size:10px;color:var(--muted);}
+
+/* ── LOADING ── */
+.loading{padding:30px;text-align:center;color:var(--muted);font-size:12px;}
+.loading i{animation:spin 1s linear infinite;display:inline-block;margin-right:8px;}
+@keyframes spin{to{transform:rotate(360deg);}}
+
+/* ── TOAST ── */
+.admin-toast{position:fixed;bottom:24px;right:24px;z-index:9999;padding:10px 18px;font-size:12px;font-family:var(--sans);font-weight:600;letter-spacing:0.05em;transform:translateY(20px);opacity:0;transition:all 0.3s;}
+.admin-toast.show{transform:translateY(0);opacity:1;}
+.admin-toast.success{background:var(--verde);color:#000;}
+.admin-toast.error{background:var(--rojo);color:#fff;}
+.admin-toast.info{background:var(--azul);color:#fff;}
+</style>
+</head>
+<body>
+
+<!-- Pantalla de acceso bloqueado -->
+<div id="acceso-bloqueado">
+  <i class="ri-shield-keyhole-line lock-icon"></i>
+  <p>Verificando acceso...</p>
+</div>
+
+<!-- Panel principal (oculto hasta verificar) -->
+<div class="admin-wrap" id="admin-wrap" style="display:none;">
+
+  <!-- SIDEBAR -->
+  <aside class="sidebar">
+    <div class="sidebar-logo">
+      <img src="../../imagenes/logo.png" alt="CDC">
+      <span class="sidebar-badge">ADMIN</span>
+    </div>
+    <nav class="sidebar-nav">
+      <div class="nav-section">General</div>
+      <div class="nav-item active" onclick="irA('estadisticas',this)"><i class="ri-dashboard-line"></i> Estadísticas</div>
+      <div class="nav-item" onclick="irA('anuncios',this)"><i class="ri-megaphone-line"></i> Anuncios</div>
+      <div class="nav-section">Gestión</div>
+      <div class="nav-item" onclick="irA('usuarios',this)"><i class="ri-team-line"></i> Usuarios</div>
+      <div class="nav-item" onclick="irA('directores',this)"><i class="ri-medal-line"></i> Directores <span class="nav-badge" id="badge-directores" style="display:none;">0</span></div>
+      <div class="nav-item" onclick="irA('campanas',this)"><i class="ri-map-pin-line"></i> Campañas</div>
+      <div class="nav-section">Contenido</div>
+      <div class="nav-item" onclick="irA('items',this)"><i class="ri-sword-line"></i> Ítems de Mundo</div>
+      <div class="nav-item" onclick="irA('nombres',this)"><i class="ri-forbidden-line"></i> Nombres Prohibidos</div>
+      <div class="nav-item" onclick="irA('versiones',this)"><i class="ri-code-box-line"></i> Versiones</div>
+      <div class="nav-section">Sistema</div>
+      <div class="nav-item" onclick="irA('bandeja',this)"><i class="ri-inbox-line"></i> Bandeja Global</div>
+    </nav>
+    <div class="sidebar-footer">
+      <div class="sidebar-user" id="sidebar-user">admin@playcdc.com</div>
+      <button class="btn-logout-admin" id="btn-logout"><i class="ri-logout-box-line"></i> Cerrar Sesión</button>
+    </div>
+  </aside>
+
+  <!-- MAIN -->
+  <main class="main">
+    <div class="topbar">
+      <span class="topbar-title" id="topbar-title">Estadísticas</span>
+      <span class="topbar-sub" id="topbar-sub">Vista general del sistema</span>
+      <div class="topbar-right">
+        <span class="topbar-stat">Servidor <span>● Activo</span></span>
+      </div>
+    </div>
+
+    <!-- ══ ESTADÍSTICAS ══ -->
+    <section class="seccion active" id="sec-estadisticas">
+      <div class="sec-header">
+        <h2 class="sec-titulo">Estadísticas Globales</h2>
+        <p class="sec-desc">Estado general de la plataforma en tiempo real.</p>
+      </div>
+      <div class="stats-grid" id="stats-grid">
+        <div class="stat-card azul"><div class="stat-icon">👤</div><div class="stat-val" id="stat-usuarios">—</div><div class="stat-lbl">Usuarios registrados</div></div>
+        <div class="stat-card verde"><div class="stat-icon">⚔️</div><div class="stat-val" id="stat-personajes">—</div><div class="stat-lbl">Personajes creados</div></div>
+        <div class="stat-card dorado"><div class="stat-icon">🗺️</div><div class="stat-val" id="stat-campanas">—</div><div class="stat-lbl">Campañas activas</div></div>
+        <div class="stat-card morado"><div class="stat-icon">🎲</div><div class="stat-val" id="stat-directores">—</div><div class="stat-lbl">Directores aprobados</div></div>
+        <div class="stat-card naranja"><div class="stat-icon">🏪</div><div class="stat-val" id="stat-items">—</div><div class="stat-lbl">Ítems en tienda</div></div>
+        <div class="stat-card rojo"><div class="stat-icon">⏳</div><div class="stat-val" id="stat-pendientes">—</div><div class="stat-lbl">Solicitudes pendientes</div></div>
+      </div>
+    </section>
+
+    <!-- ══ ANUNCIOS ══ -->
+    <section class="seccion" id="sec-anuncios">
+      <div class="sec-header">
+        <h2 class="sec-titulo">Anuncios Globales</h2>
+        <p class="sec-desc">Publica un banner visible en todas las páginas de la plataforma.</p>
+      </div>
+      <div class="admin-form">
+        <div class="admin-form-title">Estado del anuncio actual</div>
+        <div class="toggle-wrap">
+          <label class="toggle"><input type="checkbox" id="anuncio-activo" onchange="toggleAnuncio()"><span class="toggle-slider"></span></label>
+          <span class="toggle-label" id="anuncio-estado-label">Anuncio desactivado</span>
+        </div>
+        <div class="anuncio-preview" id="anuncio-preview">Vista previa del anuncio</div>
+        <div class="form-grid one" style="margin-bottom:12px;">
+          <div><label class="admin-label">Mensaje del anuncio</label><textarea class="admin-textarea" id="anuncio-texto" placeholder="Ej: Mantenimiento programado el sábado a las 22:00 hrs..." rows="2" oninput="actualizarPreviewAnuncio()"></textarea></div>
+        </div>
+        <div class="form-grid" style="margin-bottom:12px;">
+          <div><label class="admin-label">Tipo</label>
+            <select class="admin-select" id="anuncio-tipo" onchange="actualizarPreviewAnuncio()">
+              <option value="info">ℹ️ Información</option>
+              <option value="warning">⚠️ Advertencia</option>
+              <option value="success">✅ Positivo</option>
+              <option value="danger">🔴 Urgente</option>
+            </select>
+          </div>
+          <div><label class="admin-label">Expira (opcional)</label><input class="admin-input" type="datetime-local" id="anuncio-expira"></div>
+        </div>
+        <button class="btn-guardar" onclick="guardarAnuncio()"><i class="ri-save-line"></i> Guardar Anuncio</button>
+      </div>
+    </section>
+
+    <!-- ══ USUARIOS ══ -->
+    <section class="seccion" id="sec-usuarios">
+      <div class="sec-header">
+        <h2 class="sec-titulo">Usuarios</h2>
+        <p class="sec-desc">Gestión de todos los usuarios registrados en la plataforma.</p>
+      </div>
+      <div class="admin-table-wrap">
+        <div class="admin-table-header">
+          <span class="admin-table-title">Todos los usuarios</span>
+          <input class="admin-search" type="text" placeholder="Buscar usuario..." id="search-usuarios" oninput="filtrarUsuarios()">
+        </div>
+        <table class="admin-table" id="tabla-usuarios">
+          <thead><tr><th>Usuario</th><th>Rol</th><th>Estado</th><th>Registro</th><th>Acciones</th></tr></thead>
+          <tbody id="tbody-usuarios"><tr><td colspan="5" class="loading"><i class="ri-loader-4-line"></i> Cargando usuarios...</td></tr></tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- ══ DIRECTORES ══ -->
+    <section class="seccion" id="sec-directores">
+      <div class="sec-header">
+        <h2 class="sec-titulo">Solicitudes de Director</h2>
+        <p class="sec-desc">Aprueba o rechaza solicitudes de jugadores que quieren ser Directores.</p>
+      </div>
+      <div class="admin-table-wrap">
+        <div class="admin-table-header"><span class="admin-table-title">Solicitudes pendientes</span></div>
+        <table class="admin-table">
+          <thead><tr><th>Solicitante</th><th>Mensaje</th><th>Fecha</th><th>Acciones</th></tr></thead>
+          <tbody id="tbody-directores"><tr><td colspan="4" class="loading"><i class="ri-loader-4-line"></i> Cargando solicitudes...</td></tr></tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- ══ CAMPAÑAS ══ -->
+    <section class="seccion" id="sec-campanas">
+      <div class="sec-header">
+        <h2 class="sec-titulo">Campañas</h2>
+        <p class="sec-desc">Vista global de todas las campañas activas en la plataforma.</p>
+      </div>
+      <div class="admin-table-wrap">
+        <div class="admin-table-header">
+          <span class="admin-table-title">Todas las campañas</span>
+          <input class="admin-search" type="text" placeholder="Buscar campaña..." id="search-campanas" oninput="filtrarCampanas()">
+        </div>
+        <table class="admin-table" id="tabla-campanas">
+          <thead><tr><th>Nombre</th><th>Código</th><th>Director</th><th>Estado</th><th>Acciones</th></tr></thead>
+          <tbody id="tbody-campanas"><tr><td colspan="5" class="loading"><i class="ri-loader-4-line"></i> Cargando campañas...</td></tr></tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- ══ ÍTEMS DE MUNDO ══ -->
+    <section class="seccion" id="sec-items">
+      <div class="sec-header">
+        <h2 class="sec-titulo">Ítems de Mundo</h2>
+        <p class="sec-desc">Crea y gestiona ítems globales sin límite. Disponibles para todos los Directores.</p>
+      </div>
+      <div class="admin-form">
+        <div class="admin-form-title" id="item-form-titulo">Nuevo Ítem de Mundo</div>
+        <div class="form-grid" style="margin-bottom:12px;">
+          <div><label class="admin-label">Nombre *</label><input class="admin-input" id="item-nombre" placeholder="Nombre del ítem"></div>
+          <div><label class="admin-label">Categoría *</label><input class="admin-input" id="item-cat" placeholder="Ej: Arma, Consumible, Reliquia..."></div>
+        </div>
+        <div class="form-grid one" style="margin-bottom:12px;">
+          <div><label class="admin-label">Descripción</label><textarea class="admin-textarea" id="item-desc" placeholder="Descripción del ítem..." rows="2"></textarea></div>
+        </div>
+        <div class="form-grid three" style="margin-bottom:12px;">
+          <div><label class="admin-label">Precio (Marcas)</label><input class="admin-input" id="item-precio" type="number" value="0" min="0"></div>
+          <div><label class="admin-label">Calidad</label>
+            <select class="admin-select" id="item-calidad">
+              <option>Común</option><option>Profesional</option><option>Reforzada</option>
+              <option>Especializada</option><option>Obra de Arte</option><option>Única</option>
+            </select>
+          </div>
+          <div><label class="admin-label">Vendedor</label>
+            <select class="admin-select" id="item-vendedor">
+              <option value="bazar">Bazar</option><option value="armeria">Armería</option>
+              <option value="drogueria">Droguería</option><option value="mercado_negro">Mercado Negro</option>
+            </select>
+          </div>
+        </div>
+        <div class="form-grid" style="margin-bottom:12px;">
+          <div><label class="admin-label">Peso (kg)</label><input class="admin-input" id="item-peso" type="number" value="0" min="0" step="0.1"></div>
+          <div><label class="admin-label">Espacios</label><input class="admin-input" id="item-espacios" type="number" value="1" min="0"></div>
+          <div><label class="admin-label">Ranura</label><input class="admin-input" id="item-ranura" value="—"></div>
+          <div><label class="admin-label">Bono</label><input class="admin-input" id="item-bono" value="—"></div>
+        </div>
+        <div class="form-grid" style="margin-bottom:16px;">
+          <div><label class="admin-label">Equipable</label>
+            <select class="admin-select" id="item-equipable"><option value="true">Sí</option><option value="false">No</option></select>
+          </div>
+          <div><label class="admin-label">Quita Condición</label>
+            <select class="admin-select" id="item-quita">
+              <option value="">— Ninguna —</option>
+              <option value="EST001">Sangrado</option><option value="EST002">Quemadura</option>
+              <option value="EST003">Veneno</option><option value="EST004">Parálisis</option>
+              <option value="EST005">Ceguera</option><option value="EST006">Aturdimiento</option>
+              <option value="EST007">Inmovilización</option><option value="EST008">Fatiga</option>
+              <option value="EST009">Terror</option><option value="EST010">Confusión</option>
+              <option value="EST011">Maldición</option><option value="EST012">Agotamiento</option>
+            </select>
+          </div>
+        </div>
+        <div style="display:flex;gap:8px;">
+          <button class="btn-guardar" onclick="guardarItemMundo()"><i class="ri-save-line"></i> Guardar Ítem</button>
+          <button class="btn-accion" id="btn-cancelar-item" style="display:none;" onclick="cancelarEdicionItem()">Cancelar</button>
+        </div>
+      </div>
+      <div class="item-mundo-grid" id="items-mundo-grid">
+        <div class="loading"><i class="ri-loader-4-line"></i> Cargando ítems...</div>
+      </div>
+    </section>
+
+    <!-- ══ NOMBRES PROHIBIDOS ══ -->
+    <section class="seccion" id="sec-nombres">
+      <div class="sec-header">
+        <h2 class="sec-titulo">Nombres Prohibidos</h2>
+        <p class="sec-desc">Lista negra de nombres que no pueden usar los jugadores al crear personajes.</p>
+      </div>
+      <div class="admin-form">
+        <div class="admin-form-title">Agregar nombre prohibido</div>
+        <div style="display:flex;gap:10px;margin-bottom:16px;">
+          <input class="admin-input" id="nuevo-nombre-prohibido" placeholder="Ej: null, admin, badword..." style="flex:1;" onkeydown="if(event.key==='Enter')agregarNombreProhibido()">
+          <button class="btn-guardar" onclick="agregarNombreProhibido()"><i class="ri-add-line"></i> Agregar</button>
+        </div>
+        <div class="admin-form-title">Lista actual</div>
+        <div class="tags-wrap" id="tags-nombres"></div>
+        <button class="btn-guardar" onclick="guardarNombresProhibidos()"><i class="ri-save-line"></i> Guardar cambios</button>
+      </div>
+    </section>
+
+    <!-- ══ VERSIONES ══ -->
+    <section class="seccion" id="sec-versiones">
+      <div class="sec-header">
+        <h2 class="sec-titulo">Notas de Versión</h2>
+        <p class="sec-desc">Agrega y edita versiones del sistema. Los cambios se reflejan en el index automáticamente.</p>
+      </div>
+      <div class="admin-form">
+        <div class="admin-form-title">Nueva versión</div>
+        <div class="form-grid" style="margin-bottom:12px;">
+          <div><label class="admin-label">Número de versión</label><input class="admin-input" id="ver-numero" placeholder="Ej: 0.6"></div>
+          <div><label class="admin-label">Nombre</label><input class="admin-input" id="ver-nombre" placeholder="Ej: El Gran Torneo"></div>
+          <div><label class="admin-label">Fecha</label><input class="admin-input" id="ver-fecha" placeholder="Ej: Julio 2026"></div>
+        </div>
+        <div id="ver-items-wrap" style="margin-bottom:12px;"></div>
+        <button class="btn-accion" onclick="agregarItemVersion()" style="margin-bottom:16px;"><i class="ri-add-line"></i> Agregar ítem de cambio</button><br>
+        <button class="btn-guardar" onclick="guardarVersion()"><i class="ri-save-line"></i> Publicar Versión</button>
+      </div>
+      <div class="admin-form">
+        <div class="admin-form-title">Historial publicado</div>
+        <div class="version-editor-list" id="version-editor-list">
+          <div class="loading"><i class="ri-loader-4-line"></i> Cargando versiones...</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ══ BANDEJA GLOBAL ══ -->
+    <section class="seccion" id="sec-bandeja">
+      <div class="sec-header">
+        <h2 class="sec-titulo">Gestión de Bandeja</h2>
+        <p class="sec-desc">Envía mensajes masivos, limpia bandejas problemáticas y gestiona notificaciones del sistema.</p>
+      </div>
+      <div class="admin-form">
+        <div class="admin-form-title">Enviar mensaje masivo (Sistema → Todos)</div>
+        <div class="form-grid one" style="margin-bottom:12px;">
+          <div><label class="admin-label">Título</label><input class="admin-input" id="masa-titulo" placeholder="Título del mensaje..."></div>
+        </div>
+        <div class="form-grid one" style="margin-bottom:12px;">
+          <div><label class="admin-label">Mensaje</label><textarea class="admin-textarea" id="masa-texto" placeholder="Mensaje para todos los usuarios..." rows="3"></textarea></div>
+        </div>
+        <button class="btn-guardar" onclick="enviarMensajeMasivo()"><i class="ri-send-plane-line"></i> Enviar a todos</button>
+      </div>
+      <div class="admin-form">
+        <div class="admin-form-title">Enviar reset de contraseña</div>
+        <div style="display:flex;gap:10px;">
+          <input class="admin-input" id="reset-email" placeholder="Email del usuario..." style="flex:1;">
+          <button class="btn-guardar" onclick="enviarResetPassword()"><i class="ri-key-line"></i> Enviar reset</button>
+        </div>
+      </div>
+    </section>
+
+  </main>
+</div>
+
+<!-- Modal editar usuario -->
+<div class="admin-modal" id="modal-usuario">
+  <div class="admin-modal-box">
+    <div class="admin-modal-header">
+      <span class="admin-modal-titulo">Gestionar Usuario</span>
+      <button class="admin-modal-close" onclick="cerrarModalUsuario()">✕</button>
+    </div>
+    <div class="admin-modal-body">
+      <p style="font-size:13px;color:var(--sec);margin-bottom:16px;" id="modal-u-email">—</p>
+      <div class="form-grid one" style="margin-bottom:16px;">
+        <div><label class="admin-label">Cambiar rol</label>
+          <select class="admin-select" id="modal-u-rol">
+            <option value="jugador">Jugador</option>
+            <option value="director">Director</option>
+          </select>
+        </div>
+      </div>
+    </div>
+    <div class="admin-modal-footer">
+      <button class="btn-accion success" onclick="guardarRolUsuario()">Guardar rol</button>
+      <button class="btn-accion danger" onclick="bloquearUsuario()">Bloquear globalmente</button>
+      <button class="btn-accion primary" onclick="enviarResetDesdeModal()">Reset contraseña</button>
+    </div>
+  </div>
+</div>
+
+<!-- Toast -->
+<div class="admin-toast" id="admin-toast"></div>
+
+<script type="module">
+import { auth, db } from '../../js/firebase-config.js';
+import { onAuthStateChanged, signOut, sendPasswordResetEmail } from 'https://www.gstatic.com/firebasejs/9.22.0/firebase-auth.js';
+import {
+  collection, doc, getDoc, getDocs, setDoc, addDoc, updateDoc, deleteDoc,
+  query, where, orderBy, onSnapshot, serverTimestamp, arrayUnion
+} from 'https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore.js';
+
+const ADMIN_UID = 'a084j4Z7LvWHKHgZzbAsTPzKXLV2';
+
+// ── AUTH GUARD ──────────────────────────
+let ME = null;
+onAuthStateChanged(auth, async user => {
+  if (!user || user.uid !== ADMIN_UID) {
+    document.getElementById('acceso-bloqueado').innerHTML =
+      '<i class="ri-shield-keyhole-line lock-icon" style="font-size:48px;color:#c0392b;"></i>' +
+      '<p style="font-family:Cinzel,serif;font-size:14px;color:#6e6878;letter-spacing:0.1em;">Acceso denegado</p>' +
+      '<a href="../../vistas/login.html" style="font-size:11px;color:#c0392b;margin-top:8px;">Volver al inicio</a>';
+    return;
+  }
+  ME = user;
+  document.getElementById('acceso-bloqueado').style.display = 'none';
+  document.getElementById('admin-wrap').style.display = 'flex';
+  document.getElementById('sidebar-user').textContent = user.email;
+  cargarEstadisticas();
+  cargarUsuarios();
+  cargarDirectores();
+  cargarCampanas();
+  cargarItemsMundo();
+  cargarNombresProhibidos();
+  cargarVersiones();
+  cargarAnuncio();
+});
+
+document.getElementById('btn-logout').addEventListener('click', () => {
+  signOut(auth).then(() => window.location.href = '../../vistas/login.html');
+});
+
+// ── NAVEGACIÓN ──────────────────────────
+window.irA = function(sec, el) {
+  document.querySelectorAll('.seccion').forEach(s => s.classList.remove('active'));
+  document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+  document.getElementById('sec-' + sec).classList.add('active');
+  el.classList.add('active');
+  const titles = {
+    estadisticas:'Estadísticas','sub-estadisticas':'Vista general del sistema',
+    anuncios:'Anuncios Globales',
+    usuarios:'Usuarios',
+    directores:'Solicitudes de Director',
+    campanas:'Campañas',
+    items:'Ítems de Mundo',
+    nombres:'Nombres Prohibidos',
+    versiones:'Notas de Versión',
+    bandeja:'Gestión de Bandeja',
+  };
+  document.getElementById('topbar-title').textContent = titles[sec] || sec;
+};
+
+// ── TOAST ───────────────────────────────
+function toast(msg, tipo='success') {
+  const t = document.getElementById('admin-toast');
+  t.textContent = msg; t.className = 'admin-toast ' + tipo;
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 3000);
+}
+window.toast = toast;
+
+// ── ESTADÍSTICAS ────────────────────────
+async function cargarEstadisticas() {
+  const [usuarios, personajes, campanas, tienda, solicitudes] = await Promise.all([
+    getDocs(collection(db,'usuarios')),
+    getDocs(collection(db,'personajes')),
+    getDocs(query(collection(db,'campanas'),where('activa','==',true))),
+    getDocs(collection(db,'tienda')),
+    getDocs(query(collection(db,'solicitudes_director'),where('estado','==','pendiente'))),
+  ]);
+  const directores = (await getDocs(query(collection(db,'usuarios'),where('rol','==','director')))).size;
+  document.getElementById('stat-usuarios').textContent    = usuarios.size;
+  document.getElementById('stat-personajes').textContent  = personajes.size;
+  document.getElementById('stat-campanas').textContent    = campanas.size;
+  document.getElementById('stat-directores').textContent  = directores;
+  document.getElementById('stat-items').textContent       = tienda.size;
+  document.getElementById('stat-pendientes').textContent  = solicitudes.size;
+  if (solicitudes.size > 0) {
+    const b = document.getElementById('badge-directores');
+    b.textContent = solicitudes.size; b.style.display = 'flex';
+  }
+}
+
+// ── USUARIOS ────────────────────────────
+let _usuarios = [];
+async function cargarUsuarios() {
+  const snap = await getDocs(collection(db,'usuarios'));
+  _usuarios = snap.docs.map(d => ({id:d.id,...d.data()}));
+  renderUsuarios(_usuarios);
+}
+function renderUsuarios(lista) {
+  const tbody = document.getElementById('tbody-usuarios');
+  if (!lista.length) { tbody.innerHTML = '<tr><td colspan="5" class="empty-state">Sin usuarios</td></tr>'; return; }
+  tbody.innerHTML = lista.map(u => `
+    <tr>
+      <td><div class="nombre">${u.nombre||u.displayName||'Sin nombre'}</div><div class="email">${u.email||u.id}</div></td>
+      <td><span class="badge ${u.rol||'jugador'}">${(u.rol||'jugador').toUpperCase()}</span></td>
+      <td><span class="badge ${u.bloqueado?'bloqueado':'activo'}">${u.bloqueado?'BLOQUEADO':'ACTIVO'}</span></td>
+      <td style="font-family:var(--mono);font-size:10px;color:var(--muted);">${u.creadoEn||'—'}</td>
+      <td><button class="btn-accion primary" onclick="abrirModalUsuario('${u.id}')">Gestionar</button></td>
+    </tr>`).join('');
+}
+window.filtrarUsuarios = function() {
+  const q = document.getElementById('search-usuarios').value.toLowerCase();
+  renderUsuarios(_usuarios.filter(u => (u.nombre||'').toLowerCase().includes(q)||(u.email||'').toLowerCase().includes(q)));
+};
+
+let _usuarioActualId = null;
+window.abrirModalUsuario = async function(uid) {
+  _usuarioActualId = uid;
+  const u = _usuarios.find(x => x.id===uid);
+  document.getElementById('modal-u-email').textContent = u?.email || uid;
+  document.getElementById('modal-u-rol').value = u?.rol || 'jugador';
+  document.getElementById('modal-usuario').classList.add('open');
+};
+window.cerrarModalUsuario = () => document.getElementById('modal-usuario').classList.remove('open');
+window.guardarRolUsuario = async function() {
+  const rol = document.getElementById('modal-u-rol').value;
+  await updateDoc(doc(db,'usuarios',_usuarioActualId),{rol});
+  await cargarUsuarios();
+  cerrarModalUsuario();
+  toast('Rol actualizado.');
+};
+window.bloquearUsuario = async function() {
+  if (!confirm('¿Bloquear este usuario globalmente? No podrá acceder a ninguna campaña.')) return;
+  await updateDoc(doc(db,'usuarios',_usuarioActualId),{bloqueado:true});
+  await cargarUsuarios();
+  cerrarModalUsuario();
+  toast('Usuario bloqueado.','error');
+};
+window.enviarResetDesdeModal = async function() {
+  const u = _usuarios.find(x => x.id===_usuarioActualId);
+  if (!u?.email) { toast('Sin email registrado.','error'); return; }
+  await sendPasswordResetEmail(auth, u.email);
+  toast('Email de reset enviado.');
+  cerrarModalUsuario();
+};
+
+// ── DIRECTORES ──────────────────────────
+async function cargarDirectores() {
+  const snap = await getDocs(query(collection(db,'solicitudes_director'),orderBy('fecha','desc')));
+  const tbody = document.getElementById('tbody-directores');
+  if (!snap.size) { tbody.innerHTML = '<tr><td colspan="4" class="empty-state"><i class="ri-checkbox-circle-line"></i>Sin solicitudes pendientes</td></tr>'; return; }
+  tbody.innerHTML = snap.docs.map(d => {
+    const s = d.data();
+    return `<tr>
+      <td><div class="nombre">${s.nombre||'—'}</div><div class="email">${s.email||'—'}</div></td>
+      <td style="font-size:12px;color:var(--sec);max-width:260px;">${s.mensaje||'Sin mensaje'}</td>
+      <td style="font-family:var(--mono);font-size:10px;color:var(--muted);">${s.fecha?.toDate?s.fecha.toDate().toLocaleDateString('es-CL'):''}</td>
+      <td>
+        <button class="btn-accion success" onclick="aprobarDirector('${d.id}','${s.uid}','${s.nombre||''}')">✓ Aprobar</button>
+        <button class="btn-accion danger" onclick="rechazarDirector('${d.id}','${s.uid}')">✕ Rechazar</button>
+      </td>
+    </tr>`;
+  }).join('');
+}
+window.aprobarDirector = async function(solicitudId, uid, nombre) {
+  await updateDoc(doc(db,'usuarios',uid),{rol:'director'});
+  await deleteDoc(doc(db,'solicitudes_director',solicitudId));
+  await addDoc(collection(db,'usuarios',uid,'notificaciones'),{
+    tipo:'sistema',titulo:'¡Solicitud aprobada!',
+    texto:`Tu solicitud para ser Director ha sido aprobada. Ya puedes crear y gestionar campañas.`,
+    leido:false,fecha:serverTimestamp(),deUid:null,deNombre:null,adjunto:null
+  });
+  await cargarDirectores(); await cargarEstadisticas();
+  toast(`${nombre} aprobado como Director.`);
+};
+window.rechazarDirector = async function(solicitudId, uid) {
+  if (!confirm('¿Rechazar esta solicitud?')) return;
+  await deleteDoc(doc(db,'solicitudes_director',solicitudId));
+  await addDoc(collection(db,'usuarios',uid,'notificaciones'),{
+    tipo:'sistema',titulo:'Solicitud de Director rechazada',
+    texto:'Tu solicitud para ser Director no fue aprobada en esta ocasión.',
+    leido:false,fecha:serverTimestamp(),deUid:null,deNombre:null,adjunto:null
+  });
+  await cargarDirectores();
+  toast('Solicitud rechazada.','info');
+};
+
+// ── CAMPAÑAS ────────────────────────────
+let _campanas = [];
+async function cargarCampanas() {
+  const snap = await getDocs(collection(db,'campanas'));
+  _campanas = snap.docs.map(d=>({id:d.id,...d.data()}));
+  renderCampanas(_campanas);
+}
+function renderCampanas(lista) {
+  const tbody = document.getElementById('tbody-campanas');
+  if (!lista.length) { tbody.innerHTML = '<tr><td colspan="5" class="empty-state">Sin campañas</td></tr>'; return; }
+  tbody.innerHTML = lista.map(c => `
+    <tr>
+      <td class="nombre">${c.nombre||'Sin nombre'}</td>
+      <td><code style="font-family:var(--mono);font-size:10px;color:var(--dorado);">${c.codigo||'—'}</code></td>
+      <td style="font-size:11px;color:var(--muted);">${c.directorId||'—'}</td>
+      <td><span class="badge ${c.activa?'activo':'bloqueado'}">${c.activa?'ACTIVA':'INACTIVA'}</span></td>
+      <td>
+        <button class="btn-accion danger" onclick="desactivarCampana('${c.id}')" title="Desactivar campaña">Desactivar</button>
+      </td>
+    </tr>`).join('');
+}
+window.filtrarCampanas = function() {
+  const q = document.getElementById('search-campanas').value.toLowerCase();
+  renderCampanas(_campanas.filter(c=>(c.nombre||'').toLowerCase().includes(q)||(c.codigo||'').toLowerCase().includes(q)));
+};
+window.desactivarCampana = async function(id) {
+  if (!confirm('¿Desactivar esta campaña?')) return;
+  await updateDoc(doc(db,'campanas',id),{activa:false});
+  await cargarCampanas();
+  toast('Campaña desactivada.','info');
+};
+
+// ── ÍTEMS DE MUNDO ──────────────────────
+let _editandoItemId = null;
+async function cargarItemsMundo() {
+  const snap = await getDocs(collection(db,'items_mundo'));
+  const grid = document.getElementById('items-mundo-grid');
+  if (!snap.size) { grid.innerHTML = '<div class="empty-state"><i class="ri-sword-line"></i>Sin ítems de mundo aún</div>'; return; }
+  grid.innerHTML = snap.docs.map(d => {
+    const it = d.data();
+    return `<div class="item-mundo-card">
+      <div class="item-mundo-nombre">${it.nombre}</div>
+      <div class="item-mundo-meta">${it.cat||'—'} · ${it.calidad||'Común'} · ${it.precio||0} Marcas</div>
+      <div class="item-mundo-desc">${it.desc||'Sin descripción'}</div>
+      <button class="btn-accion primary" onclick="editarItemMundo('${d.id}')">Editar</button>
+      <button class="btn-accion danger" onclick="eliminarItemMundo('${d.id}')">Eliminar</button>
+    </div>`;
+  }).join('');
+}
+window.guardarItemMundo = async function() {
+  const nombre = document.getElementById('item-nombre').value.trim();
+  if (!nombre) { toast('El nombre es obligatorio.','error'); return; }
+  const data = {
+    nombre, cat:document.getElementById('item-cat').value.trim(),
+    desc:document.getElementById('item-desc').value.trim(),
+    precio:parseInt(document.getElementById('item-precio').value)||0,
+    calidad:document.getElementById('item-calidad').value,
+    vendedor:document.getElementById('item-vendedor').value,
+    peso:parseFloat(document.getElementById('item-peso').value)||0,
+    espacios:parseInt(document.getElementById('item-espacios').value)||1,
+    ranura:document.getElementById('item-ranura').value,
+    bono:document.getElementById('item-bono').value,
+    equipable:document.getElementById('item-equipable').value==='true',
+    quitaCondicion:document.getElementById('item-quita').value||null,
+    esMundo:true, activo:true,
+  };
+  if (_editandoItemId) {
+    await updateDoc(doc(db,'items_mundo',_editandoItemId),data);
+    toast('Ítem actualizado.');
+  } else {
+    await addDoc(collection(db,'items_mundo'),data);
+    toast('Ítem creado.');
+  }
+  cancelarEdicionItem();
+  cargarItemsMundo();
+};
+window.editarItemMundo = async function(id) {
+  const snap = await getDoc(doc(db,'items_mundo',id));
+  const it = snap.data();
+  _editandoItemId = id;
+  document.getElementById('item-nombre').value   = it.nombre||'';
+  document.getElementById('item-cat').value      = it.cat||'';
+  document.getElementById('item-desc').value     = it.desc||'';
+  document.getElementById('item-precio').value   = it.precio||0;
+  document.getElementById('item-calidad').value  = it.calidad||'Común';
+  document.getElementById('item-vendedor').value = it.vendedor||'bazar';
+  document.getElementById('item-peso').value     = it.peso||0;
+  document.getElementById('item-espacios').value = it.espacios||1;
+  document.getElementById('item-ranura').value   = it.ranura||'—';
+  document.getElementById('item-bono').value     = it.bono||'—';
+  document.getElementById('item-equipable').value= it.equipable?'true':'false';
+  document.getElementById('item-quita').value    = it.quitaCondicion||'';
+  document.getElementById('item-form-titulo').textContent = 'Editando: ' + it.nombre;
+  document.getElementById('btn-cancelar-item').style.display = 'inline-block';
+  document.getElementById('sec-items').scrollTop = 0;
+};
+window.cancelarEdicionItem = function() {
+  _editandoItemId = null;
+  ['item-nombre','item-cat','item-desc'].forEach(id => document.getElementById(id).value='');
+  document.getElementById('item-precio').value='0';
+  document.getElementById('item-espacios').value='1';
+  document.getElementById('item-peso').value='0';
+  document.getElementById('item-ranura').value='—';
+  document.getElementById('item-bono').value='—';
+  document.getElementById('item-quita').value='';
+  document.getElementById('item-form-titulo').textContent='Nuevo Ítem de Mundo';
+  document.getElementById('btn-cancelar-item').style.display='none';
+};
+window.eliminarItemMundo = async function(id) {
+  if (!confirm('¿Eliminar este ítem permanentemente?')) return;
+  await deleteDoc(doc(db,'items_mundo',id));
+  cargarItemsMundo();
+  toast('Ítem eliminado.','error');
+};
+
+// ── NOMBRES PROHIBIDOS ──────────────────
+let _nombresProhibidos = [];
+async function cargarNombresProhibidos() {
+  const snap = await getDoc(doc(db,'config','nombres_prohibidos'));
+  _nombresProhibidos = snap.exists() ? (snap.data().lista||[]) : ['null','undefined','admin','system','director','nan','true','false','none','void','error','test','unknown'];
+  renderTags();
+}
+function renderTags() {
+  const wrap = document.getElementById('tags-nombres');
+  wrap.innerHTML = _nombresProhibidos.map((n,i) =>
+    `<div class="tag-item">${n}<button class="tag-del" onclick="quitarNombre(${i})">✕</button></div>`
+  ).join('') || '<span style="color:var(--muted);font-size:11px;font-style:italic;">Sin nombres prohibidos</span>';
+}
+window.agregarNombreProhibido = function() {
+  const input = document.getElementById('nuevo-nombre-prohibido');
+  const val = input.value.trim().toLowerCase();
+  if (!val) return;
+  if (_nombresProhibidos.includes(val)) { toast('Ya está en la lista.','info'); return; }
+  _nombresProhibidos.push(val);
+  renderTags();
+  input.value = '';
+};
+window.quitarNombre = function(i) {
+  _nombresProhibidos.splice(i,1);
+  renderTags();
+};
+window.guardarNombresProhibidos = async function() {
+  await setDoc(doc(db,'config','nombres_prohibidos'),{lista:_nombresProhibidos});
+  toast('Lista guardada en Firestore.');
+};
+
+// ── VERSIONES ───────────────────────────
+let _versiones = [];
+let _verItems = [];
+async function cargarVersiones() {
+  try {
+    const res = await fetch('../../version.json?v='+Date.now());
+    const data = await res.json();
+    _versiones = data.versiones||[];
+    renderVersionesEditor();
+  } catch(e) { document.getElementById('version-editor-list').innerHTML = '<div class="empty-state">No se pudo cargar version.json</div>'; }
+}
+function renderVersionesEditor() {
+  const list = document.getElementById('version-editor-list');
+  list.innerHTML = _versiones.map((v,i) => `
+    <div class="version-editor-item">
+      <span class="version-editor-num">v${v.version}</span>
+      <span class="version-editor-name">${v.nombre}</span>
+      <span class="version-editor-fecha">${v.fecha}</span>
+      ${v.latest?'<span class="version-latest-badge">LATEST</span>':''}
+      <span style="margin-left:auto;font-family:var(--mono);font-size:10px;color:var(--muted);">${v.items?.length||0} cambios</span>
+    </div>`).join('');
+}
+let _verItemCount = 0;
+window.agregarItemVersion = function() {
+  _verItemCount++;
+  const wrap = document.getElementById('ver-items-wrap');
+  const div = document.createElement('div');
+  div.style.cssText = 'display:grid;grid-template-columns:40px 80px 1fr;gap:8px;margin-bottom:8px;align-items:center;';
+  div.innerHTML = `
+    <input class="admin-input" placeholder="🆕" style="text-align:center;" data-ver-icono="${_verItemCount}">
+    <select class="admin-select" data-ver-tipo="${_verItemCount}">
+      <option value="nuevo">Nuevo</option><option value="mejora">Mejora</option>
+      <option value="fix">Fix</option><option value="sistema">Sistema</option>
+    </select>
+    <input class="admin-input" placeholder="Título — descripción del cambio..." data-ver-texto="${_verItemCount}">`;
+  wrap.appendChild(div);
+};
+window.guardarVersion = async function() {
+  const numero = document.getElementById('ver-numero').value.trim();
+  const nombre = document.getElementById('ver-nombre').value.trim();
+  const fecha  = document.getElementById('ver-fecha').value.trim();
+  if (!numero||!nombre||!fecha) { toast('Completa versión, nombre y fecha.','error'); return; }
+  const items = [];
+  for (let i=1;i<=_verItemCount;i++) {
+    const icono = document.querySelector(`[data-ver-icono="${i}"]`)?.value||'🔧';
+    const tipo  = document.querySelector(`[data-ver-tipo="${i}"]`)?.value||'nuevo';
+    const texto = document.querySelector(`[data-ver-texto="${i}"]`)?.value||'';
+    if (texto.trim()) {
+      const partes = texto.split('—').map(s=>s.trim());
+      items.push({icono,tipo,titulo:partes[0]||texto,texto:partes[1]||''});
+    }
+  }
+  _versiones = _versiones.map(v=>({...v,latest:false}));
+  _versiones.unshift({version:numero,nombre,fecha,latest:true,items});
+  // Guardar en Firestore para que el index pueda leerlo
+  await setDoc(doc(db,'config','versiones'),{data:JSON.stringify({versiones:_versiones})});
+  toast('Versión publicada. Actualiza version.json con el contenido guardado en Firestore.');
+  renderVersionesEditor();
+  document.getElementById('ver-numero').value='';
+  document.getElementById('ver-nombre').value='';
+  document.getElementById('ver-fecha').value='';
+  document.getElementById('ver-items-wrap').innerHTML='';
+  _verItemCount=0;
+};
+
+// ── ANUNCIOS ────────────────────────────
+async function cargarAnuncio() {
+  const snap = await getDoc(doc(db,'config','anuncio'));
+  if (!snap.exists()) return;
+  const a = snap.data();
+  document.getElementById('anuncio-texto').value = a.texto||'';
+  document.getElementById('anuncio-tipo').value  = a.tipo||'info';
+  document.getElementById('anuncio-activo').checked = a.activo||false;
+  document.getElementById('anuncio-estado-label').textContent = a.activo?'Anuncio activo':'Anuncio desactivado';
+  actualizarPreviewAnuncio();
+}
+window.actualizarPreviewAnuncio = function() {
+  const texto = document.getElementById('anuncio-texto').value;
+  const prev  = document.getElementById('anuncio-preview');
+  if (texto) { prev.textContent = texto; prev.classList.add('visible'); }
+  else prev.classList.remove('visible');
+};
+window.toggleAnuncio = function() {
+  const activo = document.getElementById('anuncio-activo').checked;
+  document.getElementById('anuncio-estado-label').textContent = activo?'Anuncio activo':'Anuncio desactivado';
+};
+window.guardarAnuncio = async function() {
+  const texto  = document.getElementById('anuncio-texto').value.trim();
+  const tipo   = document.getElementById('anuncio-tipo').value;
+  const activo = document.getElementById('anuncio-activo').checked;
+  const expira = document.getElementById('anuncio-expira').value;
+  await setDoc(doc(db,'config','anuncio'),{texto,tipo,activo,expira:expira||null,actualizadoEn:serverTimestamp()});
+  toast('Anuncio guardado.');
+};
+
+// ── BANDEJA GLOBAL ──────────────────────
+window.enviarMensajeMasivo = async function() {
+  const titulo = document.getElementById('masa-titulo').value.trim();
+  const texto  = document.getElementById('masa-texto').value.trim();
+  if (!titulo||!texto) { toast('Completa título y mensaje.','error'); return; }
+  if (!confirm(`¿Enviar este mensaje a TODOS los usuarios?`)) return;
+  const snap = await getDocs(collection(db,'usuarios'));
+  let count = 0;
+  await Promise.all(snap.docs.map(async d => {
+    await addDoc(collection(db,'usuarios',d.id,'notificaciones'),{
+      tipo:'sistema',titulo,texto,leido:false,
+      fecha:serverTimestamp(),deUid:null,deNombre:'Sistema CDC',adjunto:null
+    });
+    count++;
+  }));
+  document.getElementById('masa-titulo').value='';
+  document.getElementById('masa-texto').value='';
+  toast(`Mensaje enviado a ${count} usuarios.`);
+};
+
+window.enviarResetPassword = async function() {
+  const email = document.getElementById('reset-email').value.trim();
+  if (!email) { toast('Ingresa un email.','error'); return; }
+  try {
+    await sendPasswordResetEmail(auth, email);
+    toast('Email de reset enviado a ' + email);
+    document.getElementById('reset-email').value='';
+  } catch(e) { toast('Error: ' + e.message,'error'); }
+};
+</script>
+</body>
+</html>
