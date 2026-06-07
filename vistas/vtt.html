@@ -950,6 +950,7 @@ function iniciarPersonajesRealtime() {
       if (u) MI_PERSONAJE = u;
     }
     renderPartyBar();
+    if(Object.keys(tokensData).length) renderTokensCanvas(tokensData);
     if (ES_DIRECTOR && tabActiva==='jugadores') renderTab('jugadores');
   });
 }
@@ -1189,23 +1190,25 @@ async function renderTokensCanvas(tokens) {
     ctx.textAlign='center'; ctx.textBaseline='top';
     ctx.fillText(t.nombre||'',x,y+r+3);
 
-    // Condición: emoji semitransparente sobre el token
-    if(t.condiciones&&t.condiciones.length>0){
-      const firstCond=CONDICIONES.find(c=>c.nombre===t.condiciones[0]);
-      const emoji=COND_EMOJI[t.condiciones[0]]||'⚡';
+    // Condición: leer siempre desde PERSONAJES_CAMPANA (fuente de verdad)
+    const pjCond = PERSONAJES_CAMPANA.find(p=>p.id===t.id);
+    const condiciones = pjCond?.condiciones||[];
+    if(condiciones.length>0){
+      const firstCond=CONDICIONES.find(c=>c.nombre===condiciones[0]);
+      const emoji=COND_EMOJI[condiciones[0]]||'⚡';
       if(firstCond){
         ctx.save();
-        ctx.globalAlpha=0.8;
+        ctx.globalAlpha=0.82;
         ctx.font=`${Math.round(r*1.0)}px serif`;
         ctx.textAlign='center'; ctx.textBaseline='middle';
         ctx.fillText(emoji,x,y);
         ctx.restore();
-        if(t.condiciones.length>1){
+        if(condiciones.length>1){
           ctx.fillStyle=firstCond.color;
           ctx.beginPath(); ctx.arc(x+r-4,y-r+4,6,0,Math.PI*2); ctx.fill();
           ctx.fillStyle='white'; ctx.font='bold 7px sans-serif';
           ctx.textAlign='center'; ctx.textBaseline='middle';
-          ctx.fillText(t.condiciones.length,x+r-4,y-r+4);
+          ctx.fillText(condiciones.length,x+r-4,y-r+4);
         }
       }
     }
