@@ -1795,12 +1795,17 @@ function renderResumen() {
 // ════════════════════════════════════════════════════
 // GUARDAR
 // ════════════════════════════════════════════════════
+const NOMBRES_PROHIBIDOS = ['null','undefined','admin','system','director','nan','true','false','none','void','error','test','unknown'];
+
 function validar() {
   const errors = [];
   if (!S.culture)                          errors.push('Debes elegir una Cultura (Paso 1)');
   const cult = CULTURES.find(c=>c.name===S.culture);
   if (cult?.isLinaje && !S.linaje)         errors.push('Debes elegir un Linaje (Paso 1)');
   if (!S.name?.trim())                     errors.push('El personaje necesita un nombre (Paso 2)');
+  else if (S.name.trim().length < 2)       errors.push('El nombre debe tener al menos 2 caracteres (Paso 2)');
+  else if (S.name.trim().length > 30)      errors.push('El nombre no puede superar los 30 caracteres (Paso 2)');
+  else if (NOMBRES_PROHIBIDOS.includes(S.name.trim().toLowerCase())) errors.push('Ese nombre no está permitido, elige otro (Paso 2)');
   if (!S.player?.trim())                   errors.push('Falta el nombre del jugador (Paso 2)');
   if (!S.age)                              errors.push('Falta la edad del personaje (Paso 2)');
   if (!S.attrEspecial)                     errors.push('Debes elegir un atributo destacado (Paso 4)');
