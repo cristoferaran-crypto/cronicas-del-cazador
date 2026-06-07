@@ -295,6 +295,139 @@
             from { opacity: 0; transform: translateY(20px); }
             to   { opacity: 1; transform: translateY(8px); }
         }
+
+        /* ── MODAL SOLICITUD DIRECTOR ── */
+        .sol-overlay {
+            position: fixed; inset: 0; z-index: 200;
+            background: rgba(0,0,0,0.85);
+            backdrop-filter: blur(6px);
+            display: flex; align-items: center; justify-content: center;
+            padding: 20px;
+            opacity: 0; pointer-events: none;
+            transition: opacity 0.3s;
+        }
+        .sol-overlay.open { opacity: 1; pointer-events: all; }
+        .sol-modal {
+            background: #0d1117;
+            border: 1px solid rgba(192,57,43,0.3);
+            border-top: 2px solid var(--rojo);
+            width: 100%; max-width: 580px;
+            max-height: 90vh; overflow-y: auto;
+        }
+        .sol-modal::-webkit-scrollbar { width: 4px; }
+        .sol-modal::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.1); }
+        .sol-header {
+            padding: 20px 24px 16px;
+            border-bottom: 1px solid rgba(255,255,255,0.06);
+            display: flex; align-items: center; justify-content: space-between;
+        }
+        .sol-titulo {
+            font-family: 'Cinzel', serif;
+            font-size: 15px; font-weight: 700;
+            color: var(--texto); letter-spacing: 0.08em;
+        }
+        .sol-close {
+            background: transparent; border: none;
+            color: var(--muted); cursor: pointer;
+            font-size: 20px; transition: color 0.15s;
+        }
+        .sol-close:hover { color: var(--texto); }
+        .sol-body { padding: 24px; }
+        .sol-intro {
+            font-size: 12px; color: var(--sec);
+            line-height: 1.7; margin-bottom: 24px;
+            padding: 12px 14px;
+            border-left: 2px solid var(--rojo);
+            background: rgba(192,57,43,0.04);
+        }
+        .sol-step {
+            margin-bottom: 20px;
+        }
+        .sol-step-num {
+            font-family: 'Cinzel', serif;
+            font-size: 9px; letter-spacing: 0.2em;
+            color: var(--rojo); text-transform: uppercase;
+            margin-bottom: 6px; display: block;
+        }
+        .sol-label {
+            font-size: 13px; font-weight: 600;
+            color: var(--texto); margin-bottom: 8px;
+            display: block; line-height: 1.4;
+        }
+        .sol-input {
+            width: 100%;
+            background: rgba(255,255,255,0.03);
+            border: 1px solid rgba(255,255,255,0.08);
+            color: var(--texto);
+            font-family: 'Raleway', sans-serif;
+            font-size: 13px; padding: 9px 12px;
+            outline: none; transition: border-color 0.2s;
+        }
+        .sol-input:focus { border-color: rgba(192,57,43,0.4); }
+        .sol-select {
+            width: 100%;
+            background: #111827;
+            border: 1px solid rgba(255,255,255,0.08);
+            color: var(--texto);
+            font-family: 'Raleway', sans-serif;
+            font-size: 13px; padding: 9px 12px;
+            outline: none; cursor: pointer;
+        }
+        .sol-textarea {
+            width: 100%;
+            background: rgba(255,255,255,0.03);
+            border: 1px solid rgba(255,255,255,0.08);
+            color: var(--texto);
+            font-family: 'Raleway', sans-serif;
+            font-size: 13px; padding: 9px 12px;
+            outline: none; resize: vertical;
+            min-height: 90px; transition: border-color 0.2s;
+        }
+        .sol-textarea:focus { border-color: rgba(192,57,43,0.4); }
+        .sol-footer {
+            padding: 16px 24px;
+            border-top: 1px solid rgba(255,255,255,0.06);
+            display: flex; gap: 10px; justify-content: flex-end;
+        }
+        .sol-btn-enviar {
+            height: 40px; padding: 0 28px;
+            background: var(--rojo); border: none;
+            color: white; font-family: 'Cinzel', serif;
+            font-size: 11px; font-weight: 700;
+            letter-spacing: 0.15em; text-transform: uppercase;
+            cursor: pointer; transition: background 0.2s;
+        }
+        .sol-btn-enviar:hover { background: var(--rojo-vivo); }
+        .sol-btn-enviar:disabled { opacity: 0.5; cursor: not-allowed; }
+        .sol-btn-cancel {
+            height: 40px; padding: 0 20px;
+            background: transparent;
+            border: 1px solid rgba(255,255,255,0.1);
+            color: var(--muted); font-family: 'Raleway', sans-serif;
+            font-size: 12px; font-weight: 600;
+            cursor: pointer; transition: all 0.2s;
+        }
+        .sol-btn-cancel:hover { border-color: rgba(255,255,255,0.2); color: var(--texto); }
+
+        /* ── ESTADO PENDIENTE ── */
+        .pendiente-msg {
+            position: absolute; z-index: 10;
+            bottom: 80px; left: 50%;
+            transform: translateX(-50%);
+            background: rgba(7,7,10,0.9);
+            border: 1px solid rgba(230,126,34,0.4);
+            padding: 12px 20px;
+            text-align: center;
+            pointer-events: none;
+            opacity: 0;
+            transition: opacity 0.3s 0.1s;
+        }
+        .panel-director:hover .pendiente-msg { opacity: 1; }
+        .pendiente-msg p {
+            font-size: 11px; color: #e67e22;
+            font-family: 'Cinzel', serif;
+            letter-spacing: 0.06em;
+        }
     </style>
 </head>
 <body>
@@ -342,37 +475,257 @@
         </a>
 
         <!-- DIRECTOR -->
-        <a href="panel-del-director/panel-del-director.html" class="panel panel-director">
+        <div class="panel panel-director" id="panel-director" onclick="entrarDirector()">
             <div class="panel-bg"></div>
             <div class="panel-overlay"></div>
             <div class="panel-content">
-                <p class="panel-eyebrow">Rol</p>
+                <p class="panel-eyebrow" id="dir-eyebrow">Rol</p>
                 <i class="ri-eye-line panel-icono"></i>
                 <h2 class="panel-titulo">Director</h2>
                 <div class="panel-line"></div>
-                <p class="panel-subtitulo">Controla la narrativa, gestiona la campaña y guía a los cazadores.</p>
-                <div class="panel-btn">
+                <p class="panel-subtitulo" id="dir-subtitulo">Controla la narrativa, gestiona la campaña y guía a los cazadores.</p>
+                <div class="panel-btn" id="dir-btn">
                     <i class="ri-arrow-right-line"></i> Entrar
                 </div>
             </div>
-        </a>
+            <!-- Mensaje pendiente -->
+            <div class="pendiente-msg" id="pendiente-msg" style="display:none;">
+                <p>⏳ Solicitud en revisión</p>
+            </div>
+        </div>
+
+        <!-- MODAL SOLICITUD DIRECTOR -->
+        <div class="sol-overlay" id="sol-overlay">
+          <div class="sol-modal">
+            <div class="sol-header">
+              <span class="sol-titulo">✦ Solicitud de Director de Juego</span>
+              <button class="sol-close" onclick="cerrarSolicitud()">✕</button>
+            </div>
+            <div class="sol-body">
+              <div class="sol-intro">
+                Para acceder como Director de Juego necesitas autorización del administrador. Completa este formulario y recibirás una respuesta en tu bandeja de entrada.
+              </div>
+
+              <div class="sol-step">
+                <span class="sol-step-num">Pregunta 1 de 9</span>
+                <label class="sol-label">¿Cuál es tu nombre o apodo en la comunidad?</label>
+                <input class="sol-input" id="sol-1" type="text" maxlength="60" placeholder="Tu nombre o apodo...">
+              </div>
+
+              <div class="sol-step">
+                <span class="sol-step-num">Pregunta 2 de 9</span>
+                <label class="sol-label">¿Cuánto tiempo llevas jugando rol de mesa?</label>
+                <select class="sol-select" id="sol-2">
+                  <option value="">— Selecciona —</option>
+                  <option>Menos de 1 año</option>
+                  <option>1 a 3 años</option>
+                  <option>3 a 5 años</option>
+                  <option>Más de 5 años</option>
+                </select>
+              </div>
+
+              <div class="sol-step">
+                <span class="sol-step-num">Pregunta 3 de 9</span>
+                <label class="sol-label">¿Has dirigido partidas antes?</label>
+                <select class="sol-select" id="sol-3">
+                  <option value="">— Selecciona —</option>
+                  <option>Nunca he dirigido</option>
+                  <option>Algunas veces</option>
+                  <option>Soy director experimentado</option>
+                </select>
+              </div>
+
+              <div class="sol-step">
+                <span class="sol-step-num">Pregunta 4 de 9</span>
+                <label class="sol-label">¿En qué sistemas has dirigido? <span style="font-weight:400;color:var(--muted);">(escribe "Ninguno" si es tu primera vez)</span></label>
+                <input class="sol-input" id="sol-4" type="text" maxlength="120" placeholder="D&D, Pathfinder, Call of Cthulhu...">
+              </div>
+
+              <div class="sol-step">
+                <span class="sol-step-num">Pregunta 5 de 9</span>
+                <label class="sol-label">¿Has jugado CDC antes como jugador?</label>
+                <select class="sol-select" id="sol-5">
+                  <option value="">— Selecciona —</option>
+                  <option>Sí, tengo experiencia</option>
+                  <option>No, pero estoy aprendiendo</option>
+                  <option>Estoy empezando desde cero</option>
+                </select>
+              </div>
+
+              <div class="sol-step">
+                <span class="sol-step-num">Pregunta 6 de 9</span>
+                <label class="sol-label">¿Qué tipo de campaña quieres dirigir?</label>
+                <textarea class="sol-textarea" id="sol-6" maxlength="300" placeholder="Describe el género, tono y duración estimada de tu campaña..."></textarea>
+              </div>
+
+              <div class="sol-step">
+                <span class="sol-step-num">Pregunta 7 de 9 — Más importante</span>
+                <label class="sol-label">¿Por qué quieres ser Director en Crónicas del Cazador?</label>
+                <textarea class="sol-textarea" id="sol-7" maxlength="500" placeholder="Cuéntanos tu motivación..."></textarea>
+              </div>
+
+              <div class="sol-step">
+                <span class="sol-step-num">Pregunta 8 de 9</span>
+                <label class="sol-label">¿Con qué frecuencia planeas hacer sesiones?</label>
+                <select class="sol-select" id="sol-8">
+                  <option value="">— Selecciona —</option>
+                  <option>Semanal</option>
+                  <option>Quincenal</option>
+                  <option>Mensual</option>
+                  <option>Según disponibilidad del grupo</option>
+                </select>
+              </div>
+
+              <div class="sol-step">
+                <span class="sol-step-num">Pregunta 9 de 9 — Opcional</span>
+                <label class="sol-label">¿Algo más que quieras contarnos?</label>
+                <textarea class="sol-textarea" id="sol-9" maxlength="300" placeholder="Cualquier información adicional que consideres relevante..."></textarea>
+              </div>
+            </div>
+            <div class="sol-footer">
+              <button class="sol-btn-cancel" onclick="cerrarSolicitud()">Cancelar</button>
+              <button class="sol-btn-enviar" id="sol-btn-enviar" onclick="enviarSolicitud()">
+                <i class="ri-send-plane-line"></i> Enviar Solicitud
+              </button>
+            </div>
+          </div>
+        </div>
 
     </div>
 
     <script type="module">
         import { app } from "../js/firebase-config.js";
         import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-auth.js";
+        import { getFirestore, doc, getDoc, addDoc, collection, query, where, getDocs, serverTimestamp }
+          from "https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore.js";
 
         const auth = getAuth(app);
+        const db   = getFirestore(app);
+        const ADMIN_UID = 'a084j4Z7LvWHKHgZzbAsTPzKXLV2';
 
-        onAuthStateChanged(auth, (user) => {
-            if (!user) {
-                window.location.href = "login.html";
-            } else {
-                const nombre = user.displayName || user.email.split('@')[0];
-                document.getElementById('nombre-usuario').textContent = nombre;
-            }
+        let ME = null;
+        let ROL_USUARIO = 'jugador';
+
+        onAuthStateChanged(auth, async (user) => {
+            if (!user) { window.location.href = "login.html"; return; }
+            if (user.uid === ADMIN_UID) { window.location.href = "admin/admin.html"; return; }
+            ME = user;
+            const nombre = user.displayName || user.email.split('@')[0];
+            document.getElementById('nombre-usuario').textContent = nombre;
+
+            // Leer rol del usuario
+            const snap = await getDoc(doc(db,'usuarios',user.uid));
+            ROL_USUARIO = snap.exists() ? (snap.data().rol || 'jugador') : 'jugador';
+
+            // Actualizar panel director según rol
+            actualizarPanelDirector();
         });
+
+        async function actualizarPanelDirector() {
+            const eyebrow   = document.getElementById('dir-eyebrow');
+            const subtitulo = document.getElementById('dir-subtitulo');
+            const btn       = document.getElementById('dir-btn');
+            const pendiente = document.getElementById('pendiente-msg');
+
+            if (ROL_USUARIO === 'director') {
+                // Tiene acceso — panel normal
+                eyebrow.textContent   = 'Rol';
+                subtitulo.textContent = 'Controla la narrativa, gestiona la campaña y guía a los cazadores.';
+                btn.innerHTML         = '<i class="ri-arrow-right-line"></i> Entrar';
+                pendiente.style.display = 'none';
+            } else {
+                // Sin acceso — verificar si tiene solicitud pendiente
+                const q = query(collection(db,'solicitudes_director'), where('uid','==',ME.uid));
+                const solicitudes = await getDocs(q);
+                if (!solicitudes.empty) {
+                    // Solicitud pendiente
+                    eyebrow.textContent   = 'Acceso restringido';
+                    subtitulo.textContent = 'Tu solicitud está siendo revisada. Recibirás una notificación con la respuesta.';
+                    btn.innerHTML         = '⏳ Solicitud enviada';
+                    btn.style.background  = 'rgba(230,126,34,0.2)';
+                    btn.style.border      = '1px solid rgba(230,126,34,0.4)';
+                    btn.style.color       = '#e67e22';
+                    btn.style.boxShadow   = 'none';
+                    pendiente.style.display = 'block';
+                } else {
+                    // Sin solicitud — puede postular
+                    eyebrow.textContent   = 'Acceso requerido';
+                    subtitulo.textContent = '¿Quieres dirigir tu propia campaña? Solicita acceso como Director de Juego.';
+                    btn.innerHTML         = '<i class="ri-quill-pen-line"></i> Solicitar Acceso';
+                    pendiente.style.display = 'none';
+                }
+            }
+        }
+
+        window.entrarDirector = function() {
+            if (ROL_USUARIO === 'director') {
+                window.location.href = 'panel-del-director/panel-del-director.html';
+            } else {
+                const q2 = getDocs(query(collection(db,'solicitudes_director'),where('uid','==',ME.uid)));
+                q2.then(snap => {
+                    if (!snap.empty) return; // ya tiene solicitud, no hacer nada
+                    abrirSolicitud();
+                });
+            }
+        };
+
+        window.abrirSolicitud = function() {
+            document.getElementById('sol-overlay').classList.add('open');
+        };
+        window.cerrarSolicitud = function() {
+            document.getElementById('sol-overlay').classList.remove('open');
+        };
+
+        window.enviarSolicitud = async function() {
+            const p1 = document.getElementById('sol-1').value.trim();
+            const p2 = document.getElementById('sol-2').value;
+            const p3 = document.getElementById('sol-3').value;
+            const p4 = document.getElementById('sol-4').value.trim();
+            const p5 = document.getElementById('sol-5').value;
+            const p6 = document.getElementById('sol-6').value.trim();
+            const p7 = document.getElementById('sol-7').value.trim();
+            const p8 = document.getElementById('sol-8').value;
+
+            // Validar campos obligatorios
+            if (!p1||!p2||!p3||!p4||!p5||!p6||!p7||!p8) {
+                alert('Por favor completa todas las preguntas obligatorias (1 a 8).');
+                return;
+            }
+
+            const btn = document.getElementById('sol-btn-enviar');
+            btn.disabled = true;
+            btn.textContent = 'Enviando...';
+
+            try {
+                await addDoc(collection(db,'solicitudes_director'),{
+                    uid:      ME.uid,
+                    email:    ME.email,
+                    nombre:   ME.displayName || ME.email.split('@')[0],
+                    estado:   'pendiente',
+                    fecha:    serverTimestamp(),
+                    respuestas: { p1,p2,p3,p4,p5,p6,p7,
+                      p8, p9: document.getElementById('sol-9').value.trim() }
+                });
+
+                // Notificación al propio usuario
+                await addDoc(collection(db,'usuarios',ME.uid,'notificaciones'),{
+                    tipo:    'sistema',
+                    titulo:  '✦ Solicitud de Director enviada',
+                    texto:   'Tu solicitud fue recibida. El administrador la revisará pronto y recibirás una respuesta en esta bandeja.',
+                    leido:   false,
+                    fecha:   serverTimestamp(),
+                    deUid:   null, deNombre: null, adjunto: null
+                });
+
+                cerrarSolicitud();
+                actualizarPanelDirector();
+
+            } catch(e) {
+                alert('Error al enviar la solicitud. Intenta de nuevo.');
+                btn.disabled = false;
+                btn.innerHTML = '<i class="ri-send-plane-line"></i> Enviar Solicitud';
+            }
+        };
 
         document.getElementById('btn-logout').addEventListener('click', () => {
             signOut(auth).then(() => { window.location.href = "login.html"; });
