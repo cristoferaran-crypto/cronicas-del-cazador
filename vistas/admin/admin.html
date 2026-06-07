@@ -386,6 +386,61 @@ html,body{height:100%;background:var(--negro);color:var(--texto);font-family:var
       <!-- Formulario nuevo/editar ítem -->
       <div class="admin-form">
         <div class="admin-form-title" id="item-form-titulo">Nuevo Ítem</div>
+        <div class="form-grid" style="margin-bottom:12px;">
+          <div><label class="admin-label">Nombre *</label><input class="admin-input" id="item-nombre" placeholder="Nombre del ítem"></div>
+          <div><label class="admin-label">Categoría *</label><input class="admin-input" id="item-cat" placeholder="Ej: Arma, Consumible..."></div>
+        </div>
+        <div class="form-grid one" style="margin-bottom:12px;">
+          <div><label class="admin-label">Descripción</label><textarea class="admin-textarea" id="item-desc" placeholder="Descripción del ítem..." rows="2"></textarea></div>
+        </div>
+        <div class="form-grid three" style="margin-bottom:12px;">
+          <div><label class="admin-label">Precio (Marcas)</label><input class="admin-input" id="item-precio" type="number" value="0" min="0"></div>
+          <div><label class="admin-label">Calidad</label>
+            <select class="admin-select" id="item-calidad">
+              <option>Común</option><option>Profesional</option><option>Reforzada</option>
+              <option>Especializada</option><option>Obra de Arte</option><option>Única</option>
+            </select>
+          </div>
+          <div><label class="admin-label">Tipo</label>
+            <select class="admin-select" id="item-tipo">
+              <option value="objeto">Objeto</option><option value="arma">Arma</option>
+              <option value="armadura">Armadura</option><option value="consumible">Consumible</option>
+            </select>
+          </div>
+        </div>
+        <div class="form-grid" style="margin-bottom:12px;">
+          <div><label class="admin-label">Peso (kg)</label><input class="admin-input" id="item-peso" type="number" value="0" min="0" step="0.1"></div>
+          <div><label class="admin-label">Espacios</label><input class="admin-input" id="item-espacios" type="number" value="1" min="0"></div>
+          <div><label class="admin-label">Ranura</label><input class="admin-input" id="item-ranura" value="—"></div>
+          <div><label class="admin-label">Bono</label><input class="admin-input" id="item-bono" value="—"></div>
+        </div>
+        <div class="form-grid" style="margin-bottom:16px;">
+          <div><label class="admin-label">Equipable</label>
+            <select class="admin-select" id="item-equipable"><option value="true">Sí</option><option value="false">No</option></select>
+          </div>
+          <div><label class="admin-label">Quita Condición</label>
+            <select class="admin-select" id="item-quita">
+              <option value="">— Ninguna —</option>
+              <option value="EST001">Sangrado</option><option value="EST002">Quemadura</option>
+              <option value="EST003">Veneno</option><option value="EST004">Parálisis</option>
+              <option value="EST005">Ceguera</option><option value="EST006">Aturdimiento</option>
+              <option value="EST007">Inmovilización</option><option value="EST008">Fatiga</option>
+              <option value="EST009">Terror</option><option value="EST010">Confusión</option>
+              <option value="EST011">Maldición</option><option value="EST012">Agotamiento</option>
+            </select>
+          </div>
+        </div>
+        <div style="display:flex;gap:8px;">
+          <button class="btn-guardar" onclick="guardarItemMundo()"><i class="ri-save-line"></i> Guardar Ítem</button>
+          <button class="btn-accion" id="btn-cancelar-item" style="display:none;" onclick="cancelarEdicionItem()">Cancelar</button>
+        </div>
+      </div>
+      <!-- Grid de ítems -->
+      <div class="item-mundo-grid" id="items-mundo-grid">
+        <div class="loading"><i class="ri-loader-4-line"></i> Cargando ítems...</div>
+      </div>
+    </section>
+
     <!-- ══ NOMBRES PROHIBIDOS ══ -->
     <section class="seccion" id="sec-nombres">
       <div class="sec-header">
