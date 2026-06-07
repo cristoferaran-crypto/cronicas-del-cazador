@@ -1143,26 +1143,28 @@ async function renderTokensCanvas(tokens) {
   tokensData = tokens||{};
   const canvas = document.getElementById('canvas-tokens');
   const ctx = canvas.getContext('2d');
-  ctx.clearRect(0,0,canvas.width,canvas.height);
 
-  for(const t of Object.values(tokensData)) {
+  // Precargar TODAS las imágenes antes de dibujar
+  const tokenList = Object.values(tokensData);
+  const imgMap = {};
+  await Promise.all(tokenList.map(async t => {
+    const pj = PERSONAJES_CAMPANA.find(p=>p.id===t.id);
+    const url = pj?.avatar || pj?.avatarUrl || null;
+    if(url) imgMap[t.id] = await cargarImagenToken(url);
+  }));
+
+  // Ahora dibujar todo síncronamente
+  ctx.clearRect(0,0,canvas.width,canvas.height);
+  for(const t of tokenList) {
     const x=t.x*canvas.width, y=t.y*canvas.height, r=21;
     const color=t.color||'#c0392b';
-
-    // Buscar avatar del personaje
-    const pj = PERSONAJES_CAMPANA.find(p=>p.id===t.id);
-    const avatarUrl = pj?.avatar || pj?.avatarUrl || null;
-    const img = avatarUrl ? await cargarImagenToken(avatarUrl) : null;
-
-    // Sombra exterior
-    ctx.shadowColor=color; ctx.shadowBlur=10;
-
-    // Fondo token cuadrado redondeado
+    const img = imgMap[t.id]||null;
     const size=r*2;
-    ctx.beginPath();
-    ctx.roundRect(x-r,y-r,size,size,8);
-    ctx.fillStyle=img?'transparent':color+'33';
-    ctx.fill();
+
+    // Sombra + fondo
+    ctx.shadowColor=color; ctx.shadowBlur=8;
+    ctx.beginPath(); ctx.roundRect(x-r,y-r,size,size,8);
+    ctx.fillStyle=img?'rgba(0,0,0,0.2)':color+'44'; ctx.fill();
     ctx.strokeStyle=color; ctx.lineWidth=2.5; ctx.stroke();
     ctx.shadowBlur=0;
 
@@ -1172,40 +1174,38 @@ async function renderTokensCanvas(tokens) {
       ctx.beginPath(); ctx.roundRect(x-r,y-r,size,size,8); ctx.clip();
       ctx.drawImage(img,x-r,y-r,size,size);
       ctx.restore();
-      // Overlay sutil con color del estado
-      ctx.fillStyle=color+'33';
+      ctx.fillStyle=color+'44';
       ctx.beginPath(); ctx.roundRect(x-r,y-r,size,size,8); ctx.fill();
     } else {
       ctx.fillStyle='white';
-      ctx.font=`bold 18px 'Cinzel',serif`;
+      ctx.font=`bold 16px 'Cinzel',serif`;
       ctx.textAlign='center'; ctx.textBaseline='middle';
       ctx.fillText(t.inicial||'?',x,y);
     }
 
     // Nombre debajo
-    ctx.fillStyle='rgba(255,255,255,0.9)';
-    ctx.font='bold 10px Raleway,sans-serif';
+    ctx.fillStyle='rgba(255,255,255,0.85)';
+    ctx.font='bold 9px Raleway,sans-serif';
     ctx.textAlign='center'; ctx.textBaseline='top';
-    ctx.fillText(t.nombre||'',x,y+r+4);
+    ctx.fillText(t.nombre||'',x,y+r+3);
 
-    // Condición: icono emoji semitransparente grande sobre el token
+    // Condición: emoji semitransparente sobre el token
     if(t.condiciones&&t.condiciones.length>0){
       const firstCond=CONDICIONES.find(c=>c.nombre===t.condiciones[0]);
       const emoji=COND_EMOJI[t.condiciones[0]]||'⚡';
       if(firstCond){
         ctx.save();
-        ctx.globalAlpha=0.75;
-        ctx.font=`${r*1.1}px serif`;
+        ctx.globalAlpha=0.8;
+        ctx.font=`${Math.round(r*1.0)}px serif`;
         ctx.textAlign='center'; ctx.textBaseline='middle';
-        ctx.fillText(emoji,x,y-2);
+        ctx.fillText(emoji,x,y);
         ctx.restore();
-        // Contador si hay más de una
         if(t.condiciones.length>1){
           ctx.fillStyle=firstCond.color;
-          ctx.beginPath(); ctx.arc(x+r-5,y-r+5,7,0,Math.PI*2); ctx.fill();
-          ctx.fillStyle='white'; ctx.font='bold 8px sans-serif';
+          ctx.beginPath(); ctx.arc(x+r-4,y-r+4,6,0,Math.PI*2); ctx.fill();
+          ctx.fillStyle='white'; ctx.font='bold 7px sans-serif';
           ctx.textAlign='center'; ctx.textBaseline='middle';
-          ctx.fillText(t.condiciones.length,x+r-5,y-r+5);
+          ctx.fillText(t.condiciones.length,x+r-4,y-r+4);
         }
       }
     }
