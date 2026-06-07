@@ -1962,7 +1962,11 @@ function renderAdminProds(){
   if(!prods.length){list.innerHTML=`<div style="font-size:12px;color:var(--muted);font-style:italic;padding:10px 0;">Sin productos en ${VENDEDORES_LABELS[adminVendedorActivo]}. <button onclick="abrirModalProd(null)" style="background:transparent;border:none;color:var(--dorado);cursor:pointer;font-size:12px;">+ Agregar</button></div>`;return;}
   list.innerHTML=prods.map(p=>{
     const cal=CALIDADES[p.calidad||'Común']||{color:'#9ca3af'};
-    return`<div class="prod-admin-card"><div style="width:6px;height:32px;background:${cal.color};flex-shrink:0;border-radius:1px;"></div><div class="prod-admin-nombre">${p.nombre}<div style="font-size:10px;color:var(--muted);font-weight:400;">${p.cat||''} · ${p.precio?p.precio.toLocaleString():0} Marcas</div></div><button class="prod-admin-toggle ${p.activo!==false?'activo':'inactivo'}" onclick="toggleProdAdmin('${adminVendedorActivo}','${p.id}')">${p.activo!==false?'ON':'OFF'}</button><button class="prod-admin-edit" onclick="abrirModalProd('${p.id}')"><i class="ri-edit-line"></i></button><button class="prod-admin-del" onclick="eliminarProd('${adminVendedorActivo}','${p.id}')"><i class="ri-delete-bin-line"></i></button></div>`;
+    const esGlobal = p.esGlobal===true;
+    const botonesEdit = esGlobal
+      ? `<span style="font-family:var(--mono);font-size:8px;color:var(--dorado);padding:2px 6px;border:1px solid rgba(201,168,76,0.3);">GLOBAL</span>`
+      : `<button class="prod-admin-edit" onclick="abrirModalProd('${p.id}')"><i class="ri-edit-line"></i></button><button class="prod-admin-del" onclick="eliminarProd('${adminVendedorActivo}','${p.id}')"><i class="ri-delete-bin-line"></i></button>`;
+    return`<div class="prod-admin-card"><div style="width:6px;height:32px;background:${cal.color};flex-shrink:0;border-radius:1px;"></div><div class="prod-admin-nombre">${p.nombre}<div style="font-size:10px;color:var(--muted);font-weight:400;">${p.cat||''} · ${p.precio?p.precio.toLocaleString():0} Marcas</div></div><button class="prod-admin-toggle ${p.activo!==false?'activo':'inactivo'}" onclick="toggleProdAdmin('${adminVendedorActivo}','${p.id}')">${p.activo!==false?'ON':'OFF'}</button>${botonesEdit}</div>`;
   }).join('');
 }
 

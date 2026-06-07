@@ -359,64 +359,33 @@ html,body{height:100%;background:var(--negro);color:var(--texto);font-family:var
     <section class="seccion" id="sec-items">
       <div class="sec-header">
         <h2 class="sec-titulo">Ítems de Mundo</h2>
-        <p class="sec-desc">Crea y gestiona ítems globales sin límite. Disponibles para todos los Directores.</p>
+        <p class="sec-desc">Gestiona todos los ítems de la tienda sin límite. Los marcados como globales son visibles para todos los Directores.</p>
       </div>
+      <!-- Tabs vendedor -->
+      <div style="display:flex;gap:6px;margin-bottom:16px;flex-wrap:wrap;">
+        <button class="btn-accion active" id="itab-bazar" onclick="setItemTab('bazar',this)" style="border-color:rgba(201,168,76,0.4);color:var(--dorado);">🛒 Bazar</button>
+        <button class="btn-accion" id="itab-armero" onclick="setItemTab('armero',this)">⚔️ Armería</button>
+        <button class="btn-accion" id="itab-drogueria" onclick="setItemTab('drogueria',this)">💊 Droguería</button>
+        <button class="btn-accion" id="itab-mercado_negro" onclick="setItemTab('mercado_negro',this)">🕵️ Mercado Negro</button>
+      </div>
+      <!-- Importación masiva -->
+      <div class="admin-form" style="margin-bottom:16px;">
+        <div class="admin-form-title">📥 Importación Masiva desde Excel</div>
+        <p style="font-size:11px;color:var(--muted);margin-bottom:12px;">Usa la misma plantilla Excel del conversor. Los ítems se importan al vendedor seleccionado arriba.</p>
+        <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap;">
+          <input type="file" id="import-excel-admin" accept=".xlsx,.xls" style="display:none;" onchange="importarExcelAdmin(this)">
+          <button class="btn-guardar" onclick="document.getElementById('import-excel-admin').click()"><i class="ri-file-excel-line"></i> Subir Excel</button>
+          <span id="import-excel-status" style="font-size:11px;color:var(--muted);"></span>
+        </div>
+        <div id="import-excel-preview" style="display:none;margin-top:12px;">
+          <div style="font-family:var(--mono);font-size:10px;color:var(--muted);margin-bottom:8px;" id="import-excel-count"></div>
+          <button class="btn-guardar" onclick="confirmarImportAdmin()"><i class="ri-upload-cloud-line"></i> Confirmar importación</button>
+          <button class="btn-accion danger" onclick="cancelarImportAdmin()" style="margin-left:8px;">Cancelar</button>
+        </div>
+      </div>
+      <!-- Formulario nuevo/editar ítem -->
       <div class="admin-form">
-        <div class="admin-form-title" id="item-form-titulo">Nuevo Ítem de Mundo</div>
-        <div class="form-grid" style="margin-bottom:12px;">
-          <div><label class="admin-label">Nombre *</label><input class="admin-input" id="item-nombre" placeholder="Nombre del ítem"></div>
-          <div><label class="admin-label">Categoría *</label><input class="admin-input" id="item-cat" placeholder="Ej: Arma, Consumible, Reliquia..."></div>
-        </div>
-        <div class="form-grid one" style="margin-bottom:12px;">
-          <div><label class="admin-label">Descripción</label><textarea class="admin-textarea" id="item-desc" placeholder="Descripción del ítem..." rows="2"></textarea></div>
-        </div>
-        <div class="form-grid three" style="margin-bottom:12px;">
-          <div><label class="admin-label">Precio (Marcas)</label><input class="admin-input" id="item-precio" type="number" value="0" min="0"></div>
-          <div><label class="admin-label">Calidad</label>
-            <select class="admin-select" id="item-calidad">
-              <option>Común</option><option>Profesional</option><option>Reforzada</option>
-              <option>Especializada</option><option>Obra de Arte</option><option>Única</option>
-            </select>
-          </div>
-          <div><label class="admin-label">Vendedor</label>
-            <select class="admin-select" id="item-vendedor">
-              <option value="bazar">Bazar</option><option value="armeria">Armería</option>
-              <option value="drogueria">Droguería</option><option value="mercado_negro">Mercado Negro</option>
-            </select>
-          </div>
-        </div>
-        <div class="form-grid" style="margin-bottom:12px;">
-          <div><label class="admin-label">Peso (kg)</label><input class="admin-input" id="item-peso" type="number" value="0" min="0" step="0.1"></div>
-          <div><label class="admin-label">Espacios</label><input class="admin-input" id="item-espacios" type="number" value="1" min="0"></div>
-          <div><label class="admin-label">Ranura</label><input class="admin-input" id="item-ranura" value="—"></div>
-          <div><label class="admin-label">Bono</label><input class="admin-input" id="item-bono" value="—"></div>
-        </div>
-        <div class="form-grid" style="margin-bottom:16px;">
-          <div><label class="admin-label">Equipable</label>
-            <select class="admin-select" id="item-equipable"><option value="true">Sí</option><option value="false">No</option></select>
-          </div>
-          <div><label class="admin-label">Quita Condición</label>
-            <select class="admin-select" id="item-quita">
-              <option value="">— Ninguna —</option>
-              <option value="EST001">Sangrado</option><option value="EST002">Quemadura</option>
-              <option value="EST003">Veneno</option><option value="EST004">Parálisis</option>
-              <option value="EST005">Ceguera</option><option value="EST006">Aturdimiento</option>
-              <option value="EST007">Inmovilización</option><option value="EST008">Fatiga</option>
-              <option value="EST009">Terror</option><option value="EST010">Confusión</option>
-              <option value="EST011">Maldición</option><option value="EST012">Agotamiento</option>
-            </select>
-          </div>
-        </div>
-        <div style="display:flex;gap:8px;">
-          <button class="btn-guardar" onclick="guardarItemMundo()"><i class="ri-save-line"></i> Guardar Ítem</button>
-          <button class="btn-accion" id="btn-cancelar-item" style="display:none;" onclick="cancelarEdicionItem()">Cancelar</button>
-        </div>
-      </div>
-      <div class="item-mundo-grid" id="items-mundo-grid">
-        <div class="loading"><i class="ri-loader-4-line"></i> Cargando ítems...</div>
-      </div>
-    </section>
-
+        <div class="admin-form-title" id="item-form-titulo">Nuevo Ítem</div>
     <!-- ══ NOMBRES PROHIBIDOS ══ -->
     <section class="seccion" id="sec-nombres">
       <div class="sec-header">
@@ -586,19 +555,21 @@ window.toast = toast;
 
 // ── ESTADÍSTICAS ────────────────────────
 async function cargarEstadisticas() {
-  const [usuarios, personajes, campanas, tienda, solicitudes] = await Promise.all([
+  const vendedores = ['bazar','armero','drogueria','mercado_negro'];
+  const [usuarios, personajes, campanas, solicitudes, ...tiendaSnaps] = await Promise.all([
     getDocs(collection(db,'usuarios')),
     getDocs(collection(db,'personajes')),
     getDocs(query(collection(db,'campanas'),where('activa','==',true))),
-    getDocs(collection(db,'tienda')),
     getDocs(query(collection(db,'solicitudes_director'),where('estado','==','pendiente'))),
+    ...vendedores.map(v=>getDocs(collection(db,'tienda',v,'productos'))),
   ]);
+  const totalItems = tiendaSnaps.reduce((sum,s)=>sum+s.size,0);
   const directores = (await getDocs(query(collection(db,'usuarios'),where('rol','==','director')))).size;
   document.getElementById('stat-usuarios').textContent    = usuarios.size;
   document.getElementById('stat-personajes').textContent  = personajes.size;
   document.getElementById('stat-campanas').textContent    = campanas.size;
   document.getElementById('stat-directores').textContent  = directores;
-  document.getElementById('stat-items').textContent       = tienda.size;
+  document.getElementById('stat-items').textContent       = totalItems;
   document.getElementById('stat-pendientes').textContent  = solicitudes.size;
   if (solicitudes.size > 0) {
     const b = document.getElementById('badge-directores');
@@ -734,87 +705,188 @@ window.desactivarCampana = async function(id) {
   toast('Campaña desactivada.','info');
 };
 
-// ── ÍTEMS DE MUNDO ──────────────────────
+// ── ÍTEMS DE TIENDA (ADMIN) ─────────────
 let _editandoItemId = null;
+let _itemTabActivo = 'bazar';
+let _itemsCache = {};
+let _importDataAdmin = null;
+
+const VENDEDORES_ADMIN = ['bazar','armero','drogueria','mercado_negro'];
+const VENDEDORES_LABELS_ADMIN = {bazar:'Bazar',armero:'Armería',drogueria:'Droguería',mercado_negro:'Mercado Negro'};
+
 async function cargarItemsMundo() {
-  const snap = await getDocs(collection(db,'items_mundo'));
-  const grid = document.getElementById('items-mundo-grid');
-  if (!snap.size) { grid.innerHTML = '<div class="empty-state"><i class="ri-sword-line"></i>Sin ítems de mundo aún</div>'; return; }
-  grid.innerHTML = snap.docs.map(d => {
-    const it = d.data();
-    return `<div class="item-mundo-card">
-      <div class="item-mundo-nombre">${it.nombre}</div>
-      <div class="item-mundo-meta">${it.cat||'—'} · ${it.calidad||'Común'} · ${it.precio||0} Marcas</div>
-      <div class="item-mundo-desc">${it.desc||'Sin descripción'}</div>
-      <button class="btn-accion primary" onclick="editarItemMundo('${d.id}')">Editar</button>
-      <button class="btn-accion danger" onclick="eliminarItemMundo('${d.id}')">Eliminar</button>
-    </div>`;
-  }).join('');
+  // Cargar todos los vendedores
+  await Promise.all(VENDEDORES_ADMIN.map(async v => {
+    const snap = await getDocs(collection(db,'tienda',v,'productos'));
+    _itemsCache[v] = snap.docs.map(d=>({id:d.id,...d.data()}));
+  }));
+  renderItemsAdmin();
 }
+
+window.setItemTab = function(v, el) {
+  _itemTabActivo = v;
+  document.querySelectorAll('[id^="itab-"]').forEach(b=>{
+    b.style.borderColor=''; b.style.color=''; b.classList.remove('active');
+  });
+  el.style.borderColor='rgba(201,168,76,0.4)'; el.style.color='var(--dorado)';
+  renderItemsAdmin();
+};
+
+function renderItemsAdmin() {
+  const grid = document.getElementById('items-mundo-grid');
+  const prods = _itemsCache[_itemTabActivo]||[];
+  if (!prods.length) {
+    grid.innerHTML = '<div class="empty-state"><i class="ri-sword-line"></i>Sin ítems en ' + VENDEDORES_LABELS_ADMIN[_itemTabActivo] + '</div>';
+    return;
+  }
+  grid.innerHTML = prods.map(it => `
+    <div class="item-mundo-card">
+      <div class="item-mundo-nombre">${it.nombre} ${it.esGlobal?'<span style="font-size:9px;color:var(--dorado);font-family:var(--mono);">GLOBAL</span>':''}</div>
+      <div class="item-mundo-meta">${it.cat||'—'} · ${it.calidad||'Común'} · ${(it.precio||0).toLocaleString()} Marcas</div>
+      <div class="item-mundo-desc">${it.desc||'Sin descripción'}</div>
+      <div style="display:flex;gap:6px;align-items:center;margin-top:8px;">
+        <button class="btn-accion primary" onclick="editarItemMundo('${it.id}','${_itemTabActivo}')">Editar</button>
+        <button class="btn-accion danger" onclick="eliminarItemMundo('${it.id}','${_itemTabActivo}')">Eliminar</button>
+        <label style="margin-left:auto;display:flex;align-items:center;gap:6px;cursor:pointer;">
+          <input type="checkbox" ${it.esGlobal?'checked':''} onchange="toggleGlobal('${it.id}','${_itemTabActivo}',this.checked)" style="accent-color:var(--dorado);">
+          <span style="font-size:10px;color:var(--muted);">Global</span>
+        </label>
+      </div>
+    </div>`).join('');
+}
+
+window.toggleGlobal = async function(id, vendedor, esGlobal) {
+  await updateDoc(doc(db,'tienda',vendedor,'productos',id),{esGlobal});
+  const item = (_itemsCache[vendedor]||[]).find(x=>x.id===id);
+  if(item) item.esGlobal = esGlobal;
+  toast(esGlobal ? 'Ítem marcado como global.' : 'Ítem ya no es global.','info');
+};
+
 window.guardarItemMundo = async function() {
   const nombre = document.getElementById('item-nombre').value.trim();
   if (!nombre) { toast('El nombre es obligatorio.','error'); return; }
+  const vendedor = _itemTabActivo;
   const data = {
     nombre, cat:document.getElementById('item-cat').value.trim(),
     desc:document.getElementById('item-desc').value.trim(),
     precio:parseInt(document.getElementById('item-precio').value)||0,
     calidad:document.getElementById('item-calidad').value,
-    vendedor:document.getElementById('item-vendedor').value,
     peso:parseFloat(document.getElementById('item-peso').value)||0,
     espacios:parseInt(document.getElementById('item-espacios').value)||1,
-    ranura:document.getElementById('item-ranura').value,
-    bono:document.getElementById('item-bono').value,
+    ranura:document.getElementById('item-ranura').value||'—',
+    bono:document.getElementById('item-bono').value||'—',
     equipable:document.getElementById('item-equipable').value==='true',
     quitaCondicion:document.getElementById('item-quita').value||null,
-    esMundo:true, activo:true,
+    esGlobal:false, activo:true,
   };
   if (_editandoItemId) {
-    await updateDoc(doc(db,'items_mundo',_editandoItemId),data);
+    await updateDoc(doc(db,'tienda',vendedor,'productos',_editandoItemId),data);
     toast('Ítem actualizado.');
+    const idx = (_itemsCache[vendedor]||[]).findIndex(x=>x.id===_editandoItemId);
+    if(idx>=0) _itemsCache[vendedor][idx] = {...data,id:_editandoItemId};
   } else {
-    await addDoc(collection(db,'items_mundo'),data);
+    const ref = await addDoc(collection(db,'tienda',vendedor,'productos'),data);
     toast('Ítem creado.');
+    if(!_itemsCache[vendedor]) _itemsCache[vendedor]=[];
+    _itemsCache[vendedor].push({...data,id:ref.id});
   }
   cancelarEdicionItem();
-  cargarItemsMundo();
+  renderItemsAdmin();
 };
-window.editarItemMundo = async function(id) {
-  const snap = await getDoc(doc(db,'items_mundo',id));
-  const it = snap.data();
-  _editandoItemId = id;
-  document.getElementById('item-nombre').value   = it.nombre||'';
-  document.getElementById('item-cat').value      = it.cat||'';
-  document.getElementById('item-desc').value     = it.desc||'';
-  document.getElementById('item-precio').value   = it.precio||0;
-  document.getElementById('item-calidad').value  = it.calidad||'Común';
-  document.getElementById('item-vendedor').value = it.vendedor||'bazar';
-  document.getElementById('item-peso').value     = it.peso||0;
-  document.getElementById('item-espacios').value = it.espacios||1;
-  document.getElementById('item-ranura').value   = it.ranura||'—';
-  document.getElementById('item-bono').value     = it.bono||'—';
-  document.getElementById('item-equipable').value= it.equipable?'true':'false';
-  document.getElementById('item-quita').value    = it.quitaCondicion||'';
+
+window.editarItemMundo = async function(id, vendedor) {
+  const it = (_itemsCache[vendedor]||[]).find(x=>x.id===id);
+  if(!it) return;
+  _editandoItemId = id; _itemTabActivo = vendedor;
+  document.getElementById('item-nombre').value    = it.nombre||'';
+  document.getElementById('item-cat').value       = it.cat||'';
+  document.getElementById('item-desc').value      = it.desc||'';
+  document.getElementById('item-precio').value    = it.precio||0;
+  document.getElementById('item-calidad').value   = it.calidad||'Común';
+  document.getElementById('item-peso').value      = it.peso||0;
+  document.getElementById('item-espacios').value  = it.espacios||1;
+  document.getElementById('item-ranura').value    = it.ranura||'—';
+  document.getElementById('item-bono').value      = it.bono||'—';
+  document.getElementById('item-equipable').value = it.equipable?'true':'false';
+  document.getElementById('item-quita').value     = it.quitaCondicion||'';
   document.getElementById('item-form-titulo').textContent = 'Editando: ' + it.nombre;
   document.getElementById('btn-cancelar-item').style.display = 'inline-block';
-  document.getElementById('sec-items').scrollTop = 0;
 };
+
 window.cancelarEdicionItem = function() {
   _editandoItemId = null;
-  ['item-nombre','item-cat','item-desc'].forEach(id => document.getElementById(id).value='');
-  document.getElementById('item-precio').value='0';
+  ['item-nombre','item-cat','item-desc'].forEach(id=>document.getElementById(id).value='');
+  ['item-precio','item-espacios','item-peso'].forEach(id=>document.getElementById(id).value='0');
   document.getElementById('item-espacios').value='1';
-  document.getElementById('item-peso').value='0';
   document.getElementById('item-ranura').value='—';
   document.getElementById('item-bono').value='—';
   document.getElementById('item-quita').value='';
-  document.getElementById('item-form-titulo').textContent='Nuevo Ítem de Mundo';
+  document.getElementById('item-form-titulo').textContent='Nuevo Ítem';
   document.getElementById('btn-cancelar-item').style.display='none';
 };
-window.eliminarItemMundo = async function(id) {
+
+window.eliminarItemMundo = async function(id, vendedor) {
   if (!confirm('¿Eliminar este ítem permanentemente?')) return;
-  await deleteDoc(doc(db,'items_mundo',id));
-  cargarItemsMundo();
+  await deleteDoc(doc(db,'tienda',vendedor,'productos',id));
+  _itemsCache[vendedor] = (_itemsCache[vendedor]||[]).filter(x=>x.id!==id);
+  renderItemsAdmin();
   toast('Ítem eliminado.','error');
+};
+
+// ── IMPORTACIÓN MASIVA EXCEL ─────────────
+window.importarExcelAdmin = async function(input) {
+  const file = input.files[0]; if(!file) return;
+  const status = document.getElementById('import-excel-status');
+  status.textContent = 'Leyendo Excel...';
+  try {
+    const XLSX = await import('https://cdn.sheetjs.com/xlsx-0.20.0/package/xlsx.mjs');
+    const buf = await file.arrayBuffer();
+    const wb = XLSX.read(buf,{type:'array'});
+    const ws = wb.Sheets[wb.SheetNames[0]];
+    const rows = XLSX.utils.sheet_to_json(ws,{defval:''});
+    _importDataAdmin = rows.map(r=>({
+      nombre:     String(r['Nombre']||r['nombre']||'').trim(),
+      cat:        String(r['Categoría']||r['categoria']||r['Categoria']||'').trim(),
+      desc:       String(r['Descripción']||r['descripcion']||'').trim(),
+      precio:     parseInt(r['Precio']||r['precio']||0)||0,
+      calidad:    String(r['Calidad']||r['calidad']||'Común').trim(),
+      peso:       parseFloat(r['Peso']||r['peso']||0)||0,
+      espacios:   parseInt(r['Espacios']||r['espacios']||1)||1,
+      ranura:     String(r['Ranura']||r['ranura']||'—').trim(),
+      bono:       String(r['Bono']||r['bono']||'—').trim(),
+      equipable:  String(r['Equipable']||r['equipable']||'No').toLowerCase()!=='no',
+      contenedor: parseInt(r['Contenedor']||r['contenedor']||0)||0,
+      quitaCondicion: String(r['Quita Condición']||r['quitaCondicion']||'').trim()||null,
+      esGlobal:   false, activo:true,
+    })).filter(r=>r.nombre);
+    document.getElementById('import-excel-count').textContent = `${_importDataAdmin.length} ítems listos para importar al vendedor: ${VENDEDORES_LABELS_ADMIN[_itemTabActivo]}`;
+    document.getElementById('import-excel-preview').style.display='block';
+    status.textContent = `✓ ${_importDataAdmin.length} ítems detectados`;
+  } catch(e) { status.textContent = 'Error al leer el archivo: ' + e.message; console.error(e); }
+  input.value='';
+};
+
+window.confirmarImportAdmin = async function() {
+  if(!_importDataAdmin?.length) return;
+  const vendedor = _itemTabActivo;
+  let ok=0, err=0;
+  for(const item of _importDataAdmin) {
+    try {
+      const ref = await addDoc(collection(db,'tienda',vendedor,'productos'),item);
+      if(!_itemsCache[vendedor]) _itemsCache[vendedor]=[];
+      _itemsCache[vendedor].push({...item,id:ref.id});
+      ok++;
+    } catch(e) { err++; }
+  }
+  cancelarImportAdmin();
+  renderItemsAdmin();
+  toast(`${ok} ítems importados${err?', '+err+' errores':''}.`,err?'error':'success');
+};
+
+window.cancelarImportAdmin = function() {
+  _importDataAdmin = null;
+  document.getElementById('import-excel-preview').style.display='none';
+  document.getElementById('import-excel-status').textContent='';
 };
 
 // ── NOMBRES PROHIBIDOS ──────────────────
