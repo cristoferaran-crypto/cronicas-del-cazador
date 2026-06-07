@@ -652,7 +652,7 @@
   <div class="menu-jugador-wrap" id="menu-jugador-wrap" style="display:none;position:relative;">
     <button class="barra-btn" onclick="toggleMenuJugador()" style="gap:4px;"><i class="ri-menu-3-line"></i> Menú <i class="ri-arrow-up-s-line" style="font-size:11px;"></i></button>
     <div id="menu-jugador-dropdown" class="menu-jugador-dropdown" style="position:absolute;bottom:calc(100% + 8px);right:4px;min-width:185px;">
-      <button onclick="volverPanel()" class="menu-jugador-item danger" style="font-size:13px;padding:12px 16px;"><i class="ri-logout-box-line"></i> Salir de la Campaña</button>
+      <button onclick="confirmarAbandonarCampana()" class="menu-jugador-item danger" style="font-size:13px;padding:12px 16px;"><i class="ri-logout-box-line"></i> Abandonar Campaña</button>
       <button onclick="abrirFicha();toggleMenuJugador();" class="menu-jugador-item" style="font-size:13px;padding:12px 16px;border-top:1px solid var(--borde);"><i class="ri-file-user-line"></i> Mi Ficha</button>
       <button onclick="abrirNotas();toggleMenuJugador();" class="menu-jugador-item" style="font-size:13px;padding:12px 16px;"><i class="ri-sticky-note-line"></i> Mis Notas</button>
       <button onclick="abrirBibliotecaJugador();toggleMenuJugador();" class="menu-jugador-item" style="font-size:13px;padding:12px 16px;border-top:1px solid var(--borde);"><i class="ri-book-open-line"></i> Biblioteca</button>
@@ -813,7 +813,7 @@ import { auth, db } from "../js/firebase-config.js";
 import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-auth.js";
 import {
   doc, getDoc, getDocs, addDoc, updateDoc, deleteDoc, setDoc,
-  collection, query, where, orderBy, onSnapshot, serverTimestamp, limit
+  collection, query, where, orderBy, onSnapshot, serverTimestamp, limit, arrayUnion
 } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore.js";
 
 // ══ CLOUDINARY ══
@@ -1492,6 +1492,8 @@ function renderTabJugadores(){
         </div>
         <!-- Badge estado salud -->
         <div style="padding:3px 8px;border:1px solid ${col.color};background:${col.bg};color:${col.color};font-size:9px;font-weight:700;letter-spacing:0.06em;text-transform:uppercase;flex-shrink:0;">● ${estado.toUpperCase()}</div>
+        <!-- Botón gestión jugador -->
+        <button onclick="abrirGestionJugador('${p.id}','${p.nombre||'Sin nombre'}','${p.userId||''}')" title="Gestionar jugador" style="background:transparent;border:1px solid var(--borde-r);color:var(--rojo);width:26px;height:26px;display:flex;align-items:center;justify-content:center;cursor:pointer;flex-shrink:0;font-size:12px;transition:background 0.15s;" onmouseover="this.style.background='rgba(192,57,43,0.15)'" onmouseout="this.style.background='transparent'"><i class="ri-lock-line"></i></button>
         <!-- Botón condiciones con popup -->
         <div style="position:relative;flex-shrink:0;">
           <button class="cond-btn-trigger" onclick="toggleCondPopup('${popupId}')" title="Gestionar condiciones">
@@ -2806,6 +2808,154 @@ document.addEventListener('click',function(e){
   const wrap=document.getElementById('menu-jugador-wrap');
   if(wrap&&!wrap.contains(e.target)) wrap.classList.remove('open');
 });
+
+// ══ GESTIÓN DE JUGADORES (DJ) ══
+let gestionJugadorId = null;
+let gestionJugadorNombre = null;
+let gestionJugadorUid = null;
+let accionConfirmadaFn = null;
+
+window.abrirGestionJugador = function(personajeId, nombre, userId) {
+  gestionJugadorId = personajeId;
+  gestionJugadorNombre = nombre;
+  gestionJugadorUid = userId;
+  document.getElementById('gj-nombre').textContent = nombre;
+  const modal = document.getElementById('modal-gestion-jugador');
+  modal.style.display = 'flex';
+};
+
+window.cerrarGestionJugador = function() {
+  document.getElementById('modal-gestion-jugador').style.display = 'none';
+};
+
+window.confirmarLiberarPersonaje = function() {
+  cerrarGestionJugador();
+  document.getElementById('conf-titulo').textContent = '🔓 Liberar Personaje';
+  document.getElementById('conf-texto').textContent = `¿Liberar a "${gestionJugadorNombre}" de esta campaña? El jugador conservará el personaje y podrá usarlo en otra campaña.`;
+  accionConfirmadaFn = ejecutarLiberarPersonaje;
+  document.getElementById('modal-confirmar-accion').style.display = 'flex';
+};
+
+window.confirmarBloquearJugador = function() {
+  cerrarGestionJugador();
+  document.getElementById('conf-titulo').textContent = '🚫 Bloquear Jugador';
+  document.getElementById('conf-texto').textContent = `¿Bloquear al jugador de "${gestionJugadorNombre}" de esta campaña? No podrá ingresar con ningún personaje. Esta acción también liberará al personaje.`;
+  accionConfirmadaFn = ejecutarBloquearJugador;
+  document.getElementById('modal-confirmar-accion').style.display = 'flex';
+};
+
+window.cerrarConfirmacion = function() {
+  document.getElementById('modal-confirmar-accion').style.display = 'none';
+  accionConfirmadaFn = null;
+};
+
+window.ejecutarAccionConfirmada = function() {
+  cerrarConfirmacion();
+  if(accionConfirmadaFn) accionConfirmadaFn();
+};
+
+async function ejecutarLiberarPersonaje() {
+  if(!gestionJugadorId) return;
+  try {
+    await updateDoc(doc(db,'personajes',gestionJugadorId),{campanaId:null});
+    await addDoc(collection(db,'campanas',CAMPANA_ID,'mensajes'),{
+      autorId:'system', autorNombre:'Sistema', tipo:'sistema',
+      texto:`🔓 ${gestionJugadorNombre} ha sido liberado de la campaña.`,
+      timestamp:serverTimestamp()
+    });
+    toast(`${gestionJugadorNombre} liberado de la campaña.`,'success');
+  } catch(e) { toast('Error al liberar personaje.','error'); }
+}
+
+async function ejecutarBloquearJugador() {
+  if(!gestionJugadorId || !gestionJugadorUid) return;
+  try {
+    // Liberar personaje
+    await updateDoc(doc(db,'personajes',gestionJugadorId),{campanaId:null});
+    // Bloquear UID en la campaña
+    await updateDoc(doc(db,'campanas',CAMPANA_ID),{bloqueados:arrayUnion(gestionJugadorUid)});
+    await addDoc(collection(db,'campanas',CAMPANA_ID,'mensajes'),{
+      autorId:'system', autorNombre:'Sistema', tipo:'sistema',
+      texto:`🚫 Un jugador ha sido bloqueado de la campaña.`,
+      timestamp:serverTimestamp()
+    });
+    toast('Jugador bloqueado de la campaña.','success');
+  } catch(e) { toast('Error al bloquear jugador.','error'); console.error(e); }
+}
+
+// ══ ABANDONAR CAMPAÑA (JUGADOR) ══
+window.confirmarAbandonarCampana = async function() {
+  if(!MI_PERSONAJE) { volverPanel(); return; }
+  document.getElementById('conf-titulo').textContent = '⚠️ Abandonar Campaña';
+  document.getElementById('conf-texto').textContent = `¿Abandonar esta campaña con "${MI_PERSONAJE.nombre}"? Tu personaje quedará libre para unirse a otra campaña.`;
+  accionConfirmadaFn = ejecutarAbandonarCampana;
+  document.getElementById('modal-confirmar-accion').style.display = 'flex';
+  // Cerrar menú jugador si está abierto
+  document.getElementById('menu-jugador-wrap')?.classList.remove('open');
+};
+
+async function ejecutarAbandonarCampana() {
+  if(!MI_PERSONAJE) { volverPanel(); return; }
+  try {
+    await updateDoc(doc(db,'personajes',MI_PERSONAJE.id),{campanaId:null});
+    toast('Abandonaste la campaña.','info');
+    setTimeout(()=>{ window.location.href='./panel-del-jugador/panel-del-jugador.html'; }, 1200);
+  } catch(e) { toast('Error al abandonar campaña.','error'); }
+}
 </script>
+
+<!-- ══ MODAL GESTIÓN JUGADOR (DJ) ══ -->
+<div id="modal-gestion-jugador" style="display:none;position:fixed;inset:0;z-index:1100;background:rgba(0,0,0,0.75);align-items:center;justify-content:center;">
+  <div style="background:var(--sup2);border:1px solid var(--borde-r);max-width:340px;width:90%;padding:0;">
+    <div style="padding:14px 16px;border-bottom:1px solid var(--borde);display:flex;align-items:center;justify-content:space-between;">
+      <span style="font-family:'Cinzel',serif;font-size:13px;font-weight:700;color:var(--rojo);"><i class="ri-lock-line"></i> Gestionar Jugador</span>
+      <button onclick="cerrarGestionJugador()" style="background:transparent;border:none;color:var(--muted);cursor:pointer;font-size:16px;">✕</button>
+    </div>
+    <div style="padding:16px;">
+      <p style="font-size:12px;color:var(--sec);margin-bottom:4px;">Personaje:</p>
+      <p id="gj-nombre" style="font-family:'Cinzel',serif;font-size:15px;font-weight:700;color:var(--texto);margin-bottom:16px;">—</p>
+      <!-- Opción 1: Liberar -->
+      <div style="border:1px solid var(--borde);padding:12px;margin-bottom:10px;cursor:pointer;transition:background 0.15s;" 
+           onmouseover="this.style.background='rgba(255,255,255,0.03)'" onmouseout="this.style.background='transparent'"
+           onclick="confirmarLiberarPersonaje()">
+        <div style="display:flex;align-items:center;gap:10px;">
+          <span style="font-size:20px;">🔓</span>
+          <div>
+            <div style="font-family:'Cinzel',serif;font-size:12px;font-weight:700;color:var(--texto);margin-bottom:3px;">Liberar Personaje</div>
+            <div style="font-size:11px;color:var(--muted);line-height:1.4;">Desvincula al personaje de esta campaña. El jugador lo conserva y puede usarlo en otra.</div>
+          </div>
+        </div>
+      </div>
+      <!-- Opción 2: Bloquear -->
+      <div style="border:1px solid var(--borde-r);padding:12px;cursor:pointer;transition:background 0.15s;"
+           onmouseover="this.style.background='rgba(192,57,43,0.08)'" onmouseout="this.style.background='transparent'"
+           onclick="confirmarBloquearJugador()">
+        <div style="display:flex;align-items:center;gap:10px;">
+          <span style="font-size:20px;">🚫</span>
+          <div>
+            <div style="font-family:'Cinzel',serif;font-size:12px;font-weight:700;color:var(--rojo);margin-bottom:3px;">Bloquear Jugador</div>
+            <div style="font-size:11px;color:var(--muted);line-height:1.4;">Impide que este jugador ingrese a esta campaña con cualquier personaje.</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══ MODAL CONFIRMACIÓN GENÉRICA ══ -->
+<div id="modal-confirmar-accion" style="display:none;position:fixed;inset:0;z-index:1200;background:rgba(0,0,0,0.8);align-items:center;justify-content:center;">
+  <div style="background:var(--sup2);border:1px solid var(--borde-r);max-width:320px;width:90%;padding:0;">
+    <div style="padding:14px 16px;border-bottom:1px solid var(--borde);">
+      <span id="conf-titulo" style="font-family:'Cinzel',serif;font-size:13px;font-weight:700;color:var(--rojo);">¿Confirmar acción?</span>
+    </div>
+    <div style="padding:16px;">
+      <p id="conf-texto" style="font-size:13px;color:var(--sec);margin-bottom:16px;line-height:1.5;">—</p>
+      <div style="display:flex;gap:8px;">
+        <button onclick="ejecutarAccionConfirmada()" style="flex:1;height:36px;background:var(--rojo);border:none;color:#fff;font-family:'Cinzel',serif;font-size:11px;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;cursor:pointer;">Confirmar</button>
+        <button onclick="cerrarConfirmacion()" style="flex:1;height:36px;background:transparent;border:1px solid var(--borde);color:var(--muted);font-family:'Cinzel',serif;font-size:11px;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;cursor:pointer;">Cancelar</button>
+      </div>
+    </div>
+  </div>
+</div>
 </body>
 </html>
