@@ -530,6 +530,29 @@
     .cond-limpiar{width:100%;margin-top:8px;padding:5px;font-size:10px;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;background:transparent;border:1px solid var(--borde-r);color:var(--muted);cursor:pointer;transition:all 0.15s;}
     .cond-limpiar:hover{color:var(--rojo);border-color:var(--rojo);}
     .cond-token-badge{position:absolute;top:-6px;left:50%;transform:translateX(-50%);font-size:8px;font-weight:800;padding:1px 4px;border-radius:2px;white-space:nowrap;color:white;pointer-events:none;z-index:5;max-width:48px;overflow:hidden;text-overflow:ellipsis;}
+
+    /* BIBLIOTECA JUGADOR */
+    .bib-jugador-overlay{position:fixed;inset:0;z-index:350;pointer-events:none;}
+    .bib-jugador-ventana{position:absolute;background:var(--sup2);border:1px solid var(--borde-d);border-top:2px solid var(--dorado);width:420px;min-height:300px;max-height:80vh;display:flex;flex-direction:column;pointer-events:all;box-shadow:0 8px 32px rgba(0,0,0,0.7);resize:both;overflow:auto;min-width:280px;}
+    .bib-jugador-header{padding:10px 14px;background:rgba(201,168,76,0.06);border-bottom:1px solid var(--borde);display:flex;align-items:center;justify-content:space-between;cursor:move;user-select:none;flex-shrink:0;}
+    .bib-jugador-titulo{font-family:'Cinzel',serif;font-size:13px;font-weight:700;color:var(--dorado);}
+    .bib-jugador-body{flex:1;overflow-y:auto;padding:12px;}
+    .bib-jugador-body::-webkit-scrollbar{width:3px;}
+    .bib-jugador-body::-webkit-scrollbar-thumb{background:var(--borde-d);}
+    .bib-jugador-tabs{display:flex;gap:6px;margin-bottom:12px;}
+    .bib-jugador-tab{flex:1;padding:5px;font-size:10px;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;background:transparent;border:1px solid var(--borde);color:var(--muted);cursor:pointer;transition:all 0.15s;text-align:center;}
+    .bib-jugador-tab.active{border-color:var(--borde-d);color:var(--dorado);background:rgba(201,168,76,0.06);}
+    .bib-asset-card{background:var(--sup3);border:1px solid var(--borde);margin-bottom:8px;overflow:hidden;transition:border-color 0.2s;}
+    .bib-asset-card:hover{border-color:var(--borde-d);}
+    .bib-asset-card-header{padding:8px 10px;display:flex;align-items:center;justify-content:space-between;cursor:pointer;}
+    .bib-asset-card-nombre{font-size:12px;font-weight:600;color:var(--texto);}
+    .bib-asset-card-tipo{font-size:9px;color:var(--muted);text-transform:uppercase;letter-spacing:0.1em;}
+    .bib-asset-card-img{width:100%;max-height:280px;object-fit:contain;background:#000;display:block;}
+    .bib-asset-card-texto{padding:12px;font-size:13px;color:var(--sec);line-height:1.7;white-space:pre-wrap;}
+    .bib-asset-card-content{display:none;}
+    .bib-asset-card.abierta .bib-asset-card-content{display:block;}
+    .bib-asset-card-toggle{font-size:11px;color:var(--dorado);cursor:pointer;background:transparent;border:none;padding:0;}
+    .asset-card-btn.pub{background:#2ecc71;color:var(--negro);}
   </style>
 </head>
 <body>
@@ -632,6 +655,7 @@
       <button onclick="volverPanel()" class="menu-jugador-item danger" style="font-size:13px;padding:12px 16px;"><i class="ri-logout-box-line"></i> Salir de la Campaña</button>
       <button onclick="abrirFicha();toggleMenuJugador();" class="menu-jugador-item" style="font-size:13px;padding:12px 16px;border-top:1px solid var(--borde);"><i class="ri-file-user-line"></i> Mi Ficha</button>
       <button onclick="abrirNotas();toggleMenuJugador();" class="menu-jugador-item" style="font-size:13px;padding:12px 16px;"><i class="ri-sticky-note-line"></i> Mis Notas</button>
+      <button onclick="abrirBibliotecaJugador();toggleMenuJugador();" class="menu-jugador-item" style="font-size:13px;padding:12px 16px;border-top:1px solid var(--borde);"><i class="ri-book-open-line"></i> Biblioteca</button>
     </div>
   </div>
 
@@ -764,6 +788,25 @@
 
 <div id="mapa-notif"></div>
 <div id="toast"></div>
+
+<!-- BIBLIOTECA JUGADOR -->
+<div id="bib-jugador-overlay" class="bib-jugador-overlay" style="display:none;">
+  <div class="bib-jugador-ventana" id="bib-jugador-ventana" style="top:80px;left:340px;">
+    <div class="bib-jugador-header" id="bib-jugador-drag">
+      <span class="bib-jugador-titulo">📚 Biblioteca de Campaña</span>
+      <button onclick="cerrarBibliotecaJugador()" style="background:transparent;border:1px solid var(--borde);color:var(--muted);cursor:pointer;font-size:14px;width:24px;height:24px;display:flex;align-items:center;justify-content:center;">✕</button>
+    </div>
+    <div class="bib-jugador-body">
+      <div class="bib-jugador-tabs">
+        <button class="bib-jugador-tab active" onclick="setBibJugadorTab('imagenes',this)">🖼 Imágenes</button>
+        <button class="bib-jugador-tab" onclick="setBibJugadorTab('textos',this)">📄 Textos</button>
+      </div>
+      <div id="bib-jugador-lista">
+        <div style="text-align:center;padding:20px;color:var(--muted);font-size:12px;font-style:italic;">Cargando...</div>
+      </div>
+    </div>
+  </div>
+</div>
 
 <script type="module">
 import { auth, db } from "../js/firebase-config.js";
@@ -1483,7 +1526,27 @@ function renderTabInventario(){
 }
 
 function renderTabBiblioteca(){
-  return`<div><div class="biblioteca-tabs"><button class="bib-tab ${bibliotecaActiva==='mapas'?'active':''}" onclick="setBibTab('mapas',this)">Mapas</button><button class="bib-tab ${bibliotecaActiva==='npcs'?'active':''}" onclick="setBibTab('npcs',this)">NPCs</button><button class="bib-tab ${bibliotecaActiva==='imagenes'?'active':''}" onclick="setBibTab('imagenes',this)">Imágenes</button></div><div class="upload-zona" onclick="document.getElementById('bib-file-input').click()"><i class="ri-upload-cloud-line"></i><p>Subir imagen a <strong style="color:var(--dorado);">${bibliotecaActiva}</strong></p></div><div class="upload-progreso" id="upload-progreso"><div class="upload-progreso-bar" id="upload-barra"></div></div><input type="file" id="bib-file-input" accept="image/*" style="display:none;" onchange="subirImagen(this)"><div class="biblioteca-grid" id="bib-grid"><div style="grid-column:1/-1;text-align:center;padding:20px;color:var(--muted);font-size:12px;">Cargando...</div></div></div>`;
+  return`<div>
+    <div class="biblioteca-tabs">
+      <button class="bib-tab ${bibliotecaActiva==='mapas'?'active':''}" onclick="setBibTab('mapas',this)">Mapas</button>
+      <button class="bib-tab ${bibliotecaActiva==='npcs'?'active':''}" onclick="setBibTab('npcs',this)">NPCs</button>
+      <button class="bib-tab ${bibliotecaActiva==='imagenes'?'active':''}" onclick="setBibTab('imagenes',this)">Imágenes</button>
+    </div>
+    <div class="upload-zona" onclick="document.getElementById('bib-file-input').click()">
+      <i class="ri-upload-cloud-line"></i>
+      <p>Subir imagen a <strong style="color:var(--dorado);">${bibliotecaActiva}</strong></p>
+    </div>
+    <div class="upload-progreso" id="upload-progreso"><div class="upload-progreso-bar" id="upload-barra"></div></div>
+    <input type="file" id="bib-file-input" accept="image/*" style="display:none;" onchange="subirImagen(this)">
+    <div class="biblioteca-grid" id="bib-grid"><div style="grid-column:1/-1;text-align:center;padding:20px;color:var(--muted);font-size:12px;">Cargando...</div></div>
+    <div style="height:1px;background:var(--borde);margin:14px 0;"></div>
+    <div style="font-family:'Cinzel',serif;font-size:11px;font-weight:700;color:var(--dorado);letter-spacing:0.1em;text-transform:uppercase;margin-bottom:8px;">📄 Publicar Texto / Pista</div>
+    <input class="form-input-vtt" id="pub-texto-titulo" placeholder="Título del documento..." style="margin-bottom:6px;">
+    <textarea class="form-textarea-vtt" id="pub-texto-cuerpo" placeholder="Escribe el contenido, pista o descripción..." style="min-height:80px;margin-bottom:8px;"></textarea>
+    <button class="btn-accion-dj" onclick="publicarTexto()" style="background:rgba(46,204,113,0.15);border:1px solid rgba(46,204,113,0.3);color:var(--verde);">
+      <i class="ri-send-plane-line"></i> Publicar en Biblioteca
+    </button>
+  </div>`;
 }
 window.setBibTab=function(tab,el){bibliotecaActiva=tab;document.querySelectorAll('.bib-tab').forEach(b=>b.classList.remove('active'));el.classList.add('active');cargarAssets();};
 async function cargarAssets(){
@@ -1492,7 +1555,7 @@ async function cargarAssets(){
     const q=query(collection(db,'campanas',CAMPANA_ID,'assets'),where('carpeta','==',bibliotecaActiva),orderBy('creadoEn','desc'));
     const snap=await getDocs(q); const assets=snap.docs.map(d=>({id:d.id,...d.data()}));
     if(!assets.length){grid.innerHTML=`<div style="grid-column:1/-1;text-align:center;padding:20px;color:var(--muted);font-size:12px;font-style:italic;">Sin imágenes todavía.</div>`;return;}
-    grid.innerHTML=assets.map(a=>`<div class="asset-card"><img src="${a.url}" alt="${a.nombre}" loading="lazy"><div class="asset-card-nombre">${a.nombre}</div><div class="asset-card-overlay">${bibliotecaActiva==='mapas'?`<button class="asset-card-btn mapa" onclick="cambiarMapaRT('${a.url}')">🗺️ Usar como mapa</button>`:`<button class="asset-card-btn show" onclick="mostrarImgRT('${a.url}','${a.nombre}')">👁️ Mostrar</button>`}<button class="asset-card-btn del" onclick="eliminarAsset('${a.id}')">🗑️ Eliminar</button></div></div>`).join('');
+    grid.innerHTML=assets.map(a=>`<div class="asset-card"><img src="${a.url}" alt="${a.nombre}" loading="lazy"><div class="asset-card-nombre">${a.nombre}</div><div class="asset-card-overlay">${bibliotecaActiva==='mapas'?`<button class="asset-card-btn mapa" onclick="cambiarMapaRT('${a.url}')">🗺️ Usar como mapa</button>`:`<button class="asset-card-btn show" onclick="mostrarImgRT('${a.url}','${a.nombre}')">👁️ Mostrar</button>`}<button class="asset-card-btn pub" onclick="publicarAsset('${a.id}','${a.nombre}','${a.url}','imagen')">📤 Publicar</button><button class="asset-card-btn del" onclick="eliminarAsset('${a.id}')">🗑️ Eliminar</button></div></div>`).join('');
   }catch(err){grid.innerHTML=`<div style="color:#e74c3c;font-size:12px;grid-column:1/-1;">Error: ${err.message}</div>`;}
 }
 window.subirImagen=async function(input){
@@ -1717,6 +1780,100 @@ window.combatEliminar = async function(idx) {
   combatOrden.splice(idx,1);
   if(combatTurnoIdx>=combatOrden.length) combatTurnoIdx=0;
   await guardarCombat();
+};
+
+// ══ BIBLIOTECA JUGADOR ══
+let bibJugadorTab = 'imagenes';
+
+window.publicarAsset = async function(assetId, nombre, url, tipo) {
+  // Guardar en campanas/{id}/biblioteca_publica
+  await setDoc(doc(db,'campanas',CAMPANA_ID,'biblioteca_publica',assetId), {
+    id: assetId, nombre, url, tipo, 
+    publicadoEn: serverTimestamp()
+  });
+  toast(`📤 "${nombre}" publicado en la biblioteca.`, 'success');
+  // Aviso en chat
+  await addDoc(collection(db,'campanas',CAMPANA_ID,'mensajes'), {
+    autorId: ME.uid,
+    autorNombre: (ME.displayName||'Director')+' [DJ]',
+    tipo: 'sistema',
+    texto: `📚 El Director ha publicado "${nombre}" en la biblioteca de campaña.`,
+    timestamp: serverTimestamp()
+  });
+};
+
+window.publicarTexto = async function() {
+  const titulo = document.getElementById('pub-texto-titulo')?.value.trim();
+  const cuerpo = document.getElementById('pub-texto-cuerpo')?.value.trim();
+  if(!titulo||!cuerpo){toast('Escribe título y contenido.','error');return;}
+  const id = 'txt_'+Date.now();
+  await setDoc(doc(db,'campanas',CAMPANA_ID,'biblioteca_publica',id), {
+    id, nombre:titulo, texto:cuerpo, tipo:'texto',
+    publicadoEn: serverTimestamp()
+  });
+  document.getElementById('pub-texto-titulo').value='';
+  document.getElementById('pub-texto-cuerpo').value='';
+  toast(`📄 "${titulo}" publicado.`,'success');
+  await addDoc(collection(db,'campanas',CAMPANA_ID,'mensajes'), {
+    autorId:ME.uid, autorNombre:(ME.displayName||'Director')+' [DJ]',
+    tipo:'sistema', texto:`📚 El Director ha publicado la nota "${titulo}" en la biblioteca.`,
+    timestamp:serverTimestamp()
+  });
+};
+
+window.abrirBibliotecaJugador = function() {
+  const overlay = document.getElementById('bib-jugador-overlay');
+  overlay.style.display = 'block';
+  cargarBibJugador();
+  hacerArrastrable(
+    document.getElementById('bib-jugador-ventana'),
+    document.getElementById('bib-jugador-drag')
+  );
+};
+
+window.cerrarBibliotecaJugador = function() {
+  document.getElementById('bib-jugador-overlay').style.display = 'none';
+};
+
+window.setBibJugadorTab = function(tab, el) {
+  bibJugadorTab = tab;
+  document.querySelectorAll('.bib-jugador-tab').forEach(b=>b.classList.remove('active'));
+  el.classList.add('active');
+  cargarBibJugador();
+};
+
+async function cargarBibJugador() {
+  const lista = document.getElementById('bib-jugador-lista');
+  if(!lista) return;
+  lista.innerHTML = '<div style="text-align:center;padding:20px;color:var(--muted);font-size:12px;">Cargando...</div>';
+  const snap = await getDocs(collection(db,'campanas',CAMPANA_ID,'biblioteca_publica'));
+  const todos = snap.docs.map(d=>d.data());
+  const filtrados = todos.filter(a=>bibJugadorTab==='textos'?a.tipo==='texto':a.tipo!=='texto');
+  if(!filtrados.length){
+    lista.innerHTML='<div style="text-align:center;padding:24px;color:var(--muted);font-size:12px;font-style:italic;">Sin archivos publicados todavía.</div>';
+    return;
+  }
+  lista.innerHTML = filtrados.map(a=>`
+    <div class="bib-asset-card" id="bib-card-${a.id}">
+      <div class="bib-asset-card-header" onclick="toggleBibCard('${a.id}')">
+        <div>
+          <div class="bib-asset-card-nombre">${a.nombre}</div>
+          <div class="bib-asset-card-tipo">${a.tipo==='texto'?'📄 Texto':'🖼 Imagen'}</div>
+        </div>
+        <button class="bib-asset-card-toggle">▼</button>
+      </div>
+      <div class="bib-asset-card-content">
+        ${a.tipo==='texto'
+          ? `<div class="bib-asset-card-texto">${a.texto||''}</div>`
+          : `<img class="bib-asset-card-img" src="${a.url}" alt="${a.nombre}" loading="lazy">`
+        }
+      </div>
+    </div>`).join('');
+}
+
+window.toggleBibCard = function(id) {
+  const card = document.getElementById('bib-card-'+id);
+  if(card) card.classList.toggle('abierta');
 };
 
 window.guardarNotasDJ=()=>localStorage.setItem(`notas-dj-${CAMPANA_ID}`,document.getElementById('notas-dj-area')?.value||'');
