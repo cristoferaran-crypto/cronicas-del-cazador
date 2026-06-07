@@ -221,6 +221,39 @@
     ::-webkit-scrollbar-thumb{background:rgba(255,51,51,0.25);border-radius:2px;}
     .ficha-main,.equip-panel,.historia-panel,.nen-panel{animation:fadeUp 0.35s ease both;}
     @keyframes fadeUp{from{opacity:0;transform:translateY(8px);}to{opacity:1;transform:translateY(0);}}
+
+    /* ── Nuevo tab Equipo ── */
+    .equip-layout{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
+    .equip-left,.equip-right{display:flex;flex-direction:column;}
+    .eq-slots-grid{display:flex;flex-direction:column;gap:6px;}
+    .eq-slot-row{display:flex;align-items:center;gap:10px;padding:7px 8px;border-radius:5px;background:rgba(255,255,255,0.02);border:1px solid var(--border);}
+    .eq-slot-icon{font-size:1rem;width:22px;text-align:center;flex-shrink:0;}
+    .eq-slot-label{font-family:var(--mono);font-size:0.6rem;letter-spacing:0.15em;text-transform:uppercase;color:var(--muted);width:68px;flex-shrink:0;}
+    .eq-slot-item{font-size:0.82rem;color:var(--text);font-family:var(--cond);}
+    .eq-slot-item.empty{color:var(--muted);font-style:italic;}
+    .eq-slot-bono{font-family:var(--mono);font-size:0.6rem;color:var(--bonus-color);margin-left:auto;flex-shrink:0;}
+    .eq-cont-list{display:flex;flex-direction:column;gap:8px;}
+    .eq-cont-row{padding:8px 10px;border-radius:5px;background:rgba(255,255,255,0.02);border:1px solid var(--border);}
+    .eq-cont-header{display:flex;align-items:center;gap:8px;margin-bottom:4px;}
+    .eq-cont-label{font-family:var(--mono);font-size:0.6rem;letter-spacing:0.12em;text-transform:uppercase;color:var(--muted);}
+    .eq-cont-name{font-size:0.82rem;color:var(--text);}
+    .eq-cont-badge{font-family:var(--mono);font-size:0.58rem;padding:1px 7px;border-radius:99px;margin-left:auto;flex-shrink:0;}
+    .eq-cont-badge.turno{background:rgba(201,168,76,0.1);border:1px solid rgba(201,168,76,0.3);color:var(--gold);}
+    .eq-cont-badge.rapido{background:rgba(74,222,128,0.1);border:1px solid rgba(74,222,128,0.3);color:var(--green);}
+    .eq-cont-empty{font-size:0.75rem;color:var(--muted);font-style:italic;}
+    .eq-marcas-badge{font-family:var(--serif);font-size:0.85rem;color:var(--gold);}
+    .eq-inv-item{display:flex;align-items:center;gap:10px;padding:8px 14px;border-bottom:1px solid var(--border);}
+    .eq-inv-item:last-child{border-bottom:none;}
+    .eq-inv-cant{font-family:var(--mono);font-size:0.68rem;color:var(--muted);min-width:18px;text-align:right;}
+    .eq-inv-name{font-size:0.85rem;color:var(--text);flex:1;}
+    .eq-inv-cal{font-family:var(--mono);font-size:0.6rem;padding:1px 6px;border-radius:3px;border:1px solid;}
+    .eq-inv-desc{font-size:0.72rem;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:160px;}
+    .eq-inv-empty{padding:20px 14px;text-align:center;color:var(--muted);font-size:0.8rem;font-style:italic;}
+    .eq-espacios-bar{display:grid;grid-template-columns:1fr 1fr 1fr;padding:10px 14px;border-top:1px solid var(--border);background:rgba(255,255,255,0.01);}
+    .eq-esp-cell{text-align:center;}
+    .eq-esp-val{font-family:var(--serif);font-size:1rem;font-weight:800;color:var(--gold);display:block;}
+    .eq-esp-lbl{font-family:var(--mono);font-size:0.52rem;letter-spacing:0.15em;text-transform:uppercase;color:var(--muted);display:block;margin-top:2px;}
+    .eq-esp-val.libre{color:var(--green);}
   </style>
 </head>
 <body>
@@ -332,27 +365,34 @@
 
 <div class="tab-panel" id="tab-equipo">
 <div class="equip-panel">
-  <div class="equip-top">
-    <div class="fc">
-      <div class="fc-header"><i class="ri-sword-line" style="color:var(--muted);font-size:0.8rem;"></i><span class="fc-title">Armas</span></div>
-      <div class="fc-body">
-        <table class="inv-table"><thead><tr><th>Nombre</th><th>Tipo</th><th>Daño</th><th>Notas</th><th></th></tr></thead><tbody id="weapons-body"></tbody></table>
-        <button class="add-row-btn" onclick="addWeaponRow()">+ Agregar arma</button>
+  <div class="equip-layout">
+    <!-- Columna izquierda: slots de equipamiento + contenedores -->
+    <div class="equip-left">
+      <div class="fc">
+        <div class="fc-header"><i class="ri-sword-line" style="color:var(--muted);font-size:0.8rem;"></i><span class="fc-title">Equipamiento</span></div>
+        <div class="fc-body" style="padding:10px 14px;">
+          <div class="eq-slots-grid" id="eq-slots-body"></div>
+        </div>
+      </div>
+      <div class="fc" style="margin-top:10px;">
+        <div class="fc-header"><i class="ri-archive-2-line" style="color:var(--muted);font-size:0.8rem;"></i><span class="fc-title">Contenedores</span></div>
+        <div class="fc-body" style="padding:10px 14px;">
+          <div class="eq-cont-list" id="eq-cont-body"></div>
+        </div>
       </div>
     </div>
-    <div class="fc">
-      <div class="fc-header"><i class="ri-first-aid-kit-line" style="color:var(--muted);font-size:0.8rem;"></i><span class="fc-title">Objetos y Consumibles</span></div>
-      <div class="fc-body">
-        <table class="inv-table"><thead><tr><th>Objeto</th><th>Cant.</th><th>Descripción</th><th></th></tr></thead><tbody id="items-body"></tbody></table>
-        <button class="add-row-btn" onclick="addItemRow()">+ Agregar objeto</button>
+    <!-- Columna derecha: inventario + marcas -->
+    <div class="equip-right">
+      <div class="fc">
+        <div class="fc-header" style="justify-content:space-between;">
+          <span style="display:flex;align-items:center;gap:8px;"><i class="ri-shopping-bag-line" style="color:var(--muted);font-size:0.8rem;"></i><span class="fc-title">Inventario</span></span>
+          <span class="eq-marcas-badge" id="eq-marcas">— Marcas</span>
+        </div>
+        <div class="fc-body" style="padding:0;">
+          <div id="eq-inv-list" style="min-height:80px;"></div>
+          <div class="eq-espacios-bar" id="eq-espacios-bar"></div>
+        </div>
       </div>
-    </div>
-  </div>
-  <div class="fc">
-    <div class="fc-header"><i class="ri-archive-2-line" style="color:var(--muted);font-size:0.8rem;"></i><span class="fc-title">Equipo General</span></div>
-    <div class="fc-body">
-      <span class="sec-lbl">Descripción de equipo, ropa, herramientas, etc.</span>
-      <textarea class="styled-textarea" id="equipo-input" style="min-height:80px;" placeholder="Ropa de viaje, cuerda, antorcha..."></textarea>
     </div>
   </div>
 </div>
@@ -579,30 +619,118 @@ function renderPenalties() {
 }
 
 // ── Inventario ──
-window.addWeaponRow = function(data={}) {
-  const tb=document.getElementById('weapons-body'), tr=document.createElement('tr');
-  tr.innerHTML=`<td><input class="inv-input" placeholder="Nombre" value="${data.nombre||''}"></td><td><input class="inv-input" placeholder="Tipo" value="${data.tipo||''}"></td><td><input class="inv-input" placeholder="—" value="${data.dano||''}" style="width:50px;"></td><td><input class="inv-input" placeholder="Notas" value="${data.notas||''}"></td><td><button class="del-btn" onclick="this.closest('tr').remove();saveInventory()">✕</button></td>`;
-  tr.querySelectorAll('input').forEach(i=>i.addEventListener('change',saveInventory));
-  tb.appendChild(tr);
+
+
+function saveInventory() { /* inventario gestionado desde VTT */ }
+
+function loadInventory() { renderEquipo(); }
+
+const RANURAS_EQUIPO_FICHA = [
+  {id:'cabeza',   icono:'🪖', label:'Cabeza'},
+  {id:'torso',    icono:'🦺', label:'Torso'},
+  {id:'brazos',   icono:'💪', label:'Brazos'},
+  {id:'manos',    icono:'🧤', label:'Manos'},
+  {id:'manoDer',  icono:'🗡️',  label:'Mano Der'},
+  {id:'manoIzq',  icono:'🛡️', label:'Mano Izq'},
+  {id:'cinturon', icono:'🔗', label:'Cinturón'},
+  {id:'piernas',  icono:'🦵', label:'Piernas'},
+  {id:'pies',     icono:'👢', label:'Pies'},
+];
+const RANURAS_CONT_FICHA = [
+  {id:'contEspalda', icono:'🎒', label:'Espalda',  accesible:false},
+  {id:'contCintura', icono:'👜', label:'Cintura',   accesible:true},
+  {id:'contHombros', icono:'🫱', label:'Hombros',   accesible:true},
+];
+const CALIDADES_FICHA = {
+  'Común':        {color:'#9ca3af'},
+  'Profesional':  {color:'#4ade80'},
+  'Reforzada':    {color:'#60a5fa'},
+  'Especializada':{color:'#a78bfa'},
+  'Obra de Arte': {color:'#c9a84c'},
+  'Única':        {color:'#ff9f43'},
 };
+function renderEquipo() {
+  const equipado  = p.equipado  || {};
+  const inventario= p.inventario|| [];
+  const dinero    = p.dinero    || 0;
 
-window.addItemRow = function(data={}) {
-  const tb=document.getElementById('items-body'), tr=document.createElement('tr');
-  tr.innerHTML=`<td><input class="inv-input" placeholder="Objeto" value="${data.nombre||''}"></td><td><input class="inv-input" placeholder="1" value="${data.cant||''}" style="width:40px;"></td><td><input class="inv-input" placeholder="Descripción" value="${data.desc||''}"></td><td><button class="del-btn" onclick="this.closest('tr').remove();saveInventory()">✕</button></td>`;
-  tr.querySelectorAll('input').forEach(i=>i.addEventListener('change',saveInventory));
-  tb.appendChild(tr);
-};
+  // Marcas
+  const marcasEl = document.getElementById('eq-marcas');
+  if(marcasEl) marcasEl.textContent = dinero.toLocaleString() + ' Marcas';
 
-function saveInventory() {
-  p.armas   = [...document.querySelectorAll('#weapons-body tr')].map(tr=>{const i=tr.querySelectorAll('input');return{nombre:i[0]?.value,tipo:i[1]?.value,dano:i[2]?.value,notas:i[3]?.value};});
-  p.objetos = [...document.querySelectorAll('#items-body tr')].map(tr=>{const i=tr.querySelectorAll('input');return{nombre:i[0]?.value,cant:i[1]?.value,desc:i[2]?.value};});
-  autoSave();
-}
+  // Slots de equipamiento
+  const slotsBody = document.getElementById('eq-slots-body');
+  if(slotsBody) {
+    slotsBody.innerHTML = RANURAS_EQUIPO_FICHA.map(r=>{
+      const item = equipado[r.id];
+      const nameHtml = item
+        ? `<span class="eq-slot-item">${item.nombre}</span>${item.bono&&item.bono!=='—'?`<span class="eq-slot-bono">${item.bono}</span>`:''}`
+        : `<span class="eq-slot-item empty">Vacío</span>`;
+      return `<div class="eq-slot-row">
+        <span class="eq-slot-icon">${r.icono}</span>
+        <span class="eq-slot-label">${r.label}</span>
+        ${nameHtml}
+      </div>`;
+    }).join('');
+  }
 
-function loadInventory() {
-  (p.armas  ||[]).forEach(w=>addWeaponRow(w));
-  (p.objetos||[]).forEach(i=>addItemRow(i));
-  document.getElementById('equipo-input').value=p.equipo||'';
+  // Contenedores
+  const contBody = document.getElementById('eq-cont-body');
+  if(contBody) {
+    contBody.innerHTML = RANURAS_CONT_FICHA.map(r=>{
+      const cont = equipado[r.id];
+      const badgeClass = r.accesible ? 'rapido' : 'turno';
+      const badgeLabel = r.accesible ? '⚡ Rápido' : '⏱ 1 turno';
+      const nameHtml = cont
+        ? `<span class="eq-cont-name">${cont.nombre}</span>${cont.contenedor?`<span style="font-family:var(--mono);font-size:0.6rem;color:var(--muted);margin-left:6px;">(${cont.contenedor} esp.)</span>`:''}`
+        : `<span class="eq-cont-empty">Sin contenedor en esta ranura</span>`;
+      return `<div class="eq-cont-row">
+        <div class="eq-cont-header">
+          <span class="eq-slot-icon">${r.icono}</span>
+          <span class="eq-cont-label">${r.label}</span>
+          <span class="eq-cont-badge ${badgeClass}">${badgeLabel}</span>
+        </div>
+        <div style="padding-left:30px;">${nameHtml}</div>
+      </div>`;
+    }).join('');
+  }
+
+  // Inventario general
+  const invList = document.getElementById('eq-inv-list');
+  if(invList) {
+    if(!inventario.length) {
+      invList.innerHTML = '<div class="eq-inv-empty">Sin ítems en el inventario</div>';
+    } else {
+      invList.innerHTML = inventario.map(item=>{
+        const cal = CALIDADES_FICHA[item.calidad]||{color:'#9ca3af'};
+        const desc = item.desc ? `<span class="eq-inv-desc">${item.desc}</span>` : '';
+        return `<div class="eq-inv-item">
+          <span class="eq-inv-cant">${item.cantidad||1}×</span>
+          <span class="eq-inv-name">${item.nombre}</span>
+          ${desc}
+          <span class="eq-inv-cal" style="color:${cal.color};border-color:${cal.color}33;">${item.calidad||'Común'}</span>
+        </div>`;
+      }).join('');
+    }
+  }
+
+  // Barra espacios
+  const espBar = document.getElementById('eq-espacios-bar');
+  if(espBar) {
+    let capacidad = 2;
+    RANURAS_CONT_FICHA.forEach(r=>{ const c=equipado[r.id]; if(c?.contenedor) capacidad+=c.contenedor; });
+    let usados = 0;
+    inventario.forEach(it=>{ usados += (it.espacios||1)*(it.cantidad||1); });
+    const libre = Math.max(0, capacidad - usados);
+    let pesoTotal = 0;
+    inventario.forEach(it=>{ pesoTotal += (it.peso||0)*(it.cantidad||1); });
+    Object.values(equipado).forEach(it=>{ if(it) pesoTotal += (it.peso||0); });
+    espBar.innerHTML = `
+      <div class="eq-esp-cell"><span class="eq-esp-val">${usados}/${capacidad}</span><span class="eq-esp-lbl">Espacios</span></div>
+      <div class="eq-esp-cell"><span class="eq-esp-val libre">${libre} Libres</span><span class="eq-esp-lbl">Disponible</span></div>
+      <div class="eq-esp-cell"><span class="eq-esp-val">${pesoTotal.toFixed(2)} kg</span><span class="eq-esp-lbl">Peso Total</span></div>
+    `;
+  }
 }
 
 // ── Save a Firestore ──
@@ -614,7 +742,6 @@ function recopilarCambios() {
     apariencia:  document.getElementById('apariencia-input')?.value ||'',
     notasDJ:     document.getElementById('notas-input')?.value      ||'',
     dinero:      p.dinero || 0,
-    equipo:      document.getElementById('equipo-input')?.value     ||'',
     paTemporal:  parseInt(document.getElementById('pa-temp-input')?.value)||0,
     armas:       p.armas   || [],
     objetos:     p.objetos || [],
@@ -713,7 +840,7 @@ onAuthStateChanged(auth, async (user) => {
     document.getElementById('notas-input').value      = p.notasDJ||'';
     document.getElementById('char-counter').textContent = `${(p.historia||'').length} / 2000`;
 
-    ['obj-input','vida-obj-input','historia-input','apariencia-input','notas-input','equipo-input'].forEach(id=>{
+    ['obj-input','vida-obj-input','historia-input','apariencia-input','notas-input'].forEach(id=>{
       const el=document.getElementById(id);
       if(!el) return;
       el.addEventListener('input',()=>{

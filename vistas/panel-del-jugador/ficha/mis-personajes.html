@@ -496,7 +496,7 @@
 
     <!-- ═══════════ NAVBAR ═══════════ -->
     <nav class="navbar">
-        <a href="../panel-del-jugador.html" class="logo">
+        <a href="../../panel-del-jugador/panel-del-jugador.html" class="logo">
             <img src="../../../imagenes/logo.png" alt="CDC"
                  style="height:36px;width:auto;filter:invert(1) brightness(0.85);mix-blend-mode:screen;">
         </a>
@@ -508,10 +508,10 @@
                     <i class="ri-arrow-down-s-line chevron"></i>
                 </div>
                 <div class="dropdown-menu">
-                    <button class="dropdown-item" onclick="window.location.href='../creador/creador.html'">
+                    <button class="dropdown-item" onclick="window.location.href='../../creador/creador.html'">
                         <i class="ri-user-add-line"></i> Crear Personaje
                     </button>
-                    <button class="dropdown-item" onclick="window.location.href='mis-personajes.html'">
+                    <button class="dropdown-item" onclick="window.location.href='../mis-personajes.html'">
                         <i class="ri-group-line"></i> Selección de Personaje
                     </button>
                 </div>
@@ -523,10 +523,10 @@
                     <i class="ri-arrow-down-s-line chevron"></i>
                 </div>
                 <div class="dropdown-menu">
-                    <button class="dropdown-item" onclick="window.location.href='../reglas/culturas.html'">
+                    <button class="dropdown-item" onclick="window.location.href='../../reglas/culturas.html'">
                         <i class="ri-map-line"></i> Culturas
                     </button>
-                    <button class="dropdown-item" onclick="window.location.href='../reglas/caminos.html'">
+                    <button class="dropdown-item" onclick="window.location.href='../../reglas/caminos.html'">
                         <i class="ri-route-line"></i> Caminos
                     </button>
                     <div class="dropdown-sep"></div>
@@ -543,11 +543,11 @@
                 </div>
             </div>
 
-            <button class="nav-btn" onclick="window.location.href='../panel-del-jugador.html'">
+            <button class="nav-btn" onclick="window.location.href='../../panel-del-jugador/panel-del-jugador.html'">
                 <i class="ri-layout-line"></i> Menú del Cazador
             </button>
 
-            <button class="nav-btn" onclick="window.location.href='../../dashboard.html'">
+            <button class="nav-btn" onclick="window.location.href='../../../dashboard.html'">
                 <i class="ri-shield-user-line"></i> Selección de Rol
             </button>
         </div>
@@ -569,7 +569,7 @@
                 <h1 class="page-titulo">Mis Personajes</h1>
                 <p class="page-contador" id="contador-texto">Cargando...</p>
             </div>
-            <a id="btn-crear" class="btn-crear" href="../creador/creador.html">
+            <a id="btn-crear" class="btn-crear" href="../../creador/creador.html">
                 <i class="ri-user-add-line"></i> Crear Personaje
             </a>
         </div>
@@ -613,14 +613,14 @@
 
         // Esperar auth antes de cargar
         onAuthStateChanged(auth, (user) => {
-            if (!user) { window.location.href = "../../login.html"; return; }
+            if (!user) { window.location.href = "../../../login.html"; return; }
             const nombre = user.displayName || user.email.split('@')[0];
             document.getElementById('nombre-nav').textContent = nombre;
             cargarPersonajes();
         });
 
         document.getElementById('btn-logout').addEventListener('click', () => {
-            signOut(auth).then(() => { window.location.href = "../../login.html"; });
+            signOut(auth).then(() => { window.location.href = "../../../login.html"; });
         });
 
         async function cargarPersonajes() {
@@ -664,7 +664,7 @@
                             <i class="ri-ghost-line"></i>
                             <h3>Aún no hay cazadores</h3>
                             <p>Tu historia en el mundo de Crónicas del Cazador<br>está por comenzar. Crea tu primer personaje.</p>
-                            <a href="../creador/creador.html" class="btn-crear-grande">
+                            <a href="../../creador/creador.html" class="btn-crear-grande">
                                 <i class="ri-user-add-line"></i> Crear mi primer personaje
                             </a>
                         </div>`;
@@ -700,7 +700,7 @@
                                 <i class="${estadoCfg.icono}"></i> ${estadoCfg.label}
                             </div>
                             <div class="tarjeta-acciones" onclick="event.stopPropagation()">
-                                <a class="btn-ver" href="ficha.html?id=${c.id}">
+                                <a class="btn-ver" href="../ficha.html?id=${c.id}">
                                     <i class="ri-eye-line"></i> Ver Ficha
                                 </a>
                                 <button class="btn-eliminar" onclick="pedirEliminar('${c.id}', '${safeNombre}')">
@@ -727,7 +727,7 @@
             }
         }
 
-        function irAFicha(id) { window.location.href = `ficha.html?id=${id}`; }
+        function irAFicha(id) { window.location.href = `../ficha.html?id=${id}`; }
 
         function pedirEliminar(id, nombre) {
             idAEliminar = id;
