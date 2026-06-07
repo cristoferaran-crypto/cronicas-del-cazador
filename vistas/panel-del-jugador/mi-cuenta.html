@@ -775,7 +775,7 @@
     <!-- SCRIPTS -->
     <script type="module">
         import { app } from "../../../js/firebase-config.js";
-import { initBandeja } from "../../../js/bandeja.js";
+        import { initBandeja } from "../../../js/bandeja.js";
         import {
             getAuth, onAuthStateChanged, updateProfile,
             updatePassword, deleteUser, signOut, reauthenticateWithCredential, EmailAuthProvider
@@ -794,6 +794,7 @@ import { initBandeja } from "../../../js/bandeja.js";
             cargarPerfil(user);
             cargarEstadisticas();
             cargarAvatarDirector(user.uid);
+            initBandeja(user.uid);
         });
 
         function cargarPerfil(user) {

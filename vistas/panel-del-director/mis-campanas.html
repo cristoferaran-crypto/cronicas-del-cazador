@@ -468,6 +468,7 @@
     <button class="nav-btn primary" onclick="abrirModalNueva()">
       <i class="ri-add-line"></i> Nueva Campaña
     </button>
+    <button class="bandeja-btn" id="bandeja-btn" onclick="abrirBandeja()" title="Bandeja de entrada" style="margin-left:auto;"><i class="ri-inbox-line"></i></button>
   </div>
 </nav>
 
@@ -554,6 +555,7 @@
 
 <script type="module">
   import { auth, db } from "../../js/firebase-config.js";
+  import { initBandeja } from "../../js/bandeja.js";
   import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-auth.js";
   import {
     collection, addDoc, getDocs, deleteDoc, doc,
@@ -574,6 +576,7 @@
   onAuthStateChanged(auth, (user) => {
     if (!user) { window.location.href = '../../vistas/login.html'; return; }
     directorId = user.uid;
+    initBandeja(user.uid);
     cargarCampanas();
 
     const params = new URLSearchParams(window.location.search);
