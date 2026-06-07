@@ -509,6 +509,15 @@
       margin-bottom:6px;
       display:block;
     }
+
+    /* CONDICIONES */
+    .cond-badge{display:inline-flex;align-items:center;gap:3px;padding:2px 6px;border-radius:3px;font-size:9px;font-weight:800;letter-spacing:0.06em;text-transform:uppercase;border:1px solid;white-space:nowrap;cursor:default;}
+    .cond-badge.removible{cursor:pointer;transition:opacity 0.15s;}
+    .cond-badge.removible:hover{opacity:0.6;}
+    .cond-selector{display:flex;flex-wrap:wrap;gap:4px;margin-top:8px;}
+    .cond-toggle{padding:3px 8px;font-size:9px;font-weight:700;letter-spacing:0.06em;text-transform:uppercase;background:transparent;border:1px solid;border-radius:3px;cursor:pointer;transition:all 0.15s;opacity:0.5;}
+    .cond-toggle.activa{opacity:1;}
+    .cond-token-badge{position:absolute;top:-6px;left:50%;transform:translateX(-50%);font-size:8px;font-weight:800;padding:1px 4px;border-radius:2px;white-space:nowrap;color:white;pointer-events:none;z-index:5;max-width:48px;overflow:hidden;text-overflow:ellipsis;}
   </style>
 </head>
 <body>
@@ -810,6 +819,22 @@ const VENDEDORES_LABELS = {
 };
 
 // ══ ESTADO GLOBAL ══
+
+const CONDICIONES = [
+  {id:'EST001', nombre:'Sangrado',     color:'#e74c3c'},
+  {id:'EST002', nombre:'Aturdido',     color:'#f1c40f'},
+  {id:'EST003', nombre:'Derribado',    color:'#e67e22'},
+  {id:'EST004', nombre:'Fatiga',       color:'#7f8c8d'},
+  {id:'EST005', nombre:'Pánico',       color:'#9b59b6'},
+  {id:'EST006', nombre:'Intimidado',   color:'#d35400'},
+  {id:'EST007', nombre:'Desorientado', color:'#3498db'},
+  {id:'EST008', nombre:'Inmovilizado', color:'#95a5a6'},
+  {id:'EST009', nombre:'Quemado I',    color:'#e59866'},
+  {id:'EST010', nombre:'Quemado II',   color:'#ca6f1e'},
+  {id:'EST011', nombre:'Quemado III',  color:'#c0392b'},
+  {id:'EST012', nombre:'Envenenado',   color:'#27ae60'},
+];
+
 let ME=null, MI_PERSONAJE=null, ES_DIRECTOR=false, CAMPANA_ID=null, CAMPANA_DATA=null;
 let AVATAR_DIRECTOR_URL=null;
 let AVATARES_USUARIOS={};
@@ -906,6 +931,8 @@ function iniciarPersonajesRealtime() {
   const q = query(collection(db,'personajes'),where('campanaId','==',CAMPANA_ID));
   unsubPersonajes = onSnapshot(q, snap => {
     PERSONAJES_CAMPANA = snap.docs.map(d=>({id:d.id,...d.data()}));
+    // Actualizar condiciones en tokens
+    PERSONAJES_CAMPANA.forEach(p=>{if(tokensData[p.id])tokensData[p.id].condiciones=p.condiciones||[];});
     if (MI_PERSONAJE) {
       const u = PERSONAJES_CAMPANA.find(p=>p.id===MI_PERSONAJE.id);
       if (u) MI_PERSONAJE = u;
@@ -1091,6 +1118,15 @@ function renderTokensCanvas(tokens) {
     ctx.fillText(t.inicial||'?',x,y);
     ctx.fillStyle='rgba(255,255,255,0.9)'; ctx.font='10px Raleway,sans-serif';
     ctx.fillText(t.nombre||'',x,y+r+10);
+    // Condiciones del personaje sobre el token
+    if(t.condiciones&&t.condiciones.length>0){
+      const firstCond=CONDICIONES.find(c=>c.nombre===t.condiciones[0]);
+      if(firstCond){
+        ctx.fillStyle=firstCond.color;
+        ctx.font='bold 9px Raleway,sans-serif';
+        ctx.fillText(t.condiciones[0],x,y-r-4);
+      }
+    }
   });
 }
 async function inicializarTokens() {
@@ -1098,7 +1134,7 @@ async function inicializarTokens() {
   const existing = campSnap.data().tokens||{};
   const nuevos = {...existing}; let cambio=false;
   PERSONAJES_CAMPANA.forEach((p,i) => {
-    if (!nuevos[p.id]) { nuevos[p.id]={id:p.id,nombre:p.nombre?.split(' ')[0]||'?',inicial:(p.nombre||'?').charAt(0).toUpperCase(),color:['#c0392b','#2980b9','#27ae60','#8e44ad','#e67e22','#16a085'][i%6],x:0.1+(i*0.12),y:0.5}; cambio=true; }
+    if (!nuevos[p.id]) { nuevos[p.id]={id:p.id,nombre:p.nombre?.split(' ')[0]||'?',inicial:(p.nombre||'?').charAt(0).toUpperCase(),color:['#c0392b','#2980b9','#27ae60','#8e44ad','#e67e22','#16a085'][i%6],x:0.1+(i*0.12),y:0.5,condiciones:p.condiciones||[]}; cambio=true; }
   });
   if (cambio) await updateDoc(doc(db,'campanas',CAMPANA_ID),{tokens:nuevos});
 }
@@ -1299,26 +1335,36 @@ function renderTabJugadores(){
     const paAct=p.paActual!==undefined?p.paActual:paMax;
     const col=ESTADO_COLORES[estado]||ESTADO_COLORES.sano;
     const condiciones=p.condiciones||[];
-    const condBadges=condiciones.map(c=>`<span style="font-size:9px;padding:1px 5px;border:1px solid rgba(255,255,255,0.15);color:var(--sec);background:rgba(255,255,255,0.04);white-space:nowrap;">${c}</span>`).join('');
+    const condBadges=condiciones.map(c=>{
+      const def=CONDICIONES.find(x=>x.nombre===c)||{color:'#7f8c8d',nombre:c};
+      return`<span class="cond-badge removible" style="color:${def.color};border-color:${def.color};background:${def.color}22;" onclick="quitarCondicionDJ('${p.id}','${c}')" title="Clic para quitar">${c} ✕</span>`;
+    }).join('');
     const estadoOpts=['sano','herido','grave','critico','ko'].map(e=>{
       const ec=ESTADO_COLORES[e]; const activo=e===estado;
       return`<button onclick="cambiarEstadoCompacto('${p.id}','${e}')" style="flex:1;padding:3px 2px;font-size:9px;font-weight:700;letter-spacing:0.04em;text-transform:uppercase;background:${activo?ec.bg:'transparent'};border:1px solid ${activo?ec.color:'var(--borde)'};color:${activo?ec.color:'var(--muted)'};cursor:pointer;transition:all 0.15s;">${e==='ko'?'KO':e.charAt(0).toUpperCase()+e.slice(1)}</button>`;
     }).join('');
 
-    return`<div style="background:var(--sup2);border:1px solid var(--borde);border-left:3px solid ${col.color};padding:10px 12px;margin-bottom:8px;transition:border-color 0.2s;">
+    const condSelectorHTML = CONDICIONES.map(c=>{
+      const tieneC=condiciones.includes(c.nombre);
+      return`<button class="cond-toggle ${tieneC?'activa':''}" style="color:${c.color};border-color:${c.color};background:${tieneC?c.color+'22':'transparent'};" onclick="toggleCondicionDJ('${p.id}','${c.nombre}')">${c.nombre}</button>`;
+    }).join('');
+    return`<div style="background:var(--sup2);border:1px solid var(--borde);border-left:3px solid ${col.color};padding:10px 12px;margin-bottom:8px;">
       <div style="display:flex;align-items:center;gap:10px;margin-bottom:8px;">
         <div onclick="abrirFichaPersonaje(${JSON.stringify(p).replace(/"/g,'&quot;')})"
-          style="width:34px;height:34px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-family:'Cinzel',serif;font-size:13px;font-weight:700;border:2px solid ${col.color};color:${col.color};cursor:pointer;flex-shrink:0;transition:transform 0.15s;background:${col.bg};"
-          onmouseover="this.style.transform='scale(1.1)'" onmouseout="this.style.transform='scale(1)'"
-          title="Ver ficha completa">${ini}</div>
+          style="width:34px;height:34px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-family:'Cinzel',serif;font-size:13px;font-weight:700;border:2px solid ${col.color};color:${col.color};cursor:pointer;flex-shrink:0;background:${col.bg};"
+          title="Ver ficha">${ini}</div>
         <div style="flex:1;min-width:0;">
           <div style="font-family:'Cinzel',serif;font-size:13px;font-weight:700;color:var(--texto);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${p.nombre||'Sin nombre'}</div>
           <div style="font-size:10px;color:var(--muted);">Nv.${p.nivel||1} · PA <strong style="color:var(--texto);">${paAct}/${paMax}</strong></div>
         </div>
-        ${condBadges?`<div style="display:flex;gap:3px;flex-wrap:wrap;justify-content:flex-end;max-width:110px;">${condBadges}</div>`:''}
         <div style="padding:3px 8px;border:1px solid ${col.color};background:${col.bg};color:${col.color};font-size:9px;font-weight:700;letter-spacing:0.06em;text-transform:uppercase;flex-shrink:0;">● ${estado.toUpperCase()}</div>
       </div>
-      <div style="display:flex;gap:3px;">${estadoOpts}</div>
+      ${condBadges?`<div style="display:flex;gap:3px;flex-wrap:wrap;margin-bottom:8px;">${condBadges}</div>`:''}
+      <div style="display:flex;gap:3px;margin-bottom:6px;">${estadoOpts}</div>
+      <div style="border-top:1px solid var(--borde);padding-top:6px;margin-top:2px;">
+        <div style="font-size:9px;color:var(--muted);font-weight:700;letter-spacing:0.1em;text-transform:uppercase;margin-bottom:4px;">Condiciones:</div>
+        <div class="cond-selector">${condSelectorHTML}</div>
+      </div>
     </div>`;
   }).join('');
 }
@@ -1870,9 +1916,36 @@ window.enviarSusurro=async function(){
   await addDoc(collection(db,'campanas',CAMPANA_ID,'mensajes'),{autorId:ME.uid,autorNombre:(ME.displayName||'Director')+' [DJ]',tipo:'susurro',paraId,paraNombre:paraNom,texto,timestamp:serverTimestamp()});
   document.getElementById('sus-mensaje').value='';toast(`🔒 Susurro enviado a ${paraNom}`,'success');
 };
+window.toggleCondicionDJ=async function(personajeId, condNombre){
+  const p=PERSONAJES_CAMPANA.find(x=>x.id===personajeId);if(!p)return;
+  const condiciones=[...(p.condiciones||[])];
+  const idx=condiciones.indexOf(condNombre);
+  if(idx>=0) condiciones.splice(idx,1);
+  else condiciones.push(condNombre);
+  await updateDoc(doc(db,'personajes',personajeId),{condiciones});
+  p.condiciones=condiciones;
+  if(tabActiva==='jugadores') renderSeccion('jugadores');
+  toast(`${condNombre} ${idx>=0?'quitado':'aplicado'}.`,'info');
+};
+
+window.quitarCondicionDJ=async function(personajeId, condNombre){
+  const p=PERSONAJES_CAMPANA.find(x=>x.id===personajeId);if(!p)return;
+  const condiciones=(p.condiciones||[]).filter(c=>c!==condNombre);
+  await updateDoc(doc(db,'personajes',personajeId),{condiciones});
+  p.condiciones=condiciones;
+  if(tabActiva==='jugadores') renderSeccion('jugadores');
+  toast(`${condNombre} quitado.`,'info');
+};
+
 window.cambiarEstadoCompacto=async function(personajeId,nuevoEstado){
-  await updateDoc(doc(db,'personajes',personajeId),{estadoSalud:nuevoEstado});
-  if(MI_PERSONAJE&&MI_PERSONAJE.id===personajeId)MI_PERSONAJE.estadoSalud=nuevoEstado;
+  const p=PERSONAJES_CAMPANA.find(x=>x.id===personajeId);
+  const condActuales=[...(p?.condiciones||[])];
+  // Condiciones automáticas
+  if(nuevoEstado==='critico' && !condActuales.includes('Fatiga')) condActuales.push('Fatiga');
+  if(nuevoEstado==='ko' && !condActuales.includes('Inmovilizado')) condActuales.push('Inmovilizado');
+  await updateDoc(doc(db,'personajes',personajeId),{estadoSalud:nuevoEstado,condiciones:condActuales});
+  if(p) p.condiciones=condActuales;
+  if(MI_PERSONAJE&&MI_PERSONAJE.id===personajeId){MI_PERSONAJE.estadoSalud=nuevoEstado;MI_PERSONAJE.condiciones=condActuales;}
   toast('Estado: '+nuevoEstado,'success');
   if(tabActiva==='jugadores')renderSeccion('jugadores');
 };
@@ -2150,6 +2223,13 @@ window.abrirFichaPersonaje=function(p){
       ${esPropia?`<button class="pa-btn" onclick="jugadorCambiarPA('${p.id}',${paAct},${paMax},-1)">−</button><span class="pa-val" id="pa-display-${p.id}">${paAct}</span><button class="pa-btn" onclick="jugadorCambiarPA('${p.id}',${paAct},${paMax},1)">+</button>`:`<span class="pa-val">${paAct}</span>`}
       <span class="pa-max">/ ${paMax}</span>
     </div>
+    <div style="margin-bottom:12px;">
+      <div style="font-size:10px;font-weight:700;letter-spacing:0.12em;text-transform:uppercase;color:var(--rojo);margin-bottom:6px;">Condiciones Activas</div>
+      <div style="display:flex;flex-wrap:wrap;gap:4px;margin-bottom:6px;" id="ftab-cond-badges">
+        ${(p.condiciones||[]).map(c=>{const def=CONDICIONES.find(x=>x.nombre===c)||{color:'#7f8c8d'};return`<span class="cond-badge" style="color:${def.color};border-color:${def.color};background:${def.color}22;">${c}</span>`;}).join('')||(esPropia?'':'<span style="font-size:11px;color:var(--muted);font-style:italic;">Sin condiciones</span>')}
+      </div>
+      ${esPropia?`<div style="display:flex;flex-wrap:wrap;gap:3px;">${CONDICIONES.map(c=>{const tieneC=(p.condiciones||[]).includes(c.nombre);return`<button class="cond-toggle ${tieneC?'activa':''}" style="color:${c.color};border-color:${c.color};background:${tieneC?c.color+'22':'transparent'};" onclick="jugadorToggleCondicion('${p.id}','${c.nombre}',${tieneC})">${c.nombre}</button>`;}).join('')}</div>`:''}
+    </div>
     <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:4px;">
       <div onclick="${esPropia?`lanzarIniciativaVTT('${p.id}','${p.nombre||'?'}',${init})`:'void(0)'}" style="background:var(--sup3);padding:10px;text-align:center;${esPropia?'cursor:pointer;border:1px solid var(--borde);transition:all 0.2s;':''}position:relative;" ${esPropia?`onmouseover="this.style.borderColor='var(--borde-d)';this.style.background='rgba(201,168,76,0.06)'" onmouseout="this.style.borderColor='var(--borde)';this.style.background='var(--sup3)'"`:''} title="${esPropia?'Clic para lanzar iniciativa':''}">
         <span style="font-family:'Cinzel',serif;font-size:20px;font-weight:800;color:var(--texto);display:block;">${init}</span>
@@ -2360,6 +2440,21 @@ window.lanzarIniciativaVTT=async function(personajeId,nombrePersonaje,valorInici
   toast(`⚡ Iniciativa de ${nombrePersonaje}: ${valorIniciativa}d6 — ${exitos} éxito${exitos!==1?'s':''}${cns>0?` · ${cns} CN`:''}`, 'success');
   cerrarModal('modal-ficha');
 };
+window.jugadorToggleCondicion=async function(personajeId,condNombre,tieneC){
+  const pRef=doc(db,'personajes',personajeId);
+  const pSnap=await getDoc(pRef);const data=pSnap.data();
+  let condiciones=[...(data.condiciones||[])];
+  // Jugador solo puede AGREGAR, no quitar
+  if(!tieneC && !condiciones.includes(condNombre)){
+    condiciones.push(condNombre);
+    await updateDoc(pRef,{condiciones});
+    if(MI_PERSONAJE) MI_PERSONAJE.condiciones=condiciones;
+    toast(`${condNombre} aplicado.`,'info');
+  } else if(tieneC) {
+    toast('Solo el Director puede quitar condiciones.','error');
+  }
+};
+
 window.jugadorCambiarEstado=async function(personajeId,nuevoEstado){
   await updateDoc(doc(db,'personajes',personajeId),{estadoSalud:nuevoEstado});
   document.querySelectorAll('.esj-btn').forEach(b=>{b.className='esj-btn';const e=b.textContent.replace('💀 ','').trim().toLowerCase();if(e===nuevoEstado)b.classList.add('active-'+nuevoEstado);});
