@@ -47,7 +47,7 @@
     .main{flex:1;display:flex;overflow:hidden;height:calc(100vh - var(--bar-h));}
 
     /* CHAT */
-    .chat-panel{width:var(--chat-w);flex-shrink:0;background:var(--sup);border-right:1px solid var(--borde);display:flex;flex-direction:row;min-width:0;}
+    .chat-panel{width:var(--chat-w);flex-shrink:0;background:var(--sup);border-right:1px solid var(--borde);display:flex;flex-direction:column;}
     .chat-header{padding:10px 14px;border-bottom:1px solid var(--borde);display:flex;align-items:center;justify-content:space-between;flex-shrink:0;}
     .chat-header-titulo{font-family:'Cinzel',serif;font-size:12px;font-weight:700;color:var(--texto);}
     .chat-mensajes{flex:1;overflow-y:auto;padding:10px;display:flex;flex-direction:column;gap:6px;}
@@ -503,6 +503,9 @@
 
 <!-- MAIN -->
 <div class="main">
+  <!-- PARTY BAR vertical independiente -->
+  <div id="party-bar" class="party-bar"></div>
+
   <!-- CHAT -->
   <div class="chat-panel">
     <div class="chat-header" style="flex-direction:column;align-items:flex-start;padding:8px 14px;gap:2px;">
@@ -512,7 +515,6 @@
       </div>
       <span class="chat-header-titulo" style="font-size:10px;color:var(--muted);font-weight:600;letter-spacing:0.15em;">💬 CHAT</span>
     </div>
-    <div id="party-bar" class="party-bar"></div>
     <div id="chat-content" style="flex:1;display:flex;flex-direction:column;min-width:0;overflow:hidden;">
     <div class="chat-mensajes" id="chat-mensajes"></div>
     <div class="chat-input-area">
@@ -623,8 +625,8 @@
       <div class="dj-dash-btn" onclick="abrirSeccionDJ('susurro')"><i class="ri-message-3-line"></i><span>Susurro</span><small>Mensaje privado</small></div>
       <div class="dj-dash-btn" onclick="abrirSeccionDJ('tienda')"><i class="ri-store-2-line"></i><span>Tienda</span><small>Gestionar productos</small></div>
       <div class="dj-dash-btn" onclick="abrirSeccionDJ('mapa')"><i class="ri-map-2-line"></i><span>Mapa</span><small>Tokens y dibujo</small></div>
-      <div class="dj-dash-btn" onclick="abrirSeccionDJ('combat')" style="grid-column:span 3;border-color:rgba(192,57,43,0.4);"><i class="ri-sword-line"></i><span>Combat Tracker</span><small>Iniciativa y turnos</small></div>
       <div class="dj-dash-btn" onclick="abrirSeccionDJ('notas')"><i class="ri-sticky-note-line"></i><span>Notas DJ</span><small>Solo tú las ves</small></div>
+      <div class="dj-dash-btn" onclick="abrirSeccionDJ('combat')" style="grid-column:span 3;border-color:rgba(192,57,43,0.4);"><i class="ri-sword-line"></i><span>Combat Tracker</span><small>Iniciativa y turnos</small></div>
       <div onclick="volverPanel()" style="grid-column:span 3;padding:10px;display:flex;align-items:center;justify-content:center;gap:8px;border:1px solid var(--borde-r);color:var(--rojo);cursor:pointer;font-family:'Cinzel',serif;font-size:11px;font-weight:700;letter-spacing:0.12em;text-transform:uppercase;transition:background 0.2s;margin-top:4px;" onmouseover="this.style.background='rgba(192,57,43,0.1)'" onmouseout="this.style.background='transparent'"><i class="ri-logout-box-line"></i> Salir de la Campaña</div>
     </div>
     <div class="dj-seccion" id="dj-sec-jugadores"><div class="dj-seccion-header"><button class="dj-back-btn" onclick="volverDashboard()"><i class="ri-arrow-left-line"></i></button><span class="dj-seccion-titulo"><i class="ri-group-line"></i> Jugadores</span></div><div class="dj-seccion-body" id="body-jugadores"></div></div>
