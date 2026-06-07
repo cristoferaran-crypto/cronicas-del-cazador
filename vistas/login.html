@@ -124,12 +124,14 @@
     .form-input:focus { border-color: var(--borde-r); background: rgba(192,57,43,0.04); }
 
     .toggle-pass {
-      position: absolute; right: 10px; top: 50%;
+      position: absolute; right: 8px; top: 50%;
       transform: translateY(-50%);
       background: transparent; border: none;
-      color: var(--muted); cursor: pointer; font-size: 15px;
+      color: var(--muted); cursor: pointer; font-size: 16px;
       padding: 4px; transition: color 0.2s;
+      z-index: 2;
     }
+    .input-wrap .form-input { padding-right: 36px; }
     .toggle-pass:hover { color: var(--texto); }
 
     /* Mantener sesión + olvidé contraseña */
@@ -374,10 +376,15 @@
 
   window._recordarSesion = true; // por defecto activado
 
-  // Si ya hay sesión activa, redirigir directo al dashboard
+  const ADMIN_UID = 'a084j4Z7LvWHKHgZzbAsTPzKXLV2';
+  // Si ya hay sesión activa, redirigir según rol
   onAuthStateChanged(auth, (user) => {
     if (user) {
-      window.location.href = "dashboard.html";
+      if (user.uid === ADMIN_UID) {
+        window.location.href = "admin/admin.html";
+      } else {
+        window.location.href = "dashboard.html";
+      }
     }
   });
 
@@ -398,8 +405,12 @@
         : browserSessionPersistence; // solo dura la sesión del navegador
 
       await setPersistence(auth, persistence);
-      await signInWithEmailAndPassword(auth, email, password);
-      window.location.href = "dashboard.html";
+      const cred = await signInWithEmailAndPassword(auth, email, password);
+      if (cred.user.uid === ADMIN_UID) {
+        window.location.href = "admin/admin.html";
+      } else {
+        window.location.href = "dashboard.html";
+      }
 
     } catch (err) {
       mostrarError(traducirError(err.code));
