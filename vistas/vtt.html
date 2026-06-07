@@ -1197,12 +1197,9 @@ async function renderTokensCanvas(tokens) {
       const firstCond=CONDICIONES.find(c=>c.nombre===condiciones[0]);
       const emoji=COND_EMOJI[condiciones[0]]||'⚡';
       if(firstCond){
-        ctx.save();
-        ctx.globalAlpha=0.82;
         ctx.font=`${Math.round(r*1.0)}px serif`;
         ctx.textAlign='center'; ctx.textBaseline='middle';
         ctx.fillText(emoji,x,y);
-        ctx.restore();
         if(condiciones.length>1){
           ctx.fillStyle=firstCond.color;
           ctx.beginPath(); ctx.arc(x+r-4,y-r+4,6,0,Math.PI*2); ctx.fill();
