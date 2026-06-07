@@ -461,27 +461,20 @@
     .combat-add-row{display:flex;gap:6px;margin-bottom:10px;}
 
     /* BARRA DE PERSONAJES */
-    .party-bar{flex-shrink:0;background:rgba(10,10,12,0.97);border-right:1px solid var(--borde);padding:6px 4px;display:flex;flex-direction:column;gap:6px;overflow-y:auto;overflow-x:hidden;align-items:center;width:56px;}
+    .party-bar{flex-shrink:0;background:rgba(10,10,12,0.97);border-right:1px solid var(--borde);padding:6px 4px;display:flex;flex-direction:column;gap:6px;overflow-y:auto;overflow-x:hidden;align-items:center;width:60px;}
     
     .party-bar::-webkit-scrollbar{height:3px;width:3px;}
     .party-bar::-webkit-scrollbar-thumb{background:var(--borde-r);}
-    .party-card{display:flex;flex-direction:column;align-items:center;gap:2px;cursor:pointer;flex-shrink:0;width:44px;transition:transform 0.15s;position:relative;}
-    .party-bar.vertical .party-card{width:68px;}
-    .party-card:hover{transform:translateY(-2px);}
-    .party-bar.vertical .party-card:hover{transform:translateX(2px);}
-    .party-avatar-wrap{position:relative;}
-    .party-avatar{width:44px;height:44px;border-radius:50%;border:2px solid;overflow:hidden;display:flex;align-items:center;justify-content:center;font-family:'Cinzel',serif;font-size:17px;font-weight:800;transition:transform 0.15s;}
-    .party-avatar img{width:100%;height:100%;object-fit:cover;}
+    .party-card{display:flex;flex-direction:column;align-items:center;gap:0;cursor:pointer;flex-shrink:0;width:52px;transition:transform 0.15s;position:relative;}
+    .party-card:hover{transform:scale(1.05);}
+    .party-avatar{width:52px;height:52px;border-radius:10px;border:2px solid;overflow:hidden;display:flex;align-items:center;justify-content:center;font-family:'Cinzel',serif;font-size:18px;font-weight:800;position:relative;}
+    .party-avatar img{width:100%;height:100%;object-fit:cover;display:block;}
+    .party-avatar-nombre{position:absolute;bottom:0;left:0;right:0;background:rgba(0,0,0,0.72);color:#fff;font-size:10px;font-weight:700;text-align:center;padding:2px 2px;letter-spacing:0.03em;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;line-height:1.3;}
     .party-bandera{position:absolute;top:-8px;left:50%;transform:translateX(-50%);font-size:14px;animation:banderaNavAnim 0.6s ease-in-out infinite alternate;}
     .party-pen{position:absolute;top:-3px;right:-3px;background:var(--rojo);color:white;font-size:9px;font-weight:800;width:18px;height:18px;border-radius:50%;display:flex;align-items:center;justify-content:center;border:1px solid var(--negro);}
     .party-tooltip{position:absolute;left:calc(100% + 8px);top:50%;transform:translateY(-50%);background:var(--sup2);border:1px solid var(--borde-d);padding:5px 9px;white-space:nowrap;font-size:11px;color:var(--texto);opacity:0;pointer-events:none;transition:opacity 0.2s;z-index:100;}
     .party-card:hover .party-tooltip{opacity:1;}
-    .party-pa-bar{width:40px;height:2px;background:rgba(255,255,255,0.08);border-radius:2px;overflow:hidden;}
-    .party-pa-fill{height:100%;background:var(--verde);border-radius:2px;transition:width 0.3s;}
-    .party-pa-fill.herido{background:var(--amarillo);}
-    .party-pa-fill.grave{background:var(--naranja);}
-    .party-pa-fill.critico{background:var(--rojo);}
-    .party-pa-fill.ko{background:var(--muted);}
+
     .party-dj{border-color:var(--dorado)!important;color:var(--dorado);}
 
     /* MENÚ JUGADOR */
@@ -912,9 +905,12 @@ function renderPartyBar() {
   const djInner2 = AVATAR_DIRECTOR_URL
     ? `<img src="${AVATAR_DIRECTOR_URL}" alt="DJ">`
     : `<span style="font-size:22px;">${(ME.displayName||'D').charAt(0).toUpperCase()}</span>`;
-  html += `<div class="party-card" style="position:relative;">
-    <div class="party-avatar party-dj" style="background:rgba(201,168,76,0.1);">${djInner2}</div>
-    <div class="party-tooltip">${ME.displayName||'Director'} · DJ</div>
+  const djNombre = (ME.displayName||'Director').split(' ')[0];
+  html += `<div class="party-card">
+    <div class="party-avatar party-dj" style="background:rgba(201,168,76,0.1);">
+      ${djInner2}
+      <div class="party-avatar-nombre" style="color:var(--dorado);">${djNombre}</div>
+    </div>
   </div>`;
 
   // Jugadores
@@ -933,12 +929,14 @@ function renderPartyBar() {
     const bandera = esTurno ? `<div class="party-bandera">🚩</div>` : '';
     const penBadge = pen<0 ? `<div class="party-pen">${pen}</div>` : '';
     const esPropio = p.userId===ME.uid;
-    html += `<div class="party-card" style="position:relative;" onclick="${esPropio||ES_DIRECTOR?`clickAvatar('${p.id}','${esPropio}')`:''}">
+    const pjNombre = (p.nombre||'?').split(' ')[0];
+    html += `<div class="party-card" onclick="${esPropio||ES_DIRECTOR?`clickAvatar('${p.id}','${esPropio}')`:''}">
       ${bandera}
-      <div class="party-avatar" style="border-color:${color};background:rgba(0,0,0,0.3);">${avatarInner}</div>
-      ${penBadge}
-      <div class="party-pa-bar"><div class="party-pa-fill ${penColores[estado]||''}" style="width:${pct}%;"></div></div>
-      <div class="party-tooltip">${p.nombre||'?'} · Nv.${p.nivel||1} · PA ${paAct}/${paMax}${pen<0?' · Pen:'+pen:''}</div>
+      <div class="party-avatar" style="border-color:${color};background:rgba(0,0,0,0.3);">
+        ${avatarInner}
+        ${penBadge}
+        <div class="party-avatar-nombre">${pjNombre}</div>
+      </div>
     </div>`;
   });
   bar.innerHTML = html;
