@@ -828,10 +828,12 @@ const CRITERIOS_XP=['Participó activamente en la sesión','Interpretó correcta
 window.volverPanel = function() {
   const params = new URLSearchParams(window.location.search);
   const rol = params.get('rol');
+  // Detectar ruta base según ubicación actual
+  const base = window.location.pathname.includes('/vistas/') ? '..' : '../vistas';
   if (rol === 'director' || ES_DIRECTOR) {
-    window.location.href = '../panel-del-director/panel-del-director.html';
+    window.location.href = base + '/panel-del-director/panel-del-director.html';
   } else {
-    window.location.href = '../panel-del-jugador/panel-del-jugador.html';
+    window.location.href = base + '/panel-del-jugador/panel-del-jugador.html';
   }
 };
 
