@@ -700,7 +700,7 @@
                                 <i class="${estadoCfg.icono}"></i> ${estadoCfg.label}
                             </div>
                             <div class="tarjeta-acciones" onclick="event.stopPropagation()">
-                                <a class="btn-ver" href="../ficha.html?id=${c.id}">
+                                <a class="btn-ver" href="ficha.html?id=${c.id}">
                                     <i class="ri-eye-line"></i> Ver Ficha
                                 </a>
                                 <button class="btn-eliminar" onclick="pedirEliminar('${c.id}', '${safeNombre}')">
@@ -727,7 +727,7 @@
             }
         }
 
-        function irAFicha(id) { window.location.href = `../ficha.html?id=${id}`; }
+        function irAFicha(id) { window.location.href = `ficha.html?id=${id}`; }
 
         function pedirEliminar(id, nombre) {
             idAEliminar = id;
