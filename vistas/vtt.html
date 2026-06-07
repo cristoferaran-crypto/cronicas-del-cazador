@@ -2008,6 +2008,7 @@ window.abrirModalProd=function(prodId){
     <div class="form-row"><div><label class="form-label">Peso (kg)</label><input class="form-input-vtt" id="prod-peso" type="number" step="0.1" value="${prod?.peso||0}" min="0"></div><div><label class="form-label">Espacios</label><input class="form-input-vtt" id="prod-espacios" type="number" value="${prod?.espacios||1}" min="0"></div></div>
     <div class="form-row"><div><label class="form-label">Ranura</label><input class="form-input-vtt" id="prod-ranura" value="${prod?.ranura||'—'}" placeholder="Ej: Torso, Mano Der/Izq"></div><div><label class="form-label">Bono</label><input class="form-input-vtt" id="prod-bono" value="${prod?.bono||'—'}" placeholder="Ej: +1 Atletismo"></div></div>
     <div class="form-row"><div><label class="form-label">Equipable</label><select class="form-select" id="prod-equipable"><option value="true" ${prod?.equipable!==false?'selected':''}>Sí</option><option value="false" ${prod?.equipable===false?'selected':''}>No</option></select></div><div><label class="form-label">Contenedor (espacios)</label><input class="form-input-vtt" id="prod-contenedor" type="number" value="${prod?.contenedor||0}" min="0" placeholder="0 = no es contenedor"></div></div>
+    <div class="form-row"><div><label class="form-label">Quita Condición</label><select class="form-select" id="prod-quita-condicion"><option value="">— Ninguna —</option>${CONDICIONES.map(c=>`<option value="${c.id}" ${prod?.quitaCondicion===c.id?'selected':''}>${c.nombre}</option>`).join('')}</select></div><div><label class="form-label">Estado Asociado</label><select class="form-select" id="prod-estado-asociado"><option value="">— Ninguno —</option>${CONDICIONES.map(c=>`<option value="${c.id}" ${prod?.estadoAsociado===c.id?'selected':''}>${c.nombre}</option>`).join('')}</select></div></div>
     <button class="btn-modal-guardar" onclick="guardarProd()"><i class="ri-save-line"></i> Guardar Producto</button>
     <button class="btn-modal-cancel" onclick="cerrarModalProd()">Cancelar</button>`;
   document.getElementById('modal-prod').classList.add('open');
@@ -2039,6 +2040,8 @@ window.guardarProd=async function(){
     bono:document.getElementById('prod-bono').value.trim()||'—',
     equipable:document.getElementById('prod-equipable').value==='true',
     contenedor:parseInt(document.getElementById('prod-contenedor').value)||0,
+    quitaCondicion:document.getElementById('prod-quita-condicion').value||null,
+    estadoAsociado:document.getElementById('prod-estado-asociado').value||null,
     activo:true,
     updatedAt:serverTimestamp(),
   };
