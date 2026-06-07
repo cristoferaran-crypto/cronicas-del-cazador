@@ -1132,6 +1132,13 @@ function cargarImagenToken(url) {
   });
 }
 
+// Mapa de iconos unicode para canvas
+const COND_EMOJI = {
+  'Sangrado':'🩸','Aturdido':'⚡','Derribado':'↙','Fatiga':'💤',
+  'Pánico':'💨','Intimidado':'👁','Desorientado':'✨','Inmovilizado':'🔒',
+  'Quemado I':'🔥','Quemado II':'🔥','Quemado III':'🔥','Envenenado':'☠'
+};
+
 async function renderTokensCanvas(tokens) {
   tokensData = tokens||{};
   const canvas = document.getElementById('canvas-tokens');
@@ -1139,7 +1146,7 @@ async function renderTokensCanvas(tokens) {
   ctx.clearRect(0,0,canvas.width,canvas.height);
 
   for(const t of Object.values(tokensData)) {
-    const x=t.x*canvas.width, y=t.y*canvas.height, r=26;
+    const x=t.x*canvas.width, y=t.y*canvas.height, r=21;
     const color=t.color||'#c0392b';
 
     // Buscar avatar del personaje
@@ -1181,20 +1188,25 @@ async function renderTokensCanvas(tokens) {
     ctx.textAlign='center'; ctx.textBaseline='top';
     ctx.fillText(t.nombre||'',x,y+r+4);
 
-    // Condición: badge arriba con color
+    // Condición: icono emoji semitransparente grande sobre el token
     if(t.condiciones&&t.condiciones.length>0){
       const firstCond=CONDICIONES.find(c=>c.nombre===t.condiciones[0]);
+      const emoji=COND_EMOJI[t.condiciones[0]]||'⚡';
       if(firstCond){
-        const txt=t.condiciones.length>1?`${t.condiciones[0]} +${t.condiciones.length-1}`:t.condiciones[0];
-        const badgeW=Math.min(txt.length*5.5+10,60);
-        ctx.fillStyle=firstCond.color+'ee';
-        ctx.beginPath();
-        ctx.roundRect(x-badgeW/2,y-r-18,badgeW,14,4);
-        ctx.fill();
-        ctx.fillStyle='white';
-        ctx.font='bold 8px Raleway,sans-serif';
+        ctx.save();
+        ctx.globalAlpha=0.75;
+        ctx.font=`${r*1.1}px serif`;
         ctx.textAlign='center'; ctx.textBaseline='middle';
-        ctx.fillText(txt,x,y-r-11);
+        ctx.fillText(emoji,x,y-2);
+        ctx.restore();
+        // Contador si hay más de una
+        if(t.condiciones.length>1){
+          ctx.fillStyle=firstCond.color;
+          ctx.beginPath(); ctx.arc(x+r-5,y-r+5,7,0,Math.PI*2); ctx.fill();
+          ctx.fillStyle='white'; ctx.font='bold 8px sans-serif';
+          ctx.textAlign='center'; ctx.textBaseline='middle';
+          ctx.fillText(t.condiciones.length,x+r-5,y-r+5);
+        }
       }
     }
   }
