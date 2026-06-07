@@ -468,6 +468,7 @@
     .party-card{display:flex;flex-direction:column;align-items:center;gap:0;cursor:pointer;flex-shrink:0;width:52px;transition:transform 0.15s;position:relative;}
     .party-card:hover{transform:scale(1.05);}
     .party-avatar{width:52px;height:52px;border-radius:10px;border:2px solid;overflow:hidden;display:flex;align-items:center;justify-content:center;font-family:'Cinzel',serif;font-size:18px;font-weight:800;position:relative;}
+    .party-cond-icon{position:absolute;top:2px;right:2px;font-size:11px;line-height:1;text-shadow:0 0 4px rgba(0,0,0,0.9);z-index:3;}
     .party-avatar img{width:100%;height:100%;object-fit:cover;display:block;}
     .party-avatar-nombre{position:absolute;bottom:0;left:0;right:0;background:rgba(0,0,0,0.72);color:#fff;font-size:10px;font-weight:700;text-align:center;padding:2px 2px;letter-spacing:0.03em;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;line-height:1.3;}
     .party-bandera{position:absolute;top:-8px;left:50%;transform:translateX(-50%);font-size:14px;animation:banderaNavAnim 0.6s ease-in-out infinite alternate;}
@@ -832,18 +833,18 @@ const VENDEDORES_LABELS = {
 // ══ ESTADO GLOBAL ══
 
 const CONDICIONES = [
-  {id:'EST001', nombre:'Sangrado',     color:'#e74c3c'},
-  {id:'EST002', nombre:'Aturdido',     color:'#f1c40f'},
-  {id:'EST003', nombre:'Derribado',    color:'#e67e22'},
-  {id:'EST004', nombre:'Fatiga',       color:'#7f8c8d'},
-  {id:'EST005', nombre:'Pánico',       color:'#9b59b6'},
-  {id:'EST006', nombre:'Intimidado',   color:'#d35400'},
-  {id:'EST007', nombre:'Desorientado', color:'#3498db'},
-  {id:'EST008', nombre:'Inmovilizado', color:'#95a5a6'},
-  {id:'EST009', nombre:'Quemado I',    color:'#e59866'},
-  {id:'EST010', nombre:'Quemado II',   color:'#ca6f1e'},
-  {id:'EST011', nombre:'Quemado III',  color:'#c0392b'},
-  {id:'EST012', nombre:'Envenenado',   color:'#27ae60'},
+  {id:'EST001', nombre:'Sangrado',     color:'#e74c3c', icon:'ri-drop-fill'},
+  {id:'EST002', nombre:'Aturdido',     color:'#f1c40f', icon:'ri-flashlight-fill'},
+  {id:'EST003', nombre:'Derribado',    color:'#e67e22', icon:'ri-user-fill', iconRotate:'90deg'},
+  {id:'EST004', nombre:'Fatiga',       color:'#7f8c8d', icon:'ri-battery-low-line'},
+  {id:'EST005', nombre:'Pánico',       color:'#9b59b6', icon:'ri-run-fill'},
+  {id:'EST006', nombre:'Intimidado',   color:'#d35400', icon:'ri-eye-fill'},
+  {id:'EST007', nombre:'Desorientado', color:'#3498db', icon:'ri-sparkling-fill'},
+  {id:'EST008', nombre:'Inmovilizado', color:'#95a5a6', icon:'ri-lock-fill'},
+  {id:'EST009', nombre:'Quemado I',    color:'#e59866', icon:'ri-fire-line'},
+  {id:'EST010', nombre:'Quemado II',   color:'#ca6f1e', icon:'ri-fire-fill'},
+  {id:'EST011', nombre:'Quemado III',  color:'#c0392b', icon:'ri-fire-fill'},
+  {id:'EST012', nombre:'Envenenado',   color:'#27ae60', icon:'ri-skull-2-fill'},
 ];
 
 let ME=null, MI_PERSONAJE=null, ES_DIRECTOR=false, CAMPANA_ID=null, CAMPANA_DATA=null;
@@ -995,6 +996,7 @@ function renderPartyBar() {
       <div class="party-avatar" style="border-color:${color};background:rgba(0,0,0,0.3);">
         ${avatarInner}
         ${penBadge}
+        ${(()=>{if(!p.condiciones||p.condiciones.length===0)return'';const c=CONDICIONES.find(x=>x.nombre===p.condiciones[0]);if(!c)return'';return`<span class="party-cond-icon" style="color:${c.color};"><i class="${c.icon}"${c.iconRotate?` style="transform:rotate(${c.iconRotate});display:inline-block;"`:''} title="${c.nombre}"></i></span>`;})()}
         <div class="party-avatar-nombre">${pjNombre}</div>
       </div>
     </div>`;
@@ -1129,13 +1131,24 @@ function renderTokensCanvas(tokens) {
     ctx.fillText(t.inicial||'?',x,y);
     ctx.fillStyle='rgba(255,255,255,0.9)'; ctx.font='10px Raleway,sans-serif';
     ctx.fillText(t.nombre||'',x,y+r+10);
-    // Condiciones del personaje sobre el token
+    // Condiciones: badge de color sobre el token
     if(t.condiciones&&t.condiciones.length>0){
       const firstCond=CONDICIONES.find(c=>c.nombre===t.condiciones[0]);
       if(firstCond){
-        ctx.fillStyle=firstCond.color;
-        ctx.font='bold 9px Raleway,sans-serif';
-        ctx.fillText(t.condiciones[0],x,y-r-4);
+        const badgeW=Math.min(t.condiciones[0].length*5.5+8,52);
+        ctx.fillStyle=firstCond.color+'cc';
+        ctx.beginPath();
+        ctx.roundRect(x-badgeW/2,y-r-18,badgeW,14,4);
+        ctx.fill();
+        ctx.fillStyle='white';
+        ctx.font='bold 8px Raleway,sans-serif';
+        ctx.textAlign='center';ctx.textBaseline='middle';
+        ctx.fillText(t.condiciones[0],x,y-r-11);
+        if(t.condiciones.length>1){
+          ctx.fillStyle='rgba(255,255,255,0.6)';
+          ctx.font='7px Raleway,sans-serif';
+          ctx.fillText(`+${t.condiciones.length-1}`,x+badgeW/2-4,y-r-18);
+        }
       }
     }
   });
@@ -2286,7 +2299,14 @@ window.abrirFichaPersonaje=function(p){
       <div style="display:flex;flex-wrap:wrap;gap:4px;margin-bottom:6px;" id="ftab-cond-badges">
         ${(p.condiciones||[]).map(c=>{const def=CONDICIONES.find(x=>x.nombre===c)||{color:'#7f8c8d'};return`<span class="cond-badge" style="color:${def.color};border-color:${def.color};background:${def.color}22;">${c}</span>`;}).join('')||(esPropia?'':'<span style="font-size:11px;color:var(--muted);font-style:italic;">Sin condiciones</span>')}
       </div>
-      ${esPropia?`<div style="display:flex;flex-wrap:wrap;gap:3px;">${CONDICIONES.map(c=>{const tieneC=(p.condiciones||[]).includes(c.nombre);return`<button class="cond-toggle ${tieneC?'activa':''}" style="color:${c.color};border-color:${c.color};background:${tieneC?c.color+'22':'transparent'};" onclick="jugadorToggleCondicion('${p.id}','${c.nombre}',${tieneC})">${c.nombre}</button>`;}).join('')}</div>`:''}
+      ${esPropia?`<div style="position:relative;display:inline-block;">
+        <button class="cond-btn-trigger" onclick="toggleCondPopup('ficha-cond-popup-${p.id}')">⚡ ${(p.condiciones||[]).length>0?(p.condiciones||[]).length+' activa'+((p.condiciones||[]).length>1?'s':''):'Agregar condición'}</button>
+        <div class="cond-popup" id="ficha-cond-popup-${p.id}">
+          <div class="cond-popup-titulo"><span>⚡ Condiciones</span><button onclick="toggleCondPopup('ficha-cond-popup-${p.id}')" style="background:transparent;border:none;color:var(--muted);cursor:pointer;font-size:14px;">✕</button></div>
+          <div class="cond-popup-grid">${CONDICIONES.map(c=>{const tieneC=(p.condiciones||[]).includes(c.nombre);return`<button class="cond-pill ${tieneC?'activa':''}" style="color:${tieneC?'white':c.color};border-color:${c.color};background:${tieneC?c.color:'transparent'};" onclick="jugadorToggleCondicion('${p.id}','${c.nombre}',${tieneC})">${c.nombre}</button>`;}).join('')}</div>
+          <p style="font-size:10px;color:var(--muted);margin-top:8px;font-style:italic;">Solo el Director puede quitar condiciones.</p>
+        </div>
+      </div>`:''}
     </div>
     <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:4px;">
       <div onclick="${esPropia?`lanzarIniciativaVTT('${p.id}','${p.nombre||'?'}',${init})`:'void(0)'}" style="background:var(--sup3);padding:10px;text-align:center;${esPropia?'cursor:pointer;border:1px solid var(--borde);transition:all 0.2s;':''}position:relative;" ${esPropia?`onmouseover="this.style.borderColor='var(--borde-d)';this.style.background='rgba(201,168,76,0.06)'" onmouseout="this.style.borderColor='var(--borde)';this.style.background='var(--sup3)'"`:''} title="${esPropia?'Clic para lanzar iniciativa':''}">
