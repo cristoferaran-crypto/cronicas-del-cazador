@@ -592,11 +592,10 @@
   </button>
   <div class="menu-jugador-wrap" id="menu-jugador-wrap" style="display:none;position:relative;">
     <button class="barra-btn" onclick="toggleMenuJugador()" style="gap:4px;"><i class="ri-menu-3-line"></i> Menú <i class="ri-arrow-up-s-line" style="font-size:11px;"></i></button>
-    <div id="menu-jugador-dropdown" class="menu-jugador-dropdown" style="position:absolute;bottom:calc(100% + 8px);right:0;min-width:170px;">
-      <button onclick="volverPanel()" class="menu-jugador-item danger"><i class="ri-logout-box-line"></i> Salir de la Campaña</button>
-      <button onclick="volverPanel()" style="width:100%;padding:11px 14px;font-size:12px;font-weight:600;color:var(--rojo);cursor:pointer;display:flex;align-items:center;gap:8px;background:transparent;border:none;border-bottom:1px solid var(--borde);text-align:left;"><i class="ri-arrow-left-line"></i> Volver al Panel</button>
-      <button onclick="abrirFicha();toggleMenuJugador();" style="width:100%;padding:11px 14px;font-size:12px;font-weight:600;color:var(--sec);cursor:pointer;display:flex;align-items:center;gap:8px;background:transparent;border:none;border-bottom:1px solid var(--borde);text-align:left;transition:background 0.15s;" onmouseover="this.style.background='var(--sup3)'" onmouseout="this.style.background='transparent'"><i class="ri-file-user-line"></i> Mi Ficha</button>
-      <button onclick="abrirNotas();toggleMenuJugador();" style="width:100%;padding:11px 14px;font-size:12px;font-weight:600;color:var(--sec);cursor:pointer;display:flex;align-items:center;gap:8px;background:transparent;border:none;text-align:left;transition:background 0.15s;" onmouseover="this.style.background='var(--sup3)'" onmouseout="this.style.background='transparent'"><i class="ri-sticky-note-line"></i> Mis Notas</button>
+    <div id="menu-jugador-dropdown" class="menu-jugador-dropdown" style="position:absolute;bottom:calc(100% + 8px);right:4px;min-width:185px;">
+      <button onclick="volverPanel()" class="menu-jugador-item danger" style="font-size:13px;padding:12px 16px;"><i class="ri-logout-box-line"></i> Salir de la Campaña</button>
+      <button onclick="abrirFicha();toggleMenuJugador();" class="menu-jugador-item" style="font-size:13px;padding:12px 16px;border-top:1px solid var(--borde);"><i class="ri-file-user-line"></i> Mi Ficha</button>
+      <button onclick="abrirNotas();toggleMenuJugador();" class="menu-jugador-item" style="font-size:13px;padding:12px 16px;"><i class="ri-sticky-note-line"></i> Mis Notas</button>
     </div>
   </div>
 
