@@ -335,7 +335,7 @@ html,body{height:100%;background:var(--negro);color:var(--texto);font-family:var
       <div class="admin-table-wrap">
         <div class="admin-table-header"><span class="admin-table-title">Solicitudes pendientes</span></div>
         <table class="admin-table">
-          <thead><tr><th>Solicitante</th><th>Mensaje</th><th>Fecha</th><th>Acciones</th></tr></thead>
+          <thead><tr><th>Solicitante</th><th>Experiencia</th><th>Fecha</th><th>Respuestas</th><th>Acciones</th></tr></thead>
           <tbody id="tbody-directores"><tr><td colspan="4" class="loading"><i class="ri-loader-4-line"></i> Cargando solicitudes...</td></tr></tbody>
         </table>
       </div>
@@ -692,23 +692,57 @@ window.enviarResetDesdeModal = async function() {
 };
 
 // ── DIRECTORES ──────────────────────────
+let _solicitudesCache = [];
 async function cargarDirectores() {
   const snap = await getDocs(query(collection(db,'solicitudes_director'),orderBy('fecha','desc')));
   const tbody = document.getElementById('tbody-directores');
-  if (!snap.size) { tbody.innerHTML = '<tr><td colspan="4" class="empty-state"><i class="ri-checkbox-circle-line"></i>Sin solicitudes pendientes</td></tr>'; return; }
-  tbody.innerHTML = snap.docs.map(d => {
-    const s = d.data();
+  if (!snap.size) { tbody.innerHTML = '<tr><td colspan="5" class="empty-state"><i class="ri-checkbox-circle-line"></i>Sin solicitudes pendientes</td></tr>'; return; }
+  _solicitudesCache = snap.docs.map(d=>({id:d.id,...d.data()}));
+  tbody.innerHTML = _solicitudesCache.map(s => {
+    const fecha = s.fecha?.toDate ? s.fecha.toDate().toLocaleDateString('es-CL') : '—';
+    const exp = s.respuestas?.p3 || '—';
     return `<tr>
       <td><div class="nombre">${s.nombre||'—'}</div><div class="email">${s.email||'—'}</div></td>
-      <td style="font-size:12px;color:var(--sec);max-width:260px;">${s.mensaje||'Sin mensaje'}</td>
-      <td style="font-family:var(--mono);font-size:10px;color:var(--muted);">${s.fecha?.toDate?s.fecha.toDate().toLocaleDateString('es-CL'):''}</td>
+      <td style="font-size:11px;color:var(--sec);">${exp}</td>
+      <td style="font-family:var(--mono);font-size:10px;color:var(--muted);">${fecha}</td>
+      <td><button class="btn-accion primary" onclick="verRespuestas('${s.id}')"><i class="ri-eye-line"></i> Ver respuestas</button></td>
       <td>
-        <button class="btn-accion success" onclick="aprobarDirector('${d.id}','${s.uid}','${s.nombre||''}')">✓ Aprobar</button>
-        <button class="btn-accion danger" onclick="rechazarDirector('${d.id}','${s.uid}')">✕ Rechazar</button>
+        <button class="btn-accion success" onclick="aprobarDirector('${s.id}','${s.uid}','${(s.nombre||'').replace(/'/g,"\'")}')">✓ Aprobar</button>
+        <button class="btn-accion danger" onclick="rechazarDirector('${s.id}','${s.uid}')">✕ Rechazar</button>
       </td>
     </tr>`;
   }).join('');
 }
+
+window.verRespuestas = function(id) {
+  const s = _solicitudesCache.find(x=>x.id===id);
+  if(!s) return;
+  const r = s.respuestas || {};
+  const preguntas = [
+    ['Nombre o apodo',              r.p1||'—'],
+    ['Tiempo jugando rol',          r.p2||'—'],
+    ['Experiencia dirigiendo',      r.p3||'—'],
+    ['Sistemas que ha dirigido',    r.p4||'—'],
+    ['Experiencia en CDC',          r.p5||'—'],
+    ['Tipo de campaña',             r.p6||'—'],
+    ['¿Por qué quiere ser DJ?',     r.p7||'—'],
+    ['Frecuencia de sesiones',      r.p8||'—'],
+    ['Información adicional',       r.p9||'Sin respuesta'],
+  ];
+  document.getElementById('modal-sol-nombre').textContent = s.nombre || '—';
+  document.getElementById('modal-sol-email').textContent  = s.email  || '—';
+  document.getElementById('modal-sol-fecha').textContent  = s.fecha?.toDate ? s.fecha.toDate().toLocaleDateString('es-CL','long') : '—';
+  document.getElementById('modal-sol-body').innerHTML = preguntas.map(([q,a],i)=>`
+    <div style="margin-bottom:16px;padding-bottom:16px;border-bottom:1px solid rgba(255,255,255,0.04);">
+      <div style="font-family:var(--mono);font-size:9px;letter-spacing:0.15em;text-transform:uppercase;color:var(--rojo);margin-bottom:6px;">Pregunta ${i+1} — ${q}</div>
+      <div style="font-size:13px;color:var(--texto);line-height:1.6;">${a}</div>
+    </div>`).join('');
+  // Guardar id para aprobar/rechazar desde el modal
+  document.getElementById('modal-sol-aprobar').onclick = () => { cerrarModalSol(); aprobarDirector(s.id, s.uid, s.nombre||''); };
+  document.getElementById('modal-sol-rechazar').onclick = () => { cerrarModalSol(); rechazarDirector(s.id, s.uid); };
+  document.getElementById('modal-solicitud').classList.add('open');
+};
+window.cerrarModalSol = () => document.getElementById('modal-solicitud').classList.remove('open');
 window.aprobarDirector = async function(solicitudId, uid, nombre) {
   await updateDoc(doc(db,'usuarios',uid),{rol:'director'});
   await deleteDoc(doc(db,'solicitudes_director',solicitudId));
@@ -1138,5 +1172,26 @@ window.enviarResetPassword = async function() {
   } catch(e) { toast('Error: ' + e.message,'error'); }
 };
 </script>
+
+<!-- Modal detalle solicitud director -->
+<div class="admin-modal" id="modal-solicitud">
+  <div class="admin-modal-box" style="max-width:580px;">
+    <div class="admin-modal-header">
+      <span class="admin-modal-titulo"><i class="ri-medal-line"></i> Solicitud de Director</span>
+      <button class="admin-modal-close" onclick="cerrarModalSol()">✕</button>
+    </div>
+    <div style="padding:16px 20px;border-bottom:1px solid rgba(255,255,255,0.06);background:rgba(255,255,255,0.01);">
+      <div style="font-family:var(--serif);font-size:15px;font-weight:700;color:var(--texto);margin-bottom:4px;" id="modal-sol-nombre">—</div>
+      <div style="font-family:var(--mono);font-size:10px;color:var(--muted);" id="modal-sol-email">—</div>
+      <div style="font-family:var(--mono);font-size:10px;color:var(--muted);margin-top:2px;" id="modal-sol-fecha">—</div>
+    </div>
+    <div class="admin-modal-body" id="modal-sol-body" style="max-height:60vh;overflow-y:auto;"></div>
+    <div class="admin-modal-footer">
+      <button class="btn-accion success" id="modal-sol-aprobar">✓ Aprobar</button>
+      <button class="btn-accion danger" id="modal-sol-rechazar">✕ Rechazar</button>
+      <button class="btn-accion" onclick="cerrarModalSol()">Cerrar</button>
+    </div>
+  </div>
+</div>
 </body>
 </html>
