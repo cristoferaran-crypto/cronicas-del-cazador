@@ -540,6 +540,7 @@
         <a href="panel-del-jugador.html" class="nav-back">
             <i class="ri-arrow-left-line"></i> Menú del Cazador
         </a>
+        <button class="bandeja-btn" id="bandeja-btn" onclick="abrirBandeja()" title="Bandeja de entrada" style="margin-left:auto;border-radius:0;"><i class="ri-inbox-line"></i></button>
     </nav>
 
     <!-- PAGE -->
@@ -774,6 +775,7 @@
     <!-- SCRIPTS -->
     <script type="module">
         import { app } from "../../../js/firebase-config.js";
+import { initBandeja } from "../../../js/bandeja.js";
         import {
             getAuth, onAuthStateChanged, updateProfile,
             updatePassword, deleteUser, signOut, reauthenticateWithCredential, EmailAuthProvider

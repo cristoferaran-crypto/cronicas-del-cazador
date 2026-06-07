@@ -423,6 +423,7 @@
 
     <!-- Cuenta -->
     <div class="nav-right">
+        <button class="bandeja-btn" id="bandeja-btn" onclick="abrirBandeja()" title="Bandeja de entrada"><i class="ri-inbox-line"></i></button>
         <div class="cuenta-dropdown">
             <div class="cuenta-trigger">
                 <i class="ri-user-3-line"></i>
@@ -538,6 +539,7 @@
 
 <script type="module">
     import { auth, db } from "../../js/firebase-config.js";
+import { initBandeja } from "../../js/bandeja.js";
     import { onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-auth.js";
     import { collection, query, where, getDocs } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore.js";
 

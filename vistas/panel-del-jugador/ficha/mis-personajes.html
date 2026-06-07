@@ -553,6 +553,7 @@
         </div>
 
         <div class="nav-right">
+            <button class="bandeja-btn" id="bandeja-btn" onclick="abrirBandeja()" title="Bandeja de entrada"><i class="ri-inbox-line"></i></button>
             <span class="nav-user">Hola, <span id="nombre-nav">Cazador</span></span>
             <button id="btn-logout" class="btn-logout">
                 <i class="ri-logout-box-r-line"></i> Cerrar Sesión
@@ -597,6 +598,7 @@
 
     <script type="module">
         import { auth } from "../../../js/firebase-config.js";
+import { initBandeja } from "../../../js/bandeja.js";
         import { onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-auth.js";
         import { obtenerMisPersonajes, eliminarPersonaje } from "../../../js/personajes.js";
 
@@ -614,6 +616,7 @@
         // Esperar auth antes de cargar
         onAuthStateChanged(auth, (user) => {
             if (!user) { window.location.href = "../../../login.html"; return; }
+            initBandeja(user.uid);
             const nombre = user.displayName || user.email.split('@')[0];
             document.getElementById('nombre-nav').textContent = nombre;
             cargarPersonajes();

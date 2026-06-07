@@ -273,6 +273,7 @@
     <div class="theme-dot dot-parchment" onclick="setTheme('parchment',this)" title="Pergamino"></div>
     <div class="theme-dot dot-selva" onclick="setTheme('selva',this)" title="Selva"></div>
   </div>
+  <button class="bandeja-btn" id="bandeja-btn" onclick="abrirBandeja()" title="Bandeja de entrada" style="border-radius:0;"><i class="ri-inbox-line"></i></button>
   <div class="nav-sep"></div>
   <button class="icon-btn" onclick="history.back()" title="Volver"><i class="ri-arrow-left-line"></i></button>
   <button class="icon-btn" onclick="guardarCambios()" title="Guardar"><i class="ri-save-line"></i></button>
@@ -469,6 +470,7 @@
 
 <script type="module">
 import { db, auth } from "../../../js/firebase-config.js";
+import { initBandeja } from "../../../js/bandeja.js";
 import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-auth.js";
 import { doc, getDoc, updateDoc, deleteDoc, serverTimestamp }
   from "https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore.js";
@@ -814,6 +816,7 @@ onAuthStateChanged(auth, async (user) => {
   if(!charId) { showToast('ID de personaje no encontrado.','error'); return; }
 
   try {
+    initBandeja(user.uid);
     const snap = await getDoc(doc(db,'personajes',charId));
     if(!snap.exists()) { showToast('Personaje no encontrado.','error'); return; }
 
