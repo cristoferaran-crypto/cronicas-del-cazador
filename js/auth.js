@@ -1,11 +1,12 @@
 // js/auth.js
-import { auth } from "./firebase-config.js";
+import { auth, db } from "./firebase-config.js";
 import {
     createUserWithEmailAndPassword,
     signInWithEmailAndPassword,
     onAuthStateChanged,
     updateProfile
 } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-auth.js";
+import { doc, setDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore.js";
 
 // ── REGISTRO ──
 const registroForm = document.getElementById('registro-form');
@@ -24,6 +25,14 @@ if (registroForm) {
         try {
             const userCredential = await createUserWithEmailAndPassword(auth, email, password);
             await updateProfile(userCredential.user, { displayName: username });
+            // Crear documento en Firestore
+            await setDoc(doc(db, 'usuarios', userCredential.user.uid), {
+                nombre:    username,
+                email:     email,
+                rol:       'jugador',
+                bloqueado: false,
+                creadoEn:  serverTimestamp(),
+            });
             await userCredential.user.reload();
             window.location.href = "dashboard.html";
         } catch (error) {
