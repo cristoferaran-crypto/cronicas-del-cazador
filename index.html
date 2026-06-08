@@ -487,8 +487,20 @@
     </script>
 
 
-    <script>
+    <script type="module">
     // ── Carga dinámica de notas de versión ──
+    import { initializeApp } from 'https://www.gstatic.com/firebasejs/9.22.0/firebase-app.js';
+    import { getFirestore, doc, getDoc } from 'https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore.js';
+
+    const firebaseConfig = {
+        apiKey:            "AIzaSyCrNow56trFt7klg5cmyLvit5hb1X_YYPU",
+        authDomain:        "cronicas-del-cazador.firebaseapp.com",
+        projectId:         "cronicas-del-cazador",
+        storageBucket:     "cronicas-del-cazador.firebasestorage.app",
+        messagingSenderId: "195997854563",
+        appId:             "1:195997854563:web:f72664697e2bd5c718c156"
+    };
+
     (async function() {
         const TIPOS = {
             nuevo:   { label: 'Nuevo',   cls: 'nuevo' },
@@ -496,11 +508,14 @@
             fix:     { label: 'Fix',     cls: 'fix' },
             sistema: { label: 'Sistema', cls: 'sistema' },
         };
-        try {
-            const res = await fetch('version.json?v=' + Date.now());
-            const data = await res.json();
+
+        function renderVersiones(versiones) {
             const container = document.getElementById('changelog-container');
-            container.innerHTML = data.versiones.map(v => `
+            if (!versiones?.length) {
+                container.innerHTML = '<div style="text-align:center;padding:40px;color:var(--muted);font-size:13px;">Sin notas de versión disponibles.</div>';
+                return;
+            }
+            container.innerHTML = versiones.map(v => `
                 <div class="version-block">
                     <div class="version-header">
                         <span class="version-badge ${v.latest ? 'latest' : ''}">v${v.version}</span>
@@ -508,17 +523,38 @@
                         <span class="version-fecha">${v.fecha}</span>
                     </div>
                     <div class="version-items">
-                        ${v.items.map(item => {
+                        ${(v.items||[]).map(item => {
                             const t = TIPOS[item.tipo] || { label: item.tipo, cls: 'sistema' };
-                            return `<div class="version-item">
-                                <span class="vi-icon">${item.icono}</span>
-                                <span class="vi-tipo ${t.cls}">${t.label}</span>
-                                <div class="vi-texto"><strong>${item.titulo}</strong> — ${item.texto}</div>
-                            </div>`;
+                            return \`<div class="version-item">
+                                <span class="vi-icon">\${item.icono}</span>
+                                <span class="vi-tipo \${t.cls}">\${t.label}</span>
+                                <div class="vi-texto"><strong>\${item.titulo}</strong> — \${item.texto}</div>
+                            </div>\`;
                         }).join('')}
                     </div>
                 </div>
             `).join('');
+        }
+
+        try {
+            // 1. Intentar cargar desde Firestore primero
+            const app = initializeApp(firebaseConfig);
+            const db  = getFirestore(app);
+            const snap = await getDoc(doc(db, 'config', 'versiones'));
+            if (snap.exists() && snap.data().data) {
+                const data = JSON.parse(snap.data().data);
+                renderVersiones(data.versiones);
+                return;
+            }
+        } catch(e) {
+            // Firestore falló, caer al JSON
+        }
+
+        try {
+            // 2. Fallback: version.json
+            const res  = await fetch('version.json?v=' + Date.now());
+            const data = await res.json();
+            renderVersiones(data.versiones);
         } catch(e) {
             document.getElementById('changelog-container').innerHTML =
                 '<div style="text-align:center;padding:40px;color:var(--muted);font-size:13px;">No se pudieron cargar las notas de versión.</div>';
