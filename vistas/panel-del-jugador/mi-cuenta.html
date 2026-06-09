@@ -973,6 +973,36 @@
             }
             input.value='';
         };
+
+        // ── Avatar jugador ──
+        window.subirAvatarJugador = async function(input) {
+            if (!input.files || !input.files[0]) return;
+            const file = input.files[0];
+            const reader = new FileReader();
+            reader.onload = e => {
+                const img = document.getElementById('avatar-img');
+                const ph  = document.getElementById('avatar-placeholder');
+                if(img){ img.src = e.target.result; img.style.display = 'block'; }
+                if(ph)  { ph.style.display = 'none'; }
+            };
+            reader.readAsDataURL(file);
+            toast('Subiendo imagen...', 'info');
+            try {
+                const fd = new FormData();
+                fd.append('file', file);
+                fd.append('upload_preset', 'cdc-assets');
+                const res  = await fetch('https://api.cloudinary.com/v1_1/davwzigvs/image/upload', {method:'POST',body:fd});
+                const data = await res.json();
+                if (!data.secure_url) throw new Error('Sin URL');
+                const url = data.secure_url;
+                await updateProfile(usuarioActual, { photoURL: url });
+                await updateDoc(doc(db, 'usuarios', usuarioActual.uid), { avatar: url });
+                toast('Avatar actualizado correctamente.', 'success');
+            } catch(err) {
+                toast('Error al subir la imagen.', 'error');
+                console.error(err);
+            }
+        };
     </script>
 
     <script>
@@ -1022,37 +1052,6 @@
         }
 
         window.togglePass = togglePass;
-        // Subir avatar jugador (dentro del módulo para acceder a updateProfile)
-        window.subirAvatarJugador = async function(input) {
-            if (!input.files || !input.files[0]) return;
-            const file = input.files[0];
-            // Preview inmediato
-            const reader = new FileReader();
-            reader.onload = e => {
-                const img = document.getElementById('avatar-img');
-                const ph  = document.getElementById('avatar-placeholder');
-                if(img){ img.src = e.target.result; img.style.display = 'block'; }
-                if(ph)  { ph.style.display = 'none'; }
-            };
-            reader.readAsDataURL(file);
-            toast('Subiendo imagen...', 'info');
-            try {
-                const fd = new FormData();
-                fd.append('file', file);
-                fd.append('upload_preset', 'cdc-assets');
-                const res  = await fetch('https://api.cloudinary.com/v1_1/davwzigvs/image/upload', {method:'POST',body:fd});
-                const data = await res.json();
-                if (!data.secure_url) throw new Error('Sin URL');
-                const url = data.secure_url;
-                await updateProfile(usuarioActual, { photoURL: url });
-                await updateDoc(doc(db, 'usuarios', usuarioActual.uid), { avatar: url });
-                toast('Avatar actualizado correctamente.', 'success');
-            } catch(e) {
-                toast('Error al subir la imagen.', 'error');
-                console.error(e);
-            }
-        };
-
         window.previewAvatar = previewAvatar;
         window.abrirModalPersonajes = abrirModalPersonajes;
         window.abrirModalCuenta = abrirModalCuenta;
