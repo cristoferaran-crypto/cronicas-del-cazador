@@ -1,6 +1,39 @@
 {
   "versiones": [
     {
+      "version": "0.5.2",
+      "nombre": "El Mundo se Conecta",
+      "fecha": "08 Junio 2026",
+      "latest": true,
+      "items": [
+        { "icono": "🆘", "tipo": "nuevo",   "titulo": "Página de Soporte",           "texto": "Nueva página con FAQ de 13 preguntas en 5 categorías y formulario de reporte de bugs. Accesible desde el menú de cuenta." },
+        { "icono": "🐛", "tipo": "nuevo",   "titulo": "Reporte de bugs",             "texto": "Los jugadores pueden reportar problemas directamente desde soporte.html. Los reportes llegan al panel admin con estado gestionable." },
+        { "icono": "📸", "tipo": "nuevo",   "titulo": "Avatar del jugador",          "texto": "Los jugadores ahora pueden subir y guardar su imagen de perfil desde Mi Cuenta. Se almacena en Cloudinary y Firestore." },
+        { "icono": "📋", "tipo": "nuevo",   "titulo": "Panel Admin — Soporte",       "texto": "Nueva sección en el panel admin para revisar reportes de usuarios, cambiar su estado y gestionar incidencias." },
+        { "icono": "🔐", "tipo": "nuevo",   "titulo": "Registro crea perfil",        "texto": "Al registrarse, ahora se crea automáticamente el documento del usuario en Firestore con rol jugador." },
+        { "icono": "📦", "tipo": "nuevo",   "titulo": "Mover ítems entre vendedores","texto": "El admin puede mover un ítem de un vendedor a otro directamente desde el panel sin tener que recrearlo." },
+        { "icono": "📥", "tipo": "nuevo",   "titulo": "Importación masiva de ítems", "texto": "El admin puede importar ítems en masa desde Excel usando la misma plantilla del conversor." },
+        { "icono": "🌐", "tipo": "mejora",  "titulo": "Notas de versión dinámicas",  "texto": "El index.html ahora lee las notas desde Firestore primero y cae al version.json como respaldo." },
+        { "icono": "🔧", "tipo": "fix",     "titulo": "Rutas y nombres de archivos", "texto": "Corregido logo_red.png, rutas de soporte y navegación entre páginas." }
+      ]
+    },
+    {
+      "version": "0.5.1",
+      "nombre": "El Mundo se Conecta",
+      "fecha": "07 Junio 2026",
+      "latest": false,
+      "items": [
+        { "icono": "📬", "tipo": "nuevo",   "titulo": "Bandeja de entrada",           "texto": "Sistema de mensajería interna disponible en todas las páginas. Los jugadores pueden enviarse mensajes y recibir notificaciones del sistema." },
+        { "icono": "🔒", "tipo": "nuevo",   "titulo": "Gestión de jugadores",         "texto": "El Director puede liberar personajes o bloquear jugadores desde el panel. Los jugadores pueden abandonar campañas cuando quieran." },
+        { "icono": "💊", "tipo": "nuevo",   "titulo": "Ítems que remueven condiciones","texto": "Al usar un consumible con condición asignada, esta se elimina automáticamente del personaje y se notifica en el chat." },
+        { "icono": "🚫", "tipo": "nuevo",   "titulo": "Lista negra de nombres",       "texto": "El creador valida que el nombre no sea una palabra reservada del sistema ni esté en la lista de nombres prohibidos." },
+        { "icono": "🗂",  "tipo": "mejora", "titulo": "Tab Equipo en ficha",          "texto": "La ficha del personaje muestra el inventario real del VTT con ranuras, contenedores, peso y espacios en tiempo real." },
+        { "icono": "🛡",  "tipo": "nuevo",  "titulo": "Panel de Administración",      "texto": "Panel completo para gestionar usuarios, directores, tienda, campañas, nombres prohibidos y configuración global." },
+        { "icono": "📋", "tipo": "nuevo",   "titulo": "Solicitud de Director",        "texto": "Los jugadores pueden solicitar acceso como Director desde el dashboard con un formulario de 9 preguntas." },
+        { "icono": "🔧", "tipo": "fix",     "titulo": "Rutas de navegación",          "texto": "Corregidas rutas en mis-personajes y otras páginas que generaban errores 404 al navegar." }
+     ]
+    },
+    {
       "version": "0.5",
       "nombre": "El Mundo se Conecta",
       "fecha": "Junio 2026",
