@@ -565,7 +565,7 @@
                             <img id="avatar-img" src="" alt="" style="display:none">
                             <div class="avatar-overlay"><i class="ri-camera-line"></i></div>
                         </div>
-                        <input type="file" id="avatar-input" accept="image/*" style="display:none" onchange="previewAvatar(this)">
+                        <input type="file" id="avatar-input" accept="image/*" style="display:none" onchange="subirAvatarJugador(this)">
                     </div>
                     <div class="perfil-info">
                         <div class="perfil-nombre" id="perfil-nombre">—</div>
@@ -794,6 +794,13 @@
             cargarPerfil(user);
             cargarEstadisticas();
             cargarAvatarDirector(user.uid);
+            // Cargar avatar jugador
+            if (user.photoURL) {
+                const img = document.getElementById('avatar-img');
+                const ph  = document.getElementById('avatar-placeholder');
+                if (img) { img.src = user.photoURL; img.style.display = 'block'; }
+                if (ph)  { ph.style.display = 'none'; }
+            }
             initBandeja(user.uid);
         });
 
@@ -1000,6 +1007,41 @@
             };
             reader.readAsDataURL(input.files[0]);
         }
+
+        window.subirAvatarJugador = async function(input) {
+            if (!input.files || !input.files[0]) return;
+            const file = input.files[0];
+            // Preview inmediato
+            const reader = new FileReader();
+            reader.onload = e => {
+                const img = document.getElementById('avatar-img');
+                const ph  = document.getElementById('avatar-placeholder');
+                img.src = e.target.result;
+                img.style.display = 'block';
+                ph.style.display = 'none';
+            };
+            reader.readAsDataURL(file);
+            // Subir a Cloudinary
+            toast('Subiendo imagen...', 'info');
+            try {
+                const fd = new FormData();
+                fd.append('file', file);
+                fd.append('upload_preset', 'cdc-assets');
+                const res  = await fetch('https://api.cloudinary.com/v1_1/davwzigvs/image/upload', {method:'POST',body:fd});
+                const data = await res.json();
+                if (!data.secure_url) throw new Error('Sin URL');
+                const url = data.secure_url;
+                // Guardar en Firebase Auth y Firestore
+                await updateProfile(usuarioActual, { photoURL: url });
+                const { getFirestore, doc: fsDoc, updateDoc: fsUpdate } = await import('https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore.js');
+                const db2 = getFirestore();
+                await fsUpdate(fsDoc(db2, 'usuarios', usuarioActual.uid), { avatar: url });
+                toast('Avatar actualizado.', 'success');
+            } catch(e) {
+                toast('Error al subir la imagen.', 'error');
+                console.error(e);
+            }
+        };
 
         function abrirModalPersonajes() {
             document.getElementById('modal-personajes').classList.add('open');
