@@ -565,7 +565,7 @@
                             <img id="avatar-img" src="" alt="" style="display:none">
                             <div class="avatar-overlay"><i class="ri-camera-line"></i></div>
                         </div>
-                        <input type="file" id="avatar-input" accept="image/*" style="display:none" onchange="subirAvatarJugador(this)">
+                        <input type="file" id="avatar-input" accept="image/*" style="display:none" onchange="previewAvatar(this)">
                     </div>
                     <div class="perfil-info">
                         <div class="perfil-nombre" id="perfil-nombre">—</div>
@@ -808,6 +808,24 @@
             const acceso  = user.metadata.lastSignInTime ? formatFecha(new Date(user.metadata.lastSignInTime)) : '—';
             document.getElementById('fecha-registro').textContent = creado;
             document.getElementById('ultimo-acceso').textContent  = acceso;
+
+            // Cargar avatar jugador — primero desde Firestore, fallback a photoURL
+            cargarAvatarJugador(user);
+        }
+
+        async function cargarAvatarJugador(user) {
+            let avatarUrl = user.photoURL || null;
+            // Intentar Firestore primero (más actualizado)
+            try {
+                const snap = await getDoc(doc(db, 'usuarios', user.uid));
+                if (snap.exists() && snap.data().avatar) avatarUrl = snap.data().avatar;
+            } catch(e) {}
+            if (avatarUrl) {
+                const img = document.getElementById('avatar-img');
+                const ph  = document.getElementById('avatar-placeholder');
+                if (img) { img.src = avatarUrl; img.style.display = 'block'; }
+                if (ph)  { ph.style.display = 'none'; }
+            }
         }
 
         function formatFecha(date) {
