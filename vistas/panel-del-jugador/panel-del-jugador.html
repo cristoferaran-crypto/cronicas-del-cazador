@@ -423,7 +423,6 @@
 
     <!-- Cuenta -->
     <div class="nav-right">
-        <button class="bandeja-btn" id="bandeja-btn" onclick="abrirBandeja()" title="Bandeja de entrada"><i class="ri-inbox-line"></i></button>
         <div class="cuenta-dropdown">
             <div class="cuenta-trigger">
                 <i class="ri-user-3-line"></i>
@@ -437,6 +436,9 @@
                 </div>
                 <button class="cuenta-item" onclick="window.location.href='mi-cuenta.html'">
                     <i class="ri-settings-3-line"></i> Mi Cuenta
+                </button>
+                <button class="cuenta-item" onclick="window.location.href='soporte.html'">
+                    <i class="ri-question-line"></i> Soporte
                 </button>
                 <div class="dropdown-sep"></div>
                 <button class="cuenta-item danger" id="btn-logout">
@@ -539,13 +541,11 @@
 
 <script type="module">
     import { auth, db } from "../../js/firebase-config.js";
-    import { initBandeja } from "../../js/bandeja.js";
     import { onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-auth.js";
     import { collection, query, where, getDocs } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore.js";
 
     onAuthStateChanged(auth, async (user) => {
         if (!user) { window.location.href = "../login.html"; return; }
-        initBandeja(user.uid);
 
         const nombre = user.displayName || user.email.split('@')[0];
         document.getElementById('nombre-nav').textContent = nombre;
