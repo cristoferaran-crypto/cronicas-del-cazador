@@ -59,10 +59,11 @@
         }
         .logo img {
             height:38px; width:auto;
+            filter: invert(1) brightness(0.9);
             transition:filter 0.2s, transform 0.2s;
         }
         .logo:hover img {
-            filter:drop-shadow(0 0 10px rgba(192,57,43,0.6));
+            filter: invert(1) brightness(1) drop-shadow(0 0 8px rgba(192,57,43,0.6));
             transform:scale(1.05);
         }
 
@@ -368,7 +369,7 @@
 <!-- NAVBAR -->
 <nav class="navbar" id="navbar">
     <a href="../../index.html" class="logo">
-        <img src="../../imagenes/logo_red.png" alt="Crónicas del Cazador">
+        <img src="../../imagenes/logo.png" alt="Crónicas del Cazador">
     </a>
 
     <div class="nav-items">
