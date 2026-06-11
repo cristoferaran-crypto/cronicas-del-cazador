@@ -1630,6 +1630,7 @@ function renderBannerTurno() {
     banner.innerHTML=`<span style="font-size:14px;">⚔️</span><span style="font-family:\'Cinzel\',serif;font-size:12px;font-weight:700;color:var(--rojo);">Turno: ${actual.nombre}</span><span style="font-size:10px;color:var(--muted);">Ronda ${combatRonda}</span>`;
   } else if(banner) banner.remove();
   renderizarAvatares();
+  renderPartyBar(); 
 }
 
 window.renderSeccionCombat = function() {
