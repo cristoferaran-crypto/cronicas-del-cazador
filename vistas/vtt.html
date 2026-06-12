@@ -479,6 +479,10 @@
       from{ box-shadow:0 0 0 3px var(--rojo), 0 0 10px 2px rgba(192,57,43,0.5); }
       to{ box-shadow:0 0 0 3px var(--rojo), 0 0 22px 8px rgba(192,57,43,0.9); }
     }
+    .avatar-circle.es-turno{
+      box-shadow:0 0 0 2px var(--rojo), 0 0 10px 3px rgba(192,57,43,0.7);
+      animation: auraTurnoAnim 1.2s ease-in-out infinite alternate;
+    }
     .party-pen{position:absolute;top:-3px;right:-3px;background:var(--rojo);color:white;font-size:9px;font-weight:800;width:18px;height:18px;border-radius:50%;display:flex;align-items:center;justify-content:center;border:1px solid var(--negro);}
     .party-tooltip{position:absolute;left:calc(100% + 8px);top:50%;transform:translateY(-50%);background:var(--sup2);border:1px solid var(--borde-d);padding:5px 9px;white-space:nowrap;font-size:11px;color:var(--texto);opacity:0;pointer-events:none;transition:opacity 0.2s;z-index:100;}
     .party-card:hover .party-tooltip{opacity:1;}
@@ -1038,7 +1042,6 @@ function renderPartyBar() {
       ? `<img src="${avatarUrl}" alt="${p.nombre}">`
       : `<span>${(p.nombre||'?').charAt(0).toUpperCase()}</span>`;
     const esTurno = combatOrden.length>0 && combatOrden[combatTurnoIdx]?.id===p.id;
-    const bandera = esTurno ? `<div class="party-bandera">🚩</div>` : '';
     const penBadge = pen<0 ? `<div class="party-pen">${pen}</div>` : '';
     const esPropio = p.userId===ME.uid;
     const pjNombre = (p.nombre||'?').split(' ')[0];
