@@ -471,7 +471,14 @@
     .party-cond-icon{position:absolute;top:2px;right:2px;font-size:11px;line-height:1;text-shadow:0 0 4px rgba(0,0,0,0.9);z-index:3;}
     .party-avatar img{width:100%;height:100%;object-fit:cover;display:block;}
     .party-avatar-nombre{position:absolute;bottom:0;left:0;right:0;background:rgba(0,0,0,0.72);color:#fff;font-size:10px;font-weight:700;text-align:center;padding:2px 2px;letter-spacing:0.03em;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;line-height:1.3;}
-    .party-bandera{position:absolute;top:-8px;left:50%;transform:translateX(-50%);font-size:14px;animation:banderaNavAnim 0.6s ease-in-out infinite alternate;}
+    .party-card.es-turno .party-avatar{
+      box-shadow:0 0 0 3px var(--rojo), 0 0 16px 4px rgba(192,57,43,0.7);
+      animation: auraTurnoAnim 1.2s ease-in-out infinite alternate;
+    }
+    @keyframes auraTurnoAnim{
+      from{ box-shadow:0 0 0 3px var(--rojo), 0 0 10px 2px rgba(192,57,43,0.5); }
+      to{ box-shadow:0 0 0 3px var(--rojo), 0 0 22px 8px rgba(192,57,43,0.9); }
+    }
     .party-pen{position:absolute;top:-3px;right:-3px;background:var(--rojo);color:white;font-size:9px;font-weight:800;width:18px;height:18px;border-radius:50%;display:flex;align-items:center;justify-content:center;border:1px solid var(--negro);}
     .party-tooltip{position:absolute;left:calc(100% + 8px);top:50%;transform:translateY(-50%);background:var(--sup2);border:1px solid var(--borde-d);padding:5px 9px;white-space:nowrap;font-size:11px;color:var(--texto);opacity:0;pointer-events:none;transition:opacity 0.2s;z-index:100;}
     .party-card:hover .party-tooltip{opacity:1;}
@@ -1035,9 +1042,7 @@ function renderPartyBar() {
     const penBadge = pen<0 ? `<div class="party-pen">${pen}</div>` : '';
     const esPropio = p.userId===ME.uid;
     const pjNombre = (p.nombre||'?').split(' ')[0];
-    html += `<div class="party-card" onclick="${esPropio||ES_DIRECTOR?`clickAvatar('${p.id}','${esPropio}')`:''}">
-      ${bandera}
-      <div class="party-avatar" style="border-color:${color};background:rgba(0,0,0,0.3);">
+    html += `<div class="party-card ${esTurno?'es-turno':''}" onclick="${esPropio||ES_DIRECTOR?`clickAvatar('${p.id}','${esPropio}')`:''}">      <div class="party-avatar" style="border-color:${color};background:rgba(0,0,0,0.3);">
         ${avatarInner}
         ${penBadge}
         ${(()=>{if(!p.condiciones||p.condiciones.length===0)return'';const c=CONDICIONES.find(x=>x.nombre===p.condiciones[0]);if(!c)return'';return`<span class="party-cond-icon" style="color:${c.color};"><i class="${c.icon}"${c.iconRotate?` style="transform:rotate(${c.iconRotate});display:inline-block;"`:''} title="${c.nombre}"></i></span>`;})()}
@@ -1064,10 +1069,9 @@ function renderizarAvatares() {
     const paAct=p.paActual!==undefined?p.paActual:paMax;
     const esPropio=p.userId===ME.uid;
     const esTurno = combatOrden.length>0 && combatOrden[combatTurnoIdx]?.id===p.id;
-    const banderaNav = esTurno ? `<div class="party-bandera">🚩</div>` : '';
     const penHtml=pen<0?`<div class="avatar-penalty">${pen}</div>`:'';
     const avatarInner=p.avatarUrl?`<img src="${p.avatarUrl}" style="width:100%;height:100%;object-fit:cover;border-radius:50%;">`:`${ini}`;
-    return `<div class="avatar-pill" onclick="clickAvatar('${p.id}','${esPropio}')"><div style="position:relative;display:inline-block;"><div class="avatar-circle est-${estado}">${avatarInner}</div>${penHtml}${banderaNav}</div><span class="avatar-nombre">${(p.nombre||'?').split(' ')[0]}</span><div class="avatar-tooltip"><strong>${p.nombre||'?'}</strong> · Nv.${p.nivel||1}<br>PA: ${paAct}/${paMax} · ${estado}${pen<0?`<br>Penalización: ${pen}`:''}</div></div>`;
+    return `<div class="avatar-pill" onclick="clickAvatar('${p.id}','${esPropio}')"><div style="position:relative;display:inline-block;"><div class="avatar-circle est-${estado} ${esTurno?'es-turno':''}">${avatarInner}</div>${penHtml}</div><span class="avatar-nombre">${(p.nombre||'?').split(' ')[0]}</span><div class="avatar-tooltip"><strong>${p.nombre||'?'}</strong> · Nv.${p.nivel||1}<br>PA: ${paAct}/${paMax} · ${estado}${pen<0?`<br>Penalización: ${pen}`:''}</div></div>`;
   }).join('');
   wrap.innerHTML = html;
 }
