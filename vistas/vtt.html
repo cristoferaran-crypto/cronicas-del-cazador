@@ -1611,10 +1611,13 @@ function iniciarCombatRealtime() {
       combatOrden = data.combat.orden || [];
       combatTurnoIdx = data.combat.turnoIdx || 0;
       combatRonda = data.combat.ronda || 1;
+    } else {
+      combatOrden = [];
     }
     if(ES_DIRECTOR && tabActiva==='combat') renderSeccion('combat');
-    // Mostrar banner turno actual a todos
     renderBannerTurno();
+    renderizarAvatares();
+    renderPartyBar();
   });
 }
 
@@ -1626,8 +1629,6 @@ function renderBannerTurno() {
   let banner = document.getElementById('combat-banner-chat');
   if(combatOrden.length > 0 && actual) {
     if(!banner) { banner = document.createElement('div'); banner.id='combat-banner-chat'; header.parentElement.insertBefore(banner, header); }
-    banner.style.cssText='padding:6px 10px;background:rgba(192,57,43,0.1);border-bottom:1px solid var(--borde-r);display:flex;align-items:center;gap:8px;flex-shrink:0;';
-    banner.innerHTML=`<span style="font-size:14px;">⚔️</span><span style="font-family:\'Cinzel\',serif;font-size:12px;font-weight:700;color:var(--rojo);">Turno: ${actual.nombre}</span><span style="font-size:10px;color:var(--muted);">Ronda ${combatRonda}</span>`;
   } else if(banner) banner.remove();
   renderizarAvatares();
   renderPartyBar(); 
