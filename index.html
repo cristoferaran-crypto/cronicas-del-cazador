@@ -96,6 +96,108 @@
         }
         .btn-register:hover { background: var(--rojo-vivo); }
 
+        /* ══ NAVBAR LOGUEADA (oculta por defecto) ══ */
+        .navbar-auth {
+            display: none;
+            position: fixed; top:0; left:0; right:0; z-index:200;
+            align-items: center; padding:0 32px; height:64px;
+            background: linear-gradient(to bottom, rgba(10,10,12,0.75) 0%, rgba(10,10,12,0.3) 60%, transparent 100%);
+            transition: background 0.4s, border-color 0.4s, backdrop-filter 0.4s;
+        }
+        .navbar-auth.scrolled { background:rgba(10,10,12,0.95); border-bottom:1px solid var(--borde); backdrop-filter:blur(16px); }
+        .navbar-auth.visible { display: flex; }
+
+        .auth-nav-items { display:flex; align-items:center; gap:2px; flex:1; }
+        .auth-nav-btn {
+            position:relative; display:flex; align-items:center; gap:6px;
+            padding:0 14px; height:64px; background:transparent; border:none;
+            color:rgba(226,221,214,0.6); font-family:'Raleway',sans-serif;
+            font-size:12px; font-weight:600; letter-spacing:0.1em; text-transform:uppercase;
+            cursor:pointer; transition:color 0.2s; white-space:nowrap; text-decoration:none;
+        }
+        .auth-nav-btn::after { content:''; position:absolute; bottom:0; left:14px; right:14px; height:2px; background:var(--rojo); transform:scaleX(0); transition:transform 0.25s; box-shadow:0 0 8px rgba(192,57,43,0.35); }
+        .auth-nav-btn:hover { color:var(--texto); } .auth-nav-btn:hover::after { transform:scaleX(1); } .auth-nav-btn i { font-size:14px; }
+
+        .auth-dropdown { position:relative; display:flex; align-items:center; height:64px; }
+        .auth-dropdown-trigger {
+            display:flex; align-items:center; gap:6px; padding:0 14px; height:64px;
+            background:transparent; border:none; color:rgba(226,221,214,0.6);
+            font-family:'Raleway',sans-serif; font-size:12px; font-weight:600;
+            letter-spacing:0.1em; text-transform:uppercase; cursor:pointer;
+            transition:color 0.2s; white-space:nowrap; user-select:none; position:relative;
+        }
+        .auth-dropdown-trigger::after { content:''; position:absolute; bottom:0; left:14px; right:14px; height:2px; background:var(--rojo); transform:scaleX(0); transition:transform 0.25s; }
+        .auth-dropdown-trigger i { font-size:14px; }
+        .auth-dropdown-trigger .chevron { font-size:13px; transition:transform 0.22s; margin-left:2px; }
+        .auth-dropdown:hover .auth-dropdown-trigger { color:var(--texto); }
+        .auth-dropdown:hover .auth-dropdown-trigger::after { transform:scaleX(1); }
+        .auth-dropdown:hover .chevron { transform:rotate(180deg); }
+        .auth-dropdown-menu {
+            display:none; position:absolute; top:100%; left:0; min-width:220px;
+            background:#16161e; border:1px solid rgba(255,255,255,0.09);
+            border-top:2px solid var(--rojo); padding:6px 0; z-index:999;
+            box-shadow:0 12px 32px rgba(0,0,0,0.5);
+        }
+        .auth-dropdown:hover .auth-dropdown-menu { display:block; }
+        .auth-dropdown-item {
+            display:flex; align-items:center; gap:10px; padding:10px 16px;
+            color:#b0aab8; font-size:12px; font-weight:500;
+            letter-spacing:0.05em; text-transform:uppercase; cursor:pointer;
+            transition:background 0.15s, color 0.15s; border:none; background:transparent;
+            width:100%; text-align:left; font-family:'Raleway',sans-serif; text-decoration:none;
+        }
+        .auth-dropdown-item:hover { background:rgba(192,57,43,0.1); color:#e8e2d9; }
+        .auth-dropdown-item i { font-size:15px; color:var(--rojo); flex-shrink:0; }
+        .auth-dropdown-item.destacado { color:var(--dorado); border-top:1px solid var(--borde); margin-top:2px; }
+        .auth-dropdown-item.destacado i { color:var(--dorado); }
+        .auth-dropdown-sep { height:1px; background:var(--borde); margin:4px 0; }
+
+        .auth-nav-right { display:flex; align-items:center; gap:8px; margin-left:auto; }
+        .auth-bandeja {
+            position:relative; display:flex; align-items:center; justify-content:center;
+            width:36px; height:36px; background:rgba(255,255,255,0.04);
+            border:1px solid var(--borde); color:#b0aab8; font-size:17px;
+            cursor:pointer; transition:border-color 0.2s, color 0.2s; text-decoration:none;
+        }
+        .auth-bandeja:hover { border-color:rgba(192,57,43,0.4); color:#e8e2d9; }
+        .auth-bandeja .badge { display:none; position:absolute; top:-5px; right:-5px; min-width:16px; height:16px; background:var(--rojo); border-radius:8px; font-size:9px; font-weight:700; color:white; align-items:center; justify-content:center; padding:0 3px; font-family:'Raleway',sans-serif; }
+        .auth-bandeja .badge.visible { display:flex; }
+
+        .auth-cuenta-dropdown { position:relative; display:flex; align-items:center; height:64px; }
+        .auth-cuenta-trigger {
+            display:flex; align-items:center; gap:8px; padding:0 12px; height:36px;
+            background:rgba(255,255,255,0.04); border:1px solid var(--borde);
+            color:#b0aab8; font-family:'Raleway',sans-serif; font-size:12px; font-weight:600;
+            letter-spacing:0.05em; cursor:pointer; transition:border-color 0.2s, color 0.2s;
+            white-space:nowrap; user-select:none;
+        }
+        .auth-cuenta-avatar { width:24px; height:24px; border-radius:50%; object-fit:cover; border:1px solid rgba(192,57,43,0.3); display:none; }
+        .auth-cuenta-avatar.visible { display:block; }
+        .auth-cuenta-nombre { color:var(--dorado); }
+        .auth-cuenta-chevron { font-size:12px; transition:transform 0.22s; }
+        .auth-cuenta-dropdown:hover .auth-cuenta-trigger { border-color:rgba(192,57,43,0.4); color:#e8e2d9; }
+        .auth-cuenta-dropdown:hover .auth-cuenta-chevron { transform:rotate(180deg); }
+        .auth-cuenta-menu {
+            display:none; position:absolute; top:calc(100% - 4px); right:0; min-width:210px;
+            background:#16161e; border:1px solid rgba(255,255,255,0.09);
+            border-top:2px solid var(--rojo); padding:6px 0; z-index:999;
+            box-shadow:0 12px 32px rgba(0,0,0,0.5);
+        }
+        .auth-cuenta-dropdown:hover .auth-cuenta-menu { display:block; }
+        .auth-cuenta-info { padding:10px 16px 12px; border-bottom:1px solid var(--borde); margin-bottom:4px; }
+        .auth-cuenta-info-nombre { font-family:'Cinzel',serif; font-size:13px; font-weight:600; color:#e8e2d9; }
+        .auth-cuenta-info-email { font-size:10px; color:#8a8490; margin-top:2px; }
+        .auth-cuenta-item {
+            display:flex; align-items:center; gap:10px; padding:10px 16px; color:#b0aab8;
+            font-size:12px; font-weight:500; letter-spacing:0.05em; text-transform:uppercase;
+            cursor:pointer; transition:background 0.15s, color 0.15s; border:none;
+            background:transparent; width:100%; text-align:left; font-family:'Raleway',sans-serif; text-decoration:none;
+        }
+        .auth-cuenta-item:hover { background:rgba(192,57,43,0.1); color:#e8e2d9; }
+        .auth-cuenta-item i { font-size:15px; color:var(--rojo); flex-shrink:0; }
+        .auth-cuenta-item.danger i { color:#e74c3c; }
+        .auth-cuenta-item.danger:hover { background:rgba(231,76,60,0.1); color:#e74c3c; }
+
         /* ══ HERO ══ */
         .hero {
             position: relative; width: 100%;
@@ -349,6 +451,7 @@
 </head>
 <body>
 
+    <!-- NAVBAR PÚBLICA (sin sesión) -->
     <nav class="navbar" id="navbar">
         <a href="index.html" class="nav-logo">
             <img src="imagenes/logo_red.png" alt="Crónicas del Cazador">
@@ -365,6 +468,69 @@
             <a href="vistas/registro.html" class="btn-register">
                 <i class="ri-quill-pen-line"></i> Registrarse
             </a>
+        </div>
+    </nav>
+
+    <!-- NAVBAR LOGUEADA (visible solo con sesión activa) -->
+    <nav class="navbar-auth" id="navbar-auth">
+        <a href="index.html" class="nav-logo">
+            <img src="imagenes/logo_red.png" alt="Crónicas del Cazador">
+        </a>
+        <div class="auth-nav-items">
+            <a href="vistas/panel-del-jugador/panel-del-jugador.html" class="auth-nav-btn">
+                <i class="ri-layout-grid-line"></i> Menú del Cazador
+            </a>
+            <div class="auth-dropdown">
+                <div class="auth-dropdown-trigger">
+                    <i class="ri-sword-line"></i> Play CDC
+                    <i class="ri-arrow-down-s-line chevron"></i>
+                </div>
+                <div class="auth-dropdown-menu">
+                    <a href="vistas/creador/creador.html" class="auth-dropdown-item"><i class="ri-user-add-line"></i> Crear Personaje</a>
+                    <a href="vistas/panel-del-jugador/ficha/mis-personajes.html" class="auth-dropdown-item"><i class="ri-group-line"></i> Mis Personajes</a>
+                    <div class="auth-dropdown-sep"></div>
+                    <a href="vistas/panel-del-jugador/unirse-campana.html" class="auth-dropdown-item destacado"><i class="ri-login-circle-line"></i> Unirse a Campaña</a>
+                </div>
+            </div>
+            <div class="auth-dropdown">
+                <div class="auth-dropdown-trigger">
+                    <i class="ri-book-open-line"></i> Reglas
+                    <i class="ri-arrow-down-s-line chevron"></i>
+                </div>
+                <div class="auth-dropdown-menu">
+                    <a href="vistas/panel-del-jugador/reglas/culturas.html" class="auth-dropdown-item"><i class="ri-map-line"></i> Culturas</a>
+                    <a href="vistas/panel-del-jugador/reglas/caminos.html" class="auth-dropdown-item"><i class="ri-route-line"></i> Caminos</a>
+                    <div class="auth-dropdown-sep"></div>
+                    <a href="#" class="auth-dropdown-item"><i class="ri-bar-chart-line"></i> Atributos & Stats</a>
+                    <a href="#" class="auth-dropdown-item"><i class="ri-flashlight-line"></i> Habilidades</a>
+                </div>
+            </div>
+            <a href="vistas/panel-del-jugador/mi-cuenta.html" class="auth-nav-btn"><i class="ri-settings-3-line"></i> Mi Cuenta</a>
+            <a href="vistas/panel-del-jugador/soporte.html" class="auth-nav-btn"><i class="ri-question-line"></i> Soporte</a>
+        </div>
+        <div class="auth-nav-right">
+            <button onclick="abrirBandeja()" class="auth-bandeja" id="auth-bandeja-btn" title="Bandeja de mensajes">
+                <i class="ri-mail-line"></i>
+                <span class="badge" id="auth-badge-bandeja"></span>
+            </button>
+            <div class="auth-cuenta-dropdown">
+                <div class="auth-cuenta-trigger">
+                    <img class="auth-cuenta-avatar" id="auth-nav-avatar" src="" alt="">
+                    <i class="ri-user-3-line" id="auth-nav-avatar-icon"></i>
+                    <span class="auth-cuenta-nombre" id="auth-nombre-nav">Cazador</span>
+                    <i class="ri-arrow-down-s-line auth-cuenta-chevron"></i>
+                </div>
+                <div class="auth-cuenta-menu">
+                    <div class="auth-cuenta-info">
+                        <div class="auth-cuenta-info-nombre" id="auth-cuenta-nombre-display">—</div>
+                        <div class="auth-cuenta-info-email" id="auth-cuenta-email-display">—</div>
+                    </div>
+                    <div class="auth-dropdown-sep"></div>
+                    <button class="auth-cuenta-item danger" id="auth-btn-logout">
+                        <i class="ri-logout-box-r-line"></i> Cerrar Sesión
+                    </button>
+                </div>
+            </div>
         </div>
     </nav>
 
@@ -476,6 +642,70 @@
         const navbar = document.getElementById('navbar');
         window.addEventListener('scroll', () => {
             navbar.classList.toggle('scrolled', window.scrollY > 60);
+        });
+    </script>
+
+    <script type="module">
+        import { auth, db } from "./js/firebase-config.js";
+        import { onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-auth.js";
+        import { doc, getDoc, collection, query, where, getDocs } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore.js";
+        import { initBandeja } from "./js/bandeja.js";
+
+        const ADMIN_UID = 'a084j4Z7LvWHKHgZzbAsTPzKXLV2';
+        const navbarPublic = document.getElementById('navbar');
+        const navbarAuth   = document.getElementById('navbar-auth');
+
+        // Scroll en navbar logueada
+        window.addEventListener('scroll', () => {
+            navbarAuth.classList.toggle('scrolled', window.scrollY > 60);
+        });
+
+        onAuthStateChanged(auth, async (user) => {
+            if (!user) return; // sin sesión → navbar pública ya visible
+
+            // Ocultar navbar pública, mostrar logueada
+            navbarPublic.style.display = 'none';
+            navbarAuth.classList.add('visible');
+
+            // Admin → no mostrar navbar jugador (tiene la suya)
+            if (user.uid === ADMIN_UID) return;
+
+            // Nombre
+            const nombre = user.displayName || 'Cazador';
+            document.getElementById('auth-nombre-nav').textContent = nombre;
+            document.getElementById('auth-cuenta-nombre-display').textContent = nombre;
+            document.getElementById('auth-cuenta-email-display').textContent = user.email;
+
+            // Avatar
+            try {
+                const snapU = await getDoc(doc(db, 'usuarios', user.uid));
+                if(snapU.exists()){
+                    const avatarUrl = snapU.data().avatar || snapU.data().avatarDirectorUrl || null;
+                    if(avatarUrl){
+                        const av = document.getElementById('auth-nav-avatar');
+                        const ic = document.getElementById('auth-nav-avatar-icon');
+                        if(av){ av.src = avatarUrl; av.classList.add('visible'); }
+                        if(ic) ic.style.display = 'none';
+                    }
+                }
+            } catch(e){}
+
+            // Badge bandeja
+            try {
+                const qB = query(collection(db,'mensajes'), where('destinatarioUid','==',user.uid), where('leido','==',false));
+                const sB = await getDocs(qB);
+                const badge = document.getElementById('auth-badge-bandeja');
+                if(badge && sB.size > 0){ badge.textContent = sB.size > 99 ? '99+' : sB.size; badge.classList.add('visible'); }
+            } catch(e){}
+
+            // Logout
+            document.getElementById('auth-btn-logout').addEventListener('click', async () => {
+                await signOut(auth);
+                window.location.reload();
+            });
+
+            // Bandeja
+            await initBandeja(user.uid);
         });
     </script>
 
