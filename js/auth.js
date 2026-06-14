@@ -4,9 +4,11 @@ import {
     createUserWithEmailAndPassword,
     signInWithEmailAndPassword,
     onAuthStateChanged,
-    updateProfile
+    updateProfile,
+    sendEmailVerification,
+    signOut
 } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-auth.js";
-import { doc, setDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore.js";
+import { doc, setDoc, getDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore.js";
 
 // ── REGISTRO ──
 const registroForm = document.getElementById('registro-form');
@@ -20,6 +22,13 @@ if (registroForm) {
         const username = document.getElementById('username').value.trim();
 
         if (!username) { mostrarError('Por favor ingresa un nombre de usuario.'); return; }
+
+        const aceptoCheckbox = document.getElementById('acepto-tos');
+        if (aceptoCheckbox && !aceptoCheckbox.checked) {
+            mostrarError('Debes aceptar los Términos de Servicio para registrarte.');
+            return;
+        }
+
         if (btnSubmit) { btnSubmit.disabled = true; btnSubmit.textContent = 'Creando cuenta...'; }
 
         try {
@@ -28,13 +37,18 @@ if (registroForm) {
             // Crear documento en Firestore
             await setDoc(doc(db, 'usuarios', userCredential.user.uid), {
                 nombre:    username,
+                nombreLower: username.toLowerCase(),
                 email:     email,
                 rol:       'jugador',
                 bloqueado: false,
                 creadoEn:  serverTimestamp(),
+                aceptoTOS: true,
+                aceptoTOSFecha: serverTimestamp(),
             });
+            await sendEmailVerification(userCredential.user);
             await userCredential.user.reload();
-            window.location.href = "dashboard.html";
+            await signOut(auth);
+            window.location.href = "verifica-correo.html";
         } catch (error) {
             if (btnSubmit) { btnSubmit.disabled = false; btnSubmit.textContent = 'Crear cuenta'; }
             mostrarError(traducirError(error.code));
@@ -55,7 +69,25 @@ if (loginForm) {
         if (btnSubmit) { btnSubmit.disabled = true; btnSubmit.textContent = 'Entrando...'; }
 
         try {
-            await signInWithEmailAndPassword(auth, email, password);
+            const cred = await signInWithEmailAndPassword(auth, email, password);
+
+            // 1. Verificar email confirmado
+            if (!cred.user.emailVerified) {
+                await sendEmailVerification(cred.user);
+                await signOut(auth);
+                if (btnSubmit) { btnSubmit.disabled = false; btnSubmit.textContent = 'Iniciar Sesión'; }
+                mostrarError('Debes verificar tu correo antes de continuar. Te enviamos un nuevo enlace de verificación a tu email.');
+                return;
+            }
+
+            // 2. Verificar aceptación de TOS (usuarios existentes)
+            const userSnap = await getDoc(doc(db, 'usuarios', cred.user.uid));
+            const data = userSnap.exists() ? userSnap.data() : {};
+            if (!data.aceptoTOS) {
+                window.location.href = "aceptar-terminos.html";
+                return;
+            }
+
             window.location.href = "dashboard.html";
         } catch (error) {
             if (btnSubmit) { btnSubmit.disabled = false; btnSubmit.textContent = 'Iniciar Sesión'; }
@@ -66,7 +98,8 @@ if (loginForm) {
 
 // ── PROTECCIÓN DE RUTAS ──
 onAuthStateChanged(auth, (user) => {
-    if (window.location.pathname.includes("dashboard.html") && !user) {
+    const path = window.location.pathname;
+    if ((path.includes("dashboard.html") || path.includes("aceptar-terminos.html")) && !user) {
         window.location.href = "login.html";
     }
 });

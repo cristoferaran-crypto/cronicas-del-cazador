@@ -72,6 +72,17 @@ const BANDEJA_CSS = `
   .bandeja-form-textarea:focus{border-color:rgba(192,57,43,0.4);}
   .bandeja-char-count{font-size:10px;color:rgba(226,221,214,0.3);text-align:right;margin-bottom:12px;}
   .bandeja-form-adjunto{padding:8px 10px;border:1px dashed rgba(255,255,255,0.1);color:rgba(226,221,214,0.3);font-size:11px;text-align:center;margin-bottom:12px;cursor:not-allowed;opacity:0.5;}
+  /* Autocomplete destinatario */
+  .bandeja-dest-wrap{position:relative;margin-bottom:12px;}
+  .bandeja-dest-input{width:100%;background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.08);color:#e2ddd6;font-family:'Raleway',sans-serif;font-size:13px;padding:8px 10px;outline:none;transition:border-color 0.2s;box-sizing:border-box;}
+  .bandeja-dest-input:focus{border-color:rgba(192,57,43,0.4);}
+  .bandeja-dest-input.valido{border-color:rgba(46,204,113,0.5);background:rgba(46,204,113,0.04);}
+  .bandeja-dest-input.invalido{border-color:rgba(192,57,43,0.6);background:rgba(192,57,43,0.04);}
+  .bandeja-dest-sugerencias{position:absolute;top:100%;left:0;right:0;background:#16161e;border:1px solid rgba(255,255,255,0.1);border-top:2px solid #c0392b;z-index:1000;max-height:160px;overflow-y:auto;display:none;}
+  .bandeja-dest-sugerencias.visible{display:block;}
+  .bandeja-dest-item{padding:8px 12px;font-family:'Raleway',sans-serif;font-size:13px;color:#b0aab8;cursor:pointer;transition:background 0.15s;}
+  .bandeja-dest-item:hover{background:rgba(192,57,43,0.1);color:#e8e2d9;}
+  .bandeja-dest-hint{font-size:10px;color:rgba(226,221,214,0.3);margin-top:4px;margin-bottom:12px;min-height:14px;}
   .bandeja-btn-enviar{width:100%;height:36px;background:#c0392b;border:none;color:#fff;font-family:'Cinzel',serif;font-size:11px;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;cursor:pointer;transition:background 0.2s;}
   .bandeja-btn-enviar:hover{background:#e74c3c;}
   /* Vista detalle mensaje */
@@ -145,9 +156,15 @@ function crearHTML() {
       </div>
       <div class="bandeja-modal-body">
         <label class="bandeja-form-label">Para</label>
-        <select id="bandeja-destinatario" class="bandeja-form-input" style="cursor:pointer;">
-          <option value="">Cargando usuarios...</option>
-        </select>
+        <div class="bandeja-dest-wrap">
+          <input id="bandeja-destinatario-input" class="bandeja-dest-input" type="text"
+            placeholder="Escribe el nombre del cazador..." autocomplete="off"
+            oninput="buscarDestinatario(this.value)">
+          <div class="bandeja-dest-sugerencias" id="bandeja-dest-sugerencias"></div>
+        </div>
+        <div class="bandeja-dest-hint" id="bandeja-dest-hint"></div>
+        <input type="hidden" id="bandeja-destinatario-uid">
+        <input type="hidden" id="bandeja-destinatario-nombre">
         <label class="bandeja-form-label">Asunto</label>
         <input id="bandeja-asunto" class="bandeja-form-input" type="text" maxlength="60" placeholder="Asunto del mensaje...">
         <label class="bandeja-form-label">Mensaje</label>
@@ -301,22 +318,18 @@ window.eliminarMensajeActual = async function() {
 
 // ── COMPOSE ──────────────────────────────
 window.abrirCompose = async function(destinatarioUid = '', destinatarioNombre = '') {
-  // Cargar lista de usuarios
-  const sel = document.getElementById('bandeja-destinatario');
-  sel.innerHTML = '<option value="">Cargando...</option>';
-  try {
-    const snap = await getDocs(collection(db, 'usuarios'));
-    const opts = snap.docs
-      .filter(d => d.id !== _uid)
-      .map(d => {
-        const data = d.data();
-        const nombre = data.nombre || data.displayName || d.id;
-        const sel = d.id === destinatarioUid ? 'selected' : '';
-        return `<option value="${d.id}|${nombre}" ${sel}>${nombre}</option>`;
-      });
-    sel.innerHTML = '<option value="">— Seleccionar destinatario —</option>' + opts.join('');
-    if (destinatarioUid) sel.value = `${destinatarioUid}|${destinatarioNombre}`;
-  } catch(e) { sel.innerHTML = '<option value="">Error cargando usuarios</option>'; }
+  // Limpiar campos
+  const inputDest  = document.getElementById('bandeja-destinatario-input');
+  const hiddenUid  = document.getElementById('bandeja-destinatario-uid');
+  const hiddenNom  = document.getElementById('bandeja-destinatario-nombre');
+  const hint       = document.getElementById('bandeja-dest-hint');
+
+  inputDest.value = destinatarioNombre || '';
+  hiddenUid.value = destinatarioUid || '';
+  hiddenNom.value = destinatarioNombre || '';
+  hint.textContent = '';
+  inputDest.className = 'bandeja-dest-input' + (destinatarioUid ? ' valido' : '');
+  document.getElementById('bandeja-dest-sugerencias').classList.remove('visible');
   document.getElementById('bandeja-asunto').value = '';
   document.getElementById('bandeja-cuerpo').value = '';
   document.getElementById('bandeja-char-count').textContent = '0/500';
@@ -330,15 +343,97 @@ window.responderMensaje = function(uid, nombre) {
   abrirCompose(uid, nombre);
 };
 
-window.enviarMensaje = async function() {
-  const selVal = document.getElementById('bandeja-destinatario').value;
-  const asunto = document.getElementById('bandeja-asunto').value.trim();
-  const cuerpo = document.getElementById('bandeja-cuerpo').value.trim();
-  if (!selVal) { alert('Selecciona un destinatario.'); return; }
-  if (!cuerpo) { alert('El mensaje no puede estar vacío.'); return; }
-  const [destUid, destNombre] = selVal.split('|');
+// ── AUTOCOMPLETE DESTINATARIO ─────────────
+let _buscarTimeout = null;
+window.buscarDestinatario = function(valor) {
+  const input    = document.getElementById('bandeja-destinatario-input');
+  const lista    = document.getElementById('bandeja-dest-sugerencias');
+  const hint     = document.getElementById('bandeja-dest-hint');
+  const hiddenUid = document.getElementById('bandeja-destinatario-uid');
+  const hiddenNom = document.getElementById('bandeja-destinatario-nombre');
 
-  // Verificar bandeja del destinatario (no aplica a admin ni a mensajes de sistema)
+  // Limpiar selección previa al escribir
+  hiddenUid.value = '';
+  hiddenNom.value = '';
+  input.classList.remove('valido', 'invalido');
+  hint.textContent = '';
+  lista.classList.remove('visible');
+  lista.innerHTML = '';
+
+  const texto = valor.trim().toLowerCase();
+  if (texto.length < 2) return;
+
+  clearTimeout(_buscarTimeout);
+  _buscarTimeout = setTimeout(async () => {
+    try {
+      // Búsqueda por prefijo en nombreLower (case-insensitive)
+      const q = query(
+        collection(db, 'usuarios'),
+        where('nombreLower', '>=', texto),
+        where('nombreLower', '<=', texto + '\uf8ff'),
+        limit(8)
+      );
+      const snap = await getDocs(q);
+      const resultados = snap.docs.filter(d => d.id !== _uid);
+
+      if (resultados.length === 0) {
+        hint.style.color = '#e57373';
+        hint.textContent = 'No se encontraron cazadores con ese nombre.';
+        return;
+      }
+
+      lista.innerHTML = resultados.map(d => {
+        const nombre = d.data().nombre || d.data().displayName || d.id;
+        return `<div class="bandeja-dest-item" onclick="seleccionarDestinatario('${d.id}', '${nombre.replace(/'/g, "\\'")}')">
+          <i class="ri-user-line" style="font-size:12px;margin-right:6px;color:#c0392b;"></i>${nombre}
+        </div>`;
+      }).join('');
+      lista.classList.add('visible');
+
+    } catch(e) {
+      hint.style.color = '#e57373';
+      hint.textContent = 'Error al buscar. Intenta de nuevo.';
+    }
+  }, 300);
+};
+
+window.seleccionarDestinatario = function(uid, nombre) {
+  document.getElementById('bandeja-destinatario-input').value = nombre;
+  document.getElementById('bandeja-destinatario-input').classList.add('valido');
+  document.getElementById('bandeja-destinatario-uid').value = uid;
+  document.getElementById('bandeja-destinatario-nombre').value = nombre;
+  document.getElementById('bandeja-dest-sugerencias').classList.remove('visible');
+  document.getElementById('bandeja-dest-sugerencias').innerHTML = '';
+  document.getElementById('bandeja-dest-hint').textContent = '';
+};
+
+// Cerrar sugerencias al hacer click fuera
+document.addEventListener('click', (e) => {
+  if (!e.target.closest('.bandeja-dest-wrap')) {
+    const lista = document.getElementById('bandeja-dest-sugerencias');
+    if (lista) lista.classList.remove('visible');
+  }
+});
+
+window.enviarMensaje = async function() {
+  const destUid   = document.getElementById('bandeja-destinatario-uid').value;
+  const destNombre = document.getElementById('bandeja-destinatario-nombre').value;
+  const asunto    = document.getElementById('bandeja-asunto').value.trim();
+  const cuerpo    = document.getElementById('bandeja-cuerpo').value.trim();
+  const hint      = document.getElementById('bandeja-dest-hint');
+  const inputDest = document.getElementById('bandeja-destinatario-input');
+
+  if (!destUid) {
+    inputDest.classList.add('invalido');
+    hint.style.color = '#e57373';
+    hint.textContent = !inputDest.value.trim()
+      ? 'Debes indicar un destinatario.'
+      : 'Este nombre de usuario no existe en nuestro sistema.';
+    return;
+  }
+  if (!cuerpo) { alert('El mensaje no puede estar vacío.'); return; }
+
+  // Verificar bandeja del destinatario
   if (!_esAdmin) {
     const destSnap = await getDocs(query(
       collection(db, 'usuarios', destUid, 'notificaciones'),
@@ -349,6 +444,7 @@ window.enviarMensaje = async function() {
       return;
     }
   }
+
   // Obtener nombre del remitente
   const miSnap = await getDoc(doc(db, 'usuarios', _uid));
   const miNombre = miSnap.data()?.nombre || miSnap.data()?.displayName || 'Cazador';
@@ -361,7 +457,7 @@ window.enviarMensaje = async function() {
     fecha: serverTimestamp(),
     deUid: _uid,
     deNombre: miNombre,
-    adjunto: null, // reservado para ítems futuros
+    adjunto: null,
   });
   cerrarCompose();
   mostrarToastBandeja('Mensaje enviado.');
