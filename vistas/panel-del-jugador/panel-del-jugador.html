@@ -244,6 +244,17 @@
         .def-texto { font-size:14px; color:var(--texto-secundario); line-height:1.75; margin-bottom:12px; }
         .def-rango { display:flex; align-items:center; gap:8px; font-size:12px; color:var(--texto-muted); }
         .def-rango strong { color:var(--dorado); font-family:'Cinzel',serif; }
+        /* ══ FOOTER ══ */
+        .site-footer { background:var(--superficie); border-top:1px solid var(--borde); padding:40px 32px 28px; margin-top:80px; }
+        .footer-inner { max-width:900px; margin:0 auto; display:flex; flex-direction:column; align-items:center; gap:20px; }
+        .footer-logo img { height:48px; width:auto; filter:invert(1) brightness(0.85); mix-blend-mode:screen; }
+        .footer-divider { width:100%; height:1px; background:var(--borde); }
+        .footer-bottom { display:flex; align-items:center; justify-content:space-between; width:100%; flex-wrap:wrap; gap:12px; }
+        .footer-copy { font-size:11px; color:var(--texto-muted); letter-spacing:0.05em; line-height:1.7; }
+        .footer-copy strong { color:var(--texto-secundario); }
+        .footer-copy a { color:var(--texto-secundario); text-decoration:underline; }
+        .footer-badge { font-size:10px; font-weight:600; letter-spacing:0.2em; text-transform:uppercase; color:var(--rojo); border:1px solid rgba(192,57,43,0.35); padding:4px 12px; text-decoration:none; flex-shrink:0; }
+        @media(max-width:600px){ .footer-bottom { flex-direction:column; align-items:center; text-align:center; } }
     </style>
 </head>
 <body>
@@ -400,6 +411,23 @@
         </div>
     </div>
 </div>
+
+    <footer class="site-footer">
+        <div class="footer-inner">
+            <div class="footer-logo">
+                <img src="../../imagenes/logo_red.png" alt="Crónicas del Cazador">
+            </div>
+            <div class="footer-divider"></div>
+            <div class="footer-bottom">
+                <p class="footer-copy">
+                    © 2025–2026 <strong>Cristofer Arancibia Lagos</strong> ("Raziel") | Todos los derechos reservados.<br>
+                    Crónicas del Cazador, su logotipo, sistema de juego, mitología y todo su contenido asociado son © y marca de Cristofer Arancibia Lagos en Chile y otros países.<br>
+                    <a href="../../terminos.html" target="_blank">Términos de Servicio</a>
+                </p>
+                <a href="../../terminos.html" target="_blank" class="footer-badge">Términos de Servicio</a>
+            </div>
+        </div>
+    </footer>
 
 <script type="module">
     import { auth, db } from "../../js/firebase-config.js";
