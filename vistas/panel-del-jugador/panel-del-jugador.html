@@ -286,10 +286,10 @@
         <a href="soporte.html" class="nav-btn"><i class="ri-question-line"></i> Soporte</a>
     </div>
     <div class="nav-right">
-        <a href="bandeja.html" class="nav-bandeja" id="nav-bandeja-btn" title="Bandeja de mensajes">
+        <button onclick="abrirBandeja()" class="nav-bandeja" id="nav-bandeja-btn" title="Bandeja de mensajes">
             <i class="ri-mail-line"></i>
             <span class="badge" id="badge-bandeja"></span>
-        </a>
+        </button>
         <div class="cuenta-dropdown">
             <div class="cuenta-trigger">
                 <img class="cuenta-avatar" id="nav-avatar" src="" alt="">
@@ -405,6 +405,7 @@
     import { auth, db } from "../../js/firebase-config.js";
     import { onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-auth.js";
     import { doc, getDoc, collection, query, where, getDocs } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore.js";
+    import { initBandeja } from "../../js/bandeja.js";
 
     onAuthStateChanged(auth, async (user) => {
         if (!user) { window.location.href = "../login.html"; return; }
@@ -426,13 +427,8 @@
                 if(ic) ic.style.display = 'none';
             }
         }
-        // Badge bandeja
-        try {
-            const qB = query(collection(db,'mensajes'), where('destinatarioUid','==',user.uid), where('leido','==',false));
-            const snapB = await getDocs(qB);
-            const badge = document.getElementById('badge-bandeja');
-            if(badge && snapB.size > 0){ badge.textContent = snapB.size > 99 ? '99+' : snapB.size; badge.classList.add('visible'); }
-        } catch(e){}
+        // Bandeja
+        await initBandeja(user.uid);
 
         // Cargar personajes desde Firestore
         await cargarPersonajes(user.uid);
