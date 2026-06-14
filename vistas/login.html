@@ -23,7 +23,6 @@
       display: flex; align-items: center; justify-content: center;
     }
 
-    /* Fondo atmosférico */
     .bg {
       position: fixed; inset: 0; z-index: 0;
       background:
@@ -31,7 +30,6 @@
         radial-gradient(ellipse 60% 40% at 0% 100%, rgba(192,57,43,0.06) 0%, transparent 60%);
     }
 
-    /* Partículas decorativas */
     .bg::before {
       content: '';
       position: absolute; inset: 0;
@@ -41,7 +39,6 @@
         radial-gradient(1px 1px at 50% 50%, rgba(192,57,43,0.2) 0%, transparent 100%);
     }
 
-    /* Marca de agua */
     .bg::after {
       content: 'CDC';
       position: absolute; bottom: -60px; right: -30px;
@@ -50,7 +47,6 @@
       letter-spacing: -0.05em; user-select: none;
     }
 
-    /* Card */
     .card {
       position: relative; z-index: 1;
       width: 100%; max-width: 420px;
@@ -65,32 +61,24 @@
       to   { opacity:1; transform:translateY(0); }
     }
 
-    /* Logo */
-    .card-logo {
-      text-align: center; margin-bottom: 28px;
-    }
-
+    .card-logo { text-align: center; margin-bottom: 28px; }
     .card-logo img {
       height: 52px; width: auto;
       filter: invert(1) brightness(0.85);
       mix-blend-mode: screen;
     }
 
-    /* Título */
     .card-titulo {
       font-family: 'Cinzel', serif;
       font-size: 22px; font-weight: 800;
-      color: var(--texto); text-align: center;
-      margin-bottom: 6px;
+      color: var(--texto); text-align: center; margin-bottom: 6px;
     }
 
     .card-subtitulo {
       font-size: 13px; color: var(--muted);
-      text-align: center; margin-bottom: 28px;
-      font-style: italic;
+      text-align: center; margin-bottom: 28px; font-style: italic;
     }
 
-    /* Formulario */
     .form-group { margin-bottom: 16px; }
 
     .form-label {
@@ -116,7 +104,7 @@
       border: 1px solid var(--borde);
       color: var(--texto); font-family: 'Raleway', sans-serif;
       font-size: 14px; font-weight: 500;
-      padding: 0 14px 0 40px; outline: none;
+      padding: 0 36px 0 40px; outline: none;
       transition: border-color 0.2s, background 0.2s;
     }
 
@@ -128,13 +116,10 @@
       transform: translateY(-50%);
       background: transparent; border: none;
       color: var(--muted); cursor: pointer; font-size: 16px;
-      padding: 4px; transition: color 0.2s;
-      z-index: 2;
+      padding: 4px; transition: color 0.2s; z-index: 2;
     }
-    .input-wrap .form-input { padding-right: 36px; }
     .toggle-pass:hover { color: var(--texto); }
 
-    /* Mantener sesión + olvidé contraseña */
     .form-meta {
       display: flex; justify-content: space-between; align-items: center;
       margin-bottom: 20px;
@@ -150,18 +135,11 @@
       display: flex; align-items: center; justify-content: center;
       flex-shrink: 0; transition: all 0.15s; cursor: pointer;
     }
-
-    .checkbox-custom.checked {
-      background: var(--rojo); border-color: var(--rojo);
-    }
-
+    .checkbox-custom.checked { background: var(--rojo); border-color: var(--rojo); }
     .checkbox-custom i { font-size: 10px; color: white; display: none; }
     .checkbox-custom.checked i { display: block; }
 
-    .checkbox-label {
-      font-size: 12px; color: var(--muted);
-      user-select: none;
-    }
+    .checkbox-label { font-size: 12px; color: var(--muted); user-select: none; }
 
     .forgot-link {
       font-size: 12px; color: var(--muted);
@@ -171,7 +149,6 @@
     }
     .forgot-link:hover { color: var(--rojo); }
 
-    /* Botón principal */
     .btn-login {
       width: 100%; height: 46px;
       background: var(--rojo); border: none;
@@ -185,25 +162,18 @@
     .btn-login:hover:not(:disabled) { background: var(--rojo-hover); transform: translateY(-1px); }
     .btn-login:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
 
-    /* Separador */
     .sep {
-      display: flex; align-items: center; gap: 12px;
-      margin-bottom: 16px;
+      display: flex; align-items: center; gap: 12px; margin-bottom: 16px;
     }
     .sep-line { flex: 1; height: 1px; background: var(--borde); }
     .sep-texto { font-size: 11px; color: var(--muted); white-space: nowrap; }
 
-    /* Registro link */
-    .registro-link {
-      text-align: center; font-size: 13px; color: var(--muted);
-    }
+    .registro-link { text-align: center; font-size: 13px; color: var(--muted); }
     .registro-link a {
-      color: var(--rojo); text-decoration: none; font-weight: 600;
-      transition: color 0.2s;
+      color: var(--rojo); text-decoration: none; font-weight: 600; transition: color 0.2s;
     }
     .registro-link a:hover { color: var(--rojo-hover); }
 
-    /* Error */
     .error-msg {
       background: rgba(192,57,43,0.08);
       border: 1px solid var(--borde-r);
@@ -213,13 +183,12 @@
     }
     .error-msg.visible { display: block; }
 
-    /* Modal reset contraseña */
+    /* Modal reset */
     .modal-overlay {
       position: fixed; inset: 0; z-index: 100;
       background: rgba(0,0,0,0.8); backdrop-filter: blur(4px);
       display: flex; align-items: center; justify-content: center;
-      padding: 20px; opacity: 0; pointer-events: none;
-      transition: opacity 0.2s;
+      padding: 20px; opacity: 0; pointer-events: none; transition: opacity 0.2s;
     }
     .modal-overlay.open { opacity: 1; pointer-events: all; }
 
@@ -235,11 +204,7 @@
       font-family: 'Cinzel', serif; font-size: 17px;
       font-weight: 700; color: var(--texto); margin-bottom: 6px;
     }
-    .modal-desc {
-      font-size: 13px; color: var(--muted);
-      line-height: 1.6; margin-bottom: 18px;
-    }
-
+    .modal-desc { font-size: 13px; color: var(--muted); line-height: 1.6; margin-bottom: 18px; }
     .modal-acciones { display: flex; gap: 10px; margin-top: 16px; }
 
     .btn-modal-enviar {
@@ -262,7 +227,6 @@
     }
     .btn-modal-cancel:hover { border-color: rgba(255,255,255,0.2); color: var(--texto); }
 
-    /* Toast */
     #toast {
       position: fixed; bottom: 24px; right: 24px; z-index: 999;
       padding: 12px 20px; border-left: 3px solid;
@@ -275,7 +239,6 @@
 
 <div class="bg"></div>
 
-<!-- CARD LOGIN -->
 <div class="card">
   <div class="card-logo">
     <img src="../imagenes/logo.png" alt="Crónicas del Cazador">
@@ -307,10 +270,9 @@
       </div>
     </div>
 
-    <!-- Mantener sesión + Olvidé contraseña -->
     <div class="form-meta">
       <div class="checkbox-wrap" onclick="toggleRecordar()">
-        <div class="checkbox-custom" id="checkbox-recordar">
+        <div class="checkbox-custom checked" id="checkbox-recordar">
           <i class="ri-check-line"></i>
         </div>
         <span class="checkbox-label">Mantener sesión</span>
@@ -348,8 +310,7 @@
       <label class="form-label">Correo electrónico</label>
       <div class="input-wrap">
         <i class="ri-mail-line"></i>
-        <input class="form-input" type="email" id="reset-email"
-               placeholder="tu@correo.com">
+        <input class="form-input" type="email" id="reset-email" placeholder="tu@correo.com">
       </div>
     </div>
     <div class="modal-acciones">
@@ -364,28 +325,31 @@
 <div id="toast"></div>
 
 <script type="module">
-  import { auth } from "../js/firebase-config.js";
+  import { auth, db } from "../js/firebase-config.js";
   import {
     signInWithEmailAndPassword,
     sendPasswordResetEmail,
+    sendEmailVerification,
+    signOut,
     onAuthStateChanged,
     setPersistence,
     browserLocalPersistence,
     browserSessionPersistence
   } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-auth.js";
+  import { doc, getDoc } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore.js";
 
-  window._recordarSesion = true; // por defecto activado
-
+  window._recordarSesion = true;
   const ADMIN_UID = 'a084j4Z7LvWHKHgZzbAsTPzKXLV2';
-  // Si ya hay sesión activa, redirigir según rol
-  onAuthStateChanged(auth, (user) => {
-    if (user) {
-      if (user.uid === ADMIN_UID) {
-        window.location.href = "admin/admin.html";
-      } else {
-        window.location.href = "dashboard.html";
-      }
-    }
+
+  // Si ya hay sesión activa válida, redirigir
+  onAuthStateChanged(auth, async (user) => {
+    if (!user) return;
+    if (user.uid === ADMIN_UID) { window.location.href = "admin/admin.html"; return; }
+    if (!user.emailVerified) return; // sesión activa pero sin verificar, no redirigir
+    const snap = await getDoc(doc(db, 'usuarios', user.uid));
+    const data = snap.exists() ? snap.data() : {};
+    if (!data.aceptoTOS) { window.location.href = "aceptar-terminos.html"; return; }
+    window.location.href = "dashboard.html";
   });
 
   // ── LOGIN ──
@@ -399,18 +363,37 @@
     ocultarError();
 
     try {
-      // Persistencia según checkbox
       const persistence = window._recordarSesion
-        ? browserLocalPersistence    // persiste aunque cierren el navegador
-        : browserSessionPersistence; // solo dura la sesión del navegador
-
+        ? browserLocalPersistence
+        : browserSessionPersistence;
       await setPersistence(auth, persistence);
+
       const cred = await signInWithEmailAndPassword(auth, email, password);
+
+      // Admin pasa siempre
       if (cred.user.uid === ADMIN_UID) {
         window.location.href = "admin/admin.html";
-      } else {
-        window.location.href = "dashboard.html";
+        return;
       }
+
+      // 1. Verificar correo
+      if (!cred.user.emailVerified) {
+        await sendEmailVerification(cred.user);
+        await signOut(auth);
+        mostrarError('Debes verificar tu correo antes de continuar. Te reenviamos el enlace de verificación.');
+        btn.disabled = false; btn.textContent = 'Entrar al mundo';
+        return;
+      }
+
+      // 2. Verificar aceptación de TOS
+      const snap = await getDoc(doc(db, 'usuarios', cred.user.uid));
+      const data = snap.exists() ? snap.data() : {};
+      if (!data.aceptoTOS) {
+        window.location.href = "aceptar-terminos.html";
+        return;
+      }
+
+      window.location.href = "dashboard.html";
 
     } catch (err) {
       mostrarError(traducirError(err.code));
@@ -484,7 +467,6 @@
 </script>
 
 <script>
-  // ── TOGGLE CONTRASEÑA ──
   function togglePass() {
     const input = document.getElementById('password');
     const icon  = document.getElementById('pass-icon');
@@ -495,18 +477,14 @@
     }
   }
 
-  // ── CHECKBOX RECORDAR ──
   const checkbox = document.getElementById('checkbox-recordar');
-  checkbox.classList.add('checked'); // activo por defecto
 
   function toggleRecordar() {
     window._recordarSesion = !window._recordarSesion;
     checkbox.classList.toggle('checked', window._recordarSesion);
   }
 
-  // ── MODAL RESET ──
   function abrirResetModal() {
-    // Pre-rellenar con el email si ya lo escribió
     const email = document.getElementById('email').value.trim();
     if (email) document.getElementById('reset-email').value = email;
     document.getElementById('reset-error').classList.remove('visible');
@@ -523,9 +501,9 @@
     if (e.target.id === 'modal-reset') cerrarResetModal();
   }
 
-  window.togglePass      = togglePass;
-  window.toggleRecordar  = toggleRecordar;
-  window.abrirResetModal = abrirResetModal;
+  window.togglePass       = togglePass;
+  window.toggleRecordar   = toggleRecordar;
+  window.abrirResetModal  = abrirResetModal;
   window.cerrarResetModal = cerrarResetModal;
   window.cerrarModalFuera = cerrarModalFuera;
 </script>
