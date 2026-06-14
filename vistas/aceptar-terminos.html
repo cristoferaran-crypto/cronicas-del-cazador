@@ -1,0 +1,419 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Términos de Servicio | Crónicas del Cazador</title>
+    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;800&family=Raleway:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/remixicon@3.5.0/fonts/remixicon.css" rel="stylesheet">
+    <style>
+        :root {
+            --rojo: #c0392b;
+            --negro: #07070a;
+            --sup2: #16161e;
+            --sup3: #1c1c26;
+            --borde: rgba(255,255,255,0.07);
+            --borde-r: rgba(192,57,43,0.35);
+            --texto: #e8e2d9;
+            --muted: #8a8490;
+            --dorado: #c9a84c;
+        }
+
+        *, *::before, *::after { margin:0; padding:0; box-sizing:border-box; }
+
+        body {
+            font-family: 'Raleway', sans-serif;
+            background: var(--negro);
+            color: var(--texto);
+            min-height: 100vh;
+            display: flex; flex-direction: column;
+            overflow-x: hidden;
+        }
+
+        body::before {
+            content: '';
+            position: fixed; inset: 0;
+            background:
+                radial-gradient(ellipse 60% 50% at 20% 10%, rgba(192,57,43,0.07) 0%, transparent 65%),
+                radial-gradient(ellipse 50% 60% at 80% 90%, rgba(192,57,43,0.04) 0%, transparent 65%);
+            pointer-events: none; z-index: 0;
+        }
+
+        /* ── NAVBAR ── */
+        .navbar {
+            position: relative; z-index: 10;
+            display: flex; align-items: center; justify-content: space-between;
+            padding: 0 40px; height: 64px;
+            border-bottom: 1px solid var(--borde);
+            background: rgba(7,7,10,0.8);
+            backdrop-filter: blur(12px);
+        }
+
+        .logo {
+            display: flex; align-items: center;
+            text-decoration: none;
+        }
+
+        .logo img {
+            height: 36px; width: auto;
+            filter: invert(1) brightness(0.85);
+            mix-blend-mode: screen;
+        }
+
+        .nav-salir {
+            font-size: 12px; font-weight: 600;
+            letter-spacing: 0.1em; text-transform: uppercase;
+            color: var(--muted); background: transparent; border: none;
+            display: flex; align-items: center; gap: 6px;
+            cursor: pointer; transition: color 0.2s;
+        }
+
+        .nav-salir:hover { color: var(--texto); }
+
+        /* ── MAIN ── */
+        main {
+            position: relative; z-index: 1;
+            flex: 1; display: flex;
+            align-items: flex-start; justify-content: center;
+            padding: 40px 20px;
+        }
+
+        .container {
+            width: 100%; max-width: 640px;
+        }
+
+        /* Banner de aviso */
+        .aviso-banner {
+            display: flex; align-items: flex-start; gap: 12px;
+            padding: 14px 18px;
+            background: rgba(192,57,43,0.08);
+            border: 1px solid rgba(192,57,43,0.25);
+            margin-bottom: 24px;
+        }
+
+        .aviso-banner i {
+            font-size: 18px; color: var(--rojo); margin-top: 1px;
+        }
+
+        .aviso-banner p {
+            font-size: 13px; color: var(--muted); line-height: 1.6;
+        }
+
+        .aviso-banner strong { color: var(--texto); }
+
+        /* Card principal */
+        .card {
+            background: var(--sup2);
+            border: 1px solid var(--borde);
+            border-top: 2px solid var(--rojo);
+        }
+
+        .card-header {
+            padding: 28px 32px 20px;
+            border-bottom: 1px solid var(--borde);
+            text-align: center;
+        }
+
+        .card-eyebrow {
+            font-size: 10px; font-weight: 600;
+            letter-spacing: 0.3em; text-transform: uppercase;
+            color: var(--rojo); margin-bottom: 8px;
+        }
+
+        .card-titulo {
+            font-family: 'Cinzel', serif;
+            font-size: 22px; font-weight: 800;
+            color: var(--texto);
+        }
+
+        /* Cuerpo de términos */
+        .tos-body {
+            padding: 24px 32px;
+            max-height: 380px;
+            overflow-y: auto;
+            scrollbar-width: thin;
+            scrollbar-color: var(--rojo) transparent;
+            border-bottom: 1px solid var(--borde);
+        }
+
+        .tos-body::-webkit-scrollbar { width: 4px; }
+        .tos-body::-webkit-scrollbar-thumb { background: var(--rojo); }
+
+        .tos-body h3 {
+            font-family: 'Cinzel', serif;
+            font-size: 12px; font-weight: 600;
+            color: var(--rojo); margin-bottom: 6px; margin-top: 20px;
+            text-transform: uppercase; letter-spacing: 0.1em;
+        }
+
+        .tos-body h3:first-child { margin-top: 0; }
+
+        .tos-body p {
+            font-size: 13px; color: var(--muted);
+            line-height: 1.7; margin-bottom: 4px;
+        }
+
+        /* Indicador de scroll */
+        .scroll-hint {
+            text-align: center; padding: 8px;
+            font-size: 11px; color: rgba(138,132,144,0.5);
+            border-bottom: 1px solid var(--borde);
+            display: flex; align-items: center; justify-content: center; gap: 6px;
+        }
+
+        .scroll-hint.oculto { display: none; }
+
+        /* Checkbox footer */
+        .card-footer {
+            padding: 20px 32px 24px;
+        }
+
+        .tos-check-row {
+            display: flex; align-items: flex-start; gap: 10px;
+            margin-bottom: 20px; padding: 14px;
+            background: rgba(255,255,255,0.02);
+            border: 1px solid var(--borde);
+        }
+
+        .tos-checkbox {
+            appearance: none; -webkit-appearance: none;
+            width: 18px; height: 18px; min-width: 18px;
+            background: rgba(255,255,255,0.03);
+            border: 1px solid rgba(255,255,255,0.2);
+            cursor: pointer; margin-top: 1px;
+            position: relative;
+            transition: border-color 0.2s, background 0.2s;
+        }
+
+        .tos-checkbox:checked {
+            background: var(--rojo);
+            border-color: var(--rojo);
+        }
+
+        .tos-checkbox:checked::after {
+            content: '';
+            position: absolute;
+            width: 5px; height: 9px;
+            border: 2px solid white;
+            border-top: none; border-left: none;
+            transform: rotate(45deg) translate(3px, -1px);
+        }
+
+        .tos-checkbox:focus { outline: none; border-color: var(--rojo); }
+
+        .tos-check-label {
+            font-size: 13px; color: var(--muted);
+            line-height: 1.5; cursor: pointer;
+        }
+
+        .tos-check-label strong { color: var(--texto); }
+
+        /* Botones */
+        .btn-row {
+            display: flex; gap: 10px;
+        }
+
+        .btn-rechazar {
+            flex: 1; height: 44px;
+            background: transparent;
+            border: 1px solid var(--borde);
+            color: var(--muted); font-family: 'Raleway', sans-serif;
+            font-size: 12px; font-weight: 600;
+            letter-spacing: 0.08em; text-transform: uppercase;
+            cursor: pointer; transition: border-color 0.2s, color 0.2s;
+        }
+
+        .btn-rechazar:hover {
+            border-color: rgba(255,255,255,0.2);
+            color: var(--texto);
+        }
+
+        .btn-aceptar {
+            flex: 2; height: 44px;
+            background: var(--rojo); border: none;
+            color: white; font-family: 'Cinzel', serif;
+            font-size: 12px; font-weight: 700;
+            letter-spacing: 0.12em; text-transform: uppercase;
+            cursor: pointer;
+            transition: background 0.2s, transform 0.15s;
+            box-shadow: 0 4px 16px rgba(192,57,43,0.25);
+        }
+
+        .btn-aceptar:hover:not(:disabled) {
+            background: #e74c3c; transform: translateY(-1px);
+        }
+
+        .btn-aceptar:disabled {
+            opacity: 0.4; cursor: not-allowed; transform: none;
+        }
+
+        /* Error */
+        #tos-error {
+            margin-top: 12px; padding: 10px 14px;
+            background: rgba(192,57,43,0.1);
+            border: 1px solid rgba(192,57,43,0.3);
+            color: #e57373; font-size: 13px;
+            display: none;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Navbar -->
+    <nav class="navbar">
+        <a href="../index.html" class="logo">
+            <img src="../imagenes/logo.png" alt="Crónicas del Cazador">
+        </a>
+        <button class="nav-salir" id="btn-nav-salir">
+            <i class="ri-logout-box-line"></i> Cerrar sesión
+        </button>
+    </nav>
+
+    <!-- Main -->
+    <main>
+        <div class="container">
+
+            <!-- Banner de aviso -->
+            <div class="aviso-banner">
+                <i class="ri-error-warning-line"></i>
+                <p>
+                    <strong>Acción requerida.</strong> Para continuar usando Crónicas del Cazador debes leer y aceptar 
+                    los Términos de Servicio actualizados. Sin tu confirmación no podrás acceder a la plataforma.
+                </p>
+            </div>
+
+            <div class="card">
+                <div class="card-header">
+                    <p class="card-eyebrow">Lectura requerida</p>
+                    <h1 class="card-titulo">Términos de Servicio</h1>
+                </div>
+
+                <!-- Texto de términos -->
+                <div class="tos-body" id="tos-body">
+                    <h3>1. Aceptación</h3>
+                    <p>Al crear una cuenta en Crónicas del Cazador (CDC), aceptas cumplir con estos Términos de Servicio. Si no estás de acuerdo, no podrás utilizar la plataforma.</p>
+
+                    <h3>2. Uso de la plataforma</h3>
+                    <p>CDC es una plataforma de juego de rol en línea destinada a mayores de 13 años. Te comprometes a utilizarla de forma responsable, sin interferir en la experiencia de otros jugadores.</p>
+
+                    <h3>3. Conducta del usuario</h3>
+                    <p>Queda prohibido el uso de lenguaje ofensivo, acoso, discriminación o cualquier comportamiento que afecte negativamente a la comunidad. El Director de Campaña (Raziel) puede suspender o eliminar cuentas que incumplan estas normas sin previo aviso.</p>
+
+                    <h3>4. Contenido generado</h3>
+                    <p>Los nombres de personajes, mensajes y contenido que crees dentro de la plataforma son visibles para otros participantes de tu campaña. Eres responsable del contenido que publiques.</p>
+
+                    <h3>5. Cuentas y seguridad</h3>
+                    <p>Eres responsable de mantener la confidencialidad de tu contraseña. CDC no se hace responsable de accesos no autorizados derivados de tu descuido.</p>
+
+                    <h3>6. Nombres prohibidos</h3>
+                    <p>La plataforma dispone de una lista de nombres prohibidos. El uso de nombres ofensivos, inapropiados o que imiten a otros usuarios puede resultar en la suspensión inmediata de la cuenta.</p>
+
+                    <h3>7. Modificaciones</h3>
+                    <p>CDC se reserva el derecho de modificar estos términos en cualquier momento. Los cambios serán notificados mediante anuncios dentro de la plataforma.</p>
+
+                    <h3>8. Contacto</h3>
+                    <p>Para dudas o reportes, utiliza la sección de Soporte dentro de la plataforma o contacta directamente con el equipo de CDC.</p>
+                </div>
+
+                <!-- Hint de scroll -->
+                <div class="scroll-hint" id="scroll-hint">
+                    <i class="ri-arrow-down-line"></i> Desplázate para leer los términos completos
+                </div>
+
+                <!-- Footer con checkbox y botones -->
+                <div class="card-footer">
+                    <div class="tos-check-row">
+                        <input type="checkbox" class="tos-checkbox" id="acepto-tos-existente">
+                        <label class="tos-check-label" for="acepto-tos-existente">
+                            Declaro que he leído y acepto los
+                            <a href="../terminos.html" target="_blank" style="color:var(--rojo);text-decoration:none;font-weight:600;">Términos de Servicio y Política de Propiedad Intelectual</a>
+                            de Crónicas del Cazador.
+                        </label>
+                    </div>
+
+                    <div class="btn-row">
+                        <button class="btn-rechazar" id="btn-rechazar">
+                            <i class="ri-close-line"></i> No acepto
+                        </button>
+                        <button class="btn-aceptar" id="btn-aceptar" disabled>
+                            <i class="ri-check-double-line"></i> Acepto y continuar
+                        </button>
+                    </div>
+
+                    <div id="tos-error"></div>
+                </div>
+            </div>
+
+        </div>
+    </main>
+
+    <script type="module">
+        import { auth, db } from "../js/firebase-config.js";
+        import { onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-auth.js";
+        import { doc, updateDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore.js";
+
+        const checkbox   = document.getElementById('acepto-tos-existente');
+        const btnAceptar = document.getElementById('btn-aceptar');
+        const btnRechazar = document.getElementById('btn-rechazar');
+        const errorEl    = document.getElementById('tos-error');
+        const tosBody    = document.getElementById('tos-body');
+        const scrollHint = document.getElementById('scroll-hint');
+
+        let currentUser = null;
+
+        // Protección de ruta — si no hay sesión, a login
+        onAuthStateChanged(auth, (user) => {
+            if (!user) {
+                window.location.href = 'login.html';
+            } else {
+                currentUser = user;
+            }
+        });
+
+        // Ocultar hint cuando el usuario scrollea hasta abajo
+        tosBody.addEventListener('scroll', () => {
+            const bottom = tosBody.scrollHeight - tosBody.scrollTop - tosBody.clientHeight;
+            if (bottom < 20) scrollHint.classList.add('oculto');
+        });
+
+        // Checkbox habilita botón aceptar
+        checkbox.addEventListener('change', () => {
+            btnAceptar.disabled = !checkbox.checked;
+        });
+
+        // Aceptar TOS
+        btnAceptar.addEventListener('click', async () => {
+            if (!checkbox.checked || !currentUser) return;
+
+            btnAceptar.disabled = true;
+            btnAceptar.textContent = 'Guardando...';
+
+            try {
+                await updateDoc(doc(db, 'usuarios', currentUser.uid), {
+                    aceptoTOS: true,
+                    aceptoTOSFecha: serverTimestamp(),
+                });
+                window.location.href = 'dashboard.html';
+            } catch (err) {
+                errorEl.style.display = 'block';
+                errorEl.textContent = 'Error al guardar. Intenta de nuevo.';
+                btnAceptar.disabled = false;
+                btnAceptar.innerHTML = '<i class="ri-check-double-line"></i> Acepto y continuar';
+            }
+        });
+
+        // Rechazar → cerrar sesión y a login
+        btnRechazar.addEventListener('click', async () => {
+            await signOut(auth);
+            window.location.href = 'login.html';
+        });
+
+        // Botón navbar cerrar sesión
+        document.getElementById('btn-nav-salir').addEventListener('click', async () => {
+            await signOut(auth);
+            window.location.href = 'login.html';
+        });
+    </script>
+
+</body>
+</html>
