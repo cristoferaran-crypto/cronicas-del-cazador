@@ -45,164 +45,44 @@
         }
 
         /* ── NAVBAR ── */
-        .navbar {
-            position: sticky;
-            top: 0;
-            z-index: 100;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            padding: 0 32px;
-            height: 60px;
-            background: rgba(10, 10, 12, 0.92);
-            border-bottom: 1px solid var(--borde);
-            backdrop-filter: blur(12px);
-        }
-
-        .logo {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            text-decoration: none;
-            margin-right: 16px;
-            flex-shrink: 0;
-        }
-
-        .logo-mark {
-            width: 34px; height: 34px;
-            border: 1.5px solid var(--rojo);
-            display: flex; align-items: center; justify-content: center;
-            position: relative;
-        }
-
-        .logo-mark::before {
-            content: '';
-            position: absolute;
-            inset: 3px;
-            border: 1px solid rgba(192,57,43,0.3);
-        }
-
-        .logo-text-main {
-            font-family: 'Cinzel', serif;
-            font-size: 13px; font-weight: 800;
-            letter-spacing: 0.12em; color: var(--texto); line-height: 1.1;
-        }
-
-        .logo-text-sub {
-            font-family: 'Cinzel', serif;
-            font-size: 9px; font-weight: 400;
-            letter-spacing: 0.2em; color: var(--rojo);
-        }
-
-        /* Nav items */
-        .nav-items {
-            display: flex;
-            align-items: center;
-            gap: 2px;
-            flex: 1;
-        }
-
-        .nav-btn {
-            position: relative;
-            display: flex; align-items: center; gap: 6px;
-            padding: 0 14px; height: 60px;
-            background: transparent; border: none;
-            color: var(--texto-secundario);
-            font-family: 'Raleway', sans-serif;
-            font-size: 12px; font-weight: 600;
-            letter-spacing: 0.1em; text-transform: uppercase;
-            cursor: pointer; transition: color 0.2s;
-            white-space: nowrap; text-decoration: none;
-        }
-
-        .nav-btn:hover { color: var(--texto); }
-        .nav-btn i { font-size: 14px; }
-
-        .nav-dropdown {
-            position: relative;
-            display: flex; align-items: center;
-            height: 60px;
-        }
-
-        .nav-dropdown-trigger {
-            display: flex; align-items: center; gap: 6px;
-            padding: 0 14px; height: 60px;
-            background: transparent; border: none;
-            color: var(--texto-secundario);
-            font-family: 'Raleway', sans-serif;
-            font-size: 12px; font-weight: 600;
-            letter-spacing: 0.1em; text-transform: uppercase;
-            cursor: pointer; transition: color 0.2s;
-            white-space: nowrap; user-select: none;
-        }
-
-        .nav-dropdown-trigger i { font-size: 14px; }
-
-        .nav-dropdown-trigger .chevron {
-            font-size: 13px; transition: transform 0.22s; margin-left: 2px;
-        }
-
-        .nav-dropdown:hover .nav-dropdown-trigger,
-        .nav-dropdown.open .nav-dropdown-trigger { color: var(--texto); }
-
-        .nav-dropdown:hover .chevron,
-        .nav-dropdown.open .chevron { transform: rotate(180deg); }
-
-        .dropdown-menu {
-            display: none;
-            position: absolute; top: 100%; left: 0;
-            min-width: 210px;
-            background: var(--superficie-2);
-            border: 1px solid rgba(255,255,255,0.09);
-            border-top: 2px solid var(--rojo);
-            padding: 6px 0; z-index: 999;
-            box-shadow: 0 12px 32px rgba(0,0,0,0.5);
-        }
-
-        .nav-dropdown:hover .dropdown-menu,
-        .nav-dropdown.open .dropdown-menu { display: block; }
-
-        .dropdown-item {
-            display: flex; align-items: center; gap: 10px;
-            padding: 10px 16px;
-            color: var(--texto-secundario);
-            font-size: 12px; font-weight: 500;
-            letter-spacing: 0.05em; text-transform: uppercase;
-            cursor: pointer; transition: background 0.15s, color 0.15s;
-            border: none; background: transparent;
-            width: 100%; text-align: left;
-            font-family: 'Raleway', sans-serif;
-        }
-
-        .dropdown-item:hover { background: rgba(192,57,43,0.1); color: var(--texto); }
-        .dropdown-item i { font-size: 15px; color: var(--rojo); flex-shrink: 0; }
-
-        .dropdown-sep { height: 1px; background: var(--borde); margin: 4px 0; }
-
-        .nav-right {
-            display: flex; align-items: center; gap: 12px; margin-left: auto;
-        }
-
-        .nav-user {
-            font-size: 12px; font-weight: 500;
-            color: var(--texto-muted); letter-spacing: 0.05em;
-        }
-
-        .nav-user span { color: var(--dorado); font-weight: 600; }
-
-        .btn-logout {
-            display: flex; align-items: center; gap: 6px;
-            padding: 0 14px; height: 32px;
-            background: transparent;
-            border: 1px solid rgba(192,57,43,0.4);
-            color: var(--rojo);
-            font-family: 'Raleway', sans-serif;
-            font-size: 11px; font-weight: 600;
-            letter-spacing: 0.1em; text-transform: uppercase;
-            cursor: pointer; transition: background 0.2s, color 0.2s;
-        }
-
-        .btn-logout:hover { background: var(--rojo); color: white; }
+        /* ══ NAVBAR JUGADOR ══ */
+        .navbar { position:fixed; top:0; left:0; right:0; z-index:100; display:flex; align-items:center; padding:0 32px; height:64px; background:linear-gradient(to bottom, rgba(10,10,12,0.75) 0%, rgba(10,10,12,0.3) 60%, transparent 100%); transition:background 0.4s, border-color 0.4s, backdrop-filter 0.4s; }
+        .navbar.scrolled { background:rgba(10,10,12,0.95); border-bottom:1px solid var(--borde); backdrop-filter:blur(16px); }
+        .nav-logo { display:flex; align-items:center; text-decoration:none; margin-right:24px; flex-shrink:0; }
+        .nav-logo img { height:36px; width:auto; filter:invert(1) brightness(0.85); mix-blend-mode:screen; transition:filter 0.2s, transform 0.2s; }
+        .nav-logo:hover img { filter:invert(1) brightness(1) drop-shadow(0 0 8px rgba(192,57,43,0.6)); transform:scale(1.05); }
+        .nav-items { display:flex; align-items:center; gap:2px; flex:1; }
+        .nav-btn { position:relative; display:flex; align-items:center; gap:6px; padding:0 14px; height:64px; background:transparent; border:none; color:rgba(226,221,214,0.6); font-family:'Raleway',sans-serif; font-size:12px; font-weight:600; letter-spacing:0.1em; text-transform:uppercase; cursor:pointer; transition:color 0.2s; white-space:nowrap; text-decoration:none; }
+        .nav-btn::after { content:''; position:absolute; bottom:0; left:14px; right:14px; height:2px; background:var(--rojo); transform:scaleX(0); transition:transform 0.25s; box-shadow:0 0 8px rgba(192,57,43,0.35); }
+        .nav-btn:hover, .nav-btn.activo { color:var(--texto); } .nav-btn:hover::after, .nav-btn.activo::after { transform:scaleX(1); } .nav-btn i { font-size:14px; }
+        .nav-dropdown { position:relative; display:flex; align-items:center; height:64px; }
+        .nav-dropdown-trigger { display:flex; align-items:center; gap:6px; padding:0 14px; height:64px; background:transparent; border:none; color:rgba(226,221,214,0.6); font-family:'Raleway',sans-serif; font-size:12px; font-weight:600; letter-spacing:0.1em; text-transform:uppercase; cursor:pointer; transition:color 0.2s; white-space:nowrap; user-select:none; position:relative; }
+        .nav-dropdown-trigger::after { content:''; position:absolute; bottom:0; left:14px; right:14px; height:2px; background:var(--rojo); transform:scaleX(0); transition:transform 0.25s; box-shadow:0 0 8px rgba(192,57,43,0.35); }
+        .nav-dropdown-trigger i { font-size:14px; } .nav-dropdown-trigger .chevron { font-size:13px; transition:transform 0.22s; margin-left:2px; }
+        .nav-dropdown:hover .nav-dropdown-trigger { color:var(--texto); } .nav-dropdown:hover .nav-dropdown-trigger::after { transform:scaleX(1); } .nav-dropdown:hover .chevron { transform:rotate(180deg); }
+        .dropdown-menu { display:none; position:absolute; top:100%; left:0; min-width:220px; background:#16161e; border:1px solid rgba(255,255,255,0.09); border-top:2px solid var(--rojo); padding:6px 0; z-index:999; box-shadow:0 12px 32px rgba(0,0,0,0.5); }
+        .nav-dropdown:hover .dropdown-menu { display:block; }
+        .dropdown-item { display:flex; align-items:center; gap:10px; padding:10px 16px; color:#b0aab8; font-size:12px; font-weight:500; letter-spacing:0.05em; text-transform:uppercase; cursor:pointer; transition:background 0.15s, color 0.15s; border:none; background:transparent; width:100%; text-align:left; font-family:'Raleway',sans-serif; text-decoration:none; }
+        .dropdown-item:hover { background:rgba(192,57,43,0.1); color:#e8e2d9; } .dropdown-item i { font-size:15px; color:var(--rojo); flex-shrink:0; }
+        .dropdown-item.destacado { color:#c9a84c; border-top:1px solid rgba(255,255,255,0.07); margin-top:2px; } .dropdown-item.destacado i { color:#c9a84c; } .dropdown-item.destacado:hover { background:rgba(201,168,76,0.08); }
+        .dropdown-sep { height:1px; background:rgba(255,255,255,0.07); margin:4px 0; }
+        .nav-right { display:flex; align-items:center; gap:8px; margin-left:auto; }
+        .nav-bandeja { position:relative; display:flex; align-items:center; justify-content:center; width:36px; height:36px; background:rgba(255,255,255,0.04); border:1px solid rgba(255,255,255,0.07); color:#b0aab8; font-size:17px; cursor:pointer; transition:border-color 0.2s, color 0.2s; text-decoration:none; }
+        .nav-bandeja:hover { border-color:rgba(192,57,43,0.4); color:#e8e2d9; }
+        .nav-bandeja .badge { display:none; position:absolute; top:-5px; right:-5px; min-width:16px; height:16px; background:var(--rojo); border-radius:8px; font-size:9px; font-weight:700; color:white; align-items:center; justify-content:center; padding:0 3px; font-family:'Raleway',sans-serif; }
+        .nav-bandeja .badge.visible { display:flex; }
+        .cuenta-dropdown { position:relative; display:flex; align-items:center; height:64px; }
+        .cuenta-trigger { display:flex; align-items:center; gap:8px; padding:0 12px; height:36px; background:rgba(255,255,255,0.04); border:1px solid rgba(255,255,255,0.07); color:#b0aab8; font-family:'Raleway',sans-serif; font-size:12px; font-weight:600; letter-spacing:0.05em; cursor:pointer; transition:border-color 0.2s, color 0.2s; white-space:nowrap; user-select:none; }
+        .cuenta-avatar { width:24px; height:24px; border-radius:50%; object-fit:cover; border:1px solid rgba(192,57,43,0.3); display:none; } .cuenta-avatar.visible { display:block; }
+        .cuenta-nombre { color:#c9a84c; } .cuenta-chevron { font-size:12px; transition:transform 0.22s; }
+        .cuenta-dropdown:hover .cuenta-trigger { border-color:rgba(192,57,43,0.4); color:#e8e2d9; } .cuenta-dropdown:hover .cuenta-chevron { transform:rotate(180deg); }
+        .cuenta-menu { display:none; position:absolute; top:calc(100% - 4px); right:0; min-width:210px; background:#16161e; border:1px solid rgba(255,255,255,0.09); border-top:2px solid var(--rojo); padding:6px 0; z-index:999; box-shadow:0 12px 32px rgba(0,0,0,0.5); }
+        .cuenta-dropdown:hover .cuenta-menu { display:block; }
+        .cuenta-info { padding:10px 16px 12px; border-bottom:1px solid rgba(255,255,255,0.07); margin-bottom:4px; } .cuenta-info-nombre { font-family:'Cinzel',serif; font-size:13px; font-weight:600; color:#e8e2d9; } .cuenta-info-email { font-size:10px; color:#8a8490; margin-top:2px; }
+        .cuenta-item { display:flex; align-items:center; gap:10px; padding:10px 16px; color:#b0aab8; font-size:12px; font-weight:500; letter-spacing:0.05em; text-transform:uppercase; cursor:pointer; transition:background 0.15s, color 0.15s; border:none; background:transparent; width:100%; text-align:left; font-family:'Raleway',sans-serif; text-decoration:none; }
+        .cuenta-item:hover { background:rgba(192,57,43,0.1); color:#e8e2d9; } .cuenta-item i { font-size:15px; color:var(--rojo); flex-shrink:0; }
+        .cuenta-item.danger i { color:#e74c3c; } .cuenta-item.danger:hover { background:rgba(231,76,60,0.1); color:#e74c3c; }
+        /* ══ FIN NAVBAR ══ */
 
         /* ── LAYOUT PRINCIPAL ── */
         .layout {
@@ -573,80 +453,67 @@
 <body>
 
     <!-- NAVBAR -->
-    <nav class="navbar">
-
-        <!-- Logo -->
-       <a href="../../../index.html" style="display:flex;align-items:center;text-decoration:none;margin-right:16px;flex-shrink:0;">
-            <img src="../../../imagenes/logo_red.png" alt="Crónicas del Cazador"
-                style="height:36px;width:auto;filter:invert(1) brightness(0.85);mix-blend-mode:screen;">
-       </a>
-
-        <!-- Nav items -->
-        <div class="nav-items">
-
-            <!-- Play CDC (con dropdown) -->
-            <div class="nav-dropdown">
-                <div class="nav-dropdown-trigger">
-                    <i class="ri-sword-line"></i>
-                    Play CDC
-                    <i class="ri-arrow-down-s-line chevron"></i>
-                </div>
-                <div class="dropdown-menu">
-                    <button class="dropdown-item" onclick="window.location.href='../../creador/creador.html'">
-                        <i class="ri-user-add-line"></i> Crear Personaje
-                    </button>
-                    <button class="dropdown-item" onclick="window.location.href='../ficha/mis-personajes.html'">
-                        <i class="ri-group-line"></i> Selección de Personaje
-                    </button>
-                </div>
+<nav class="navbar" id="navbar">
+    <a href="../../../index.html" class="nav-logo">
+        <img src="../../../imagenes/logo_red.png" alt="Crónicas del Cazador">
+    </a>
+    <div class="nav-items">
+        <a href="../panel-del-jugador.html" class="nav-btn">
+            <i class="ri-layout-grid-line"></i> Menú del Cazador
+        </a>
+        <div class="nav-dropdown">
+            <div class="nav-dropdown-trigger">
+                <i class="ri-sword-line"></i> Play CDC
+                <i class="ri-arrow-down-s-line chevron"></i>
             </div>
-
-            <!-- Reglas (con dropdown) -->
-            <div class="nav-dropdown">
-                <div class="nav-dropdown-trigger">
-                    <i class="ri-book-open-line"></i>
-                    Reglas
-                    <i class="ri-arrow-down-s-line chevron"></i>
-                </div>
-                <div class="dropdown-menu">
-                    <button class="dropdown-item" onclick="window.location.href='culturas.html'">
-                        <i class="ri-map-line"></i> Culturas
-                    </button>
-                    <button class="dropdown-item" onclick="window.location.href='caminos.html'
-                    ">
-                        <i class="ri-route-line"></i> Caminos
-                    </button>
-                    <div class="dropdown-sep"></div>
-                    <button class="dropdown-item" onclick="">
-                        <i class="ri-bar-chart-line"></i> Atributos & Stats
-                    </button>
-                    <button class="dropdown-item" onclick="">
-                        <i class="ri-flashlight-line"></i> Habilidades
-                    </button>
-                    <div class="dropdown-sep"></div>
-                    <button class="dropdown-item" onclick="">
-                        <i class="ri-translate-2"></i> Glosario
-                    </button>
-                </div>
+            <div class="dropdown-menu">
+                <a href="../../creador/creador.html" class="dropdown-item"><i class="ri-user-add-line"></i> Crear Personaje</a>
+                <a href="../ficha/mis-personajes.html" class="dropdown-item"><i class="ri-group-line"></i> Mis Personajes</a>
+                <div class="dropdown-sep"></div>
+                <a href="../unirse-campana.html" class="dropdown-item destacado"><i class="ri-login-circle-line"></i> Unirse a Campaña</a>
             </div>
-
-            <!-- Selección de Rol -->
-            <button class="nav-btn" onclick="window.location.href='../../dashboard.html'">
-                <i class="ri-shield-user-line"></i>
-                Selección de Rol
-            </button>
-
         </div>
-
-        <!-- Derecha: usuario + logout -->
-        <div class="nav-right">
-            <span class="nav-user">Hola, <span id="nombre-nav">Cazador</span></span>
-            <button id="btn-logout" class="btn-logout">
-                <i class="ri-logout-box-r-line"></i>
-                Cerrar Sesión
-            </button>
+        <div class="nav-dropdown">
+            <div class="nav-dropdown-trigger">
+                <i class="ri-book-open-line"></i> Reglas
+                <i class="ri-arrow-down-s-line chevron"></i>
+            </div>
+            <div class="dropdown-menu">
+                <a href="culturas.html" class="dropdown-item activo"><i class="ri-map-line"></i> Culturas</a>
+                <a href="caminos.html" class="dropdown-item"><i class="ri-route-line"></i> Caminos</a>
+                <div class="dropdown-sep"></div>
+                <a href="#" class="dropdown-item"><i class="ri-bar-chart-line"></i> Atributos & Stats</a>
+                <a href="#" class="dropdown-item"><i class="ri-flashlight-line"></i> Habilidades</a>
+            </div>
         </div>
-    </nav>
+        <a href="../mi-cuenta.html" class="nav-btn"><i class="ri-settings-3-line"></i> Mi Cuenta</a>
+        <a href="../soporte.html" class="nav-btn"><i class="ri-question-line"></i> Soporte</a>
+    </div>
+    <div class="nav-right">
+        <a href="../bandeja.html" class="nav-bandeja" id="nav-bandeja-btn" title="Bandeja de mensajes">
+            <i class="ri-mail-line"></i>
+            <span class="badge" id="badge-bandeja"></span>
+        </a>
+        <div class="cuenta-dropdown">
+            <div class="cuenta-trigger">
+                <img class="cuenta-avatar" id="nav-avatar" src="" alt="">
+                <i class="ri-user-3-line" id="nav-avatar-icon"></i>
+                <span class="cuenta-nombre" id="nombre-nav">Cazador</span>
+                <i class="ri-arrow-down-s-line cuenta-chevron"></i>
+            </div>
+            <div class="cuenta-menu">
+                <div class="cuenta-info">
+                    <div class="cuenta-info-nombre" id="cuenta-nombre-display">—</div>
+                    <div class="cuenta-info-email" id="cuenta-email-display">—</div>
+                </div>
+                <div class="dropdown-sep"></div>
+                <button class="cuenta-item danger" id="btn-logout">
+                    <i class="ri-logout-box-r-line"></i> Cerrar Sesión
+                </button>
+            </div>
+        </div>
+    </div>
+</nav>
 
     <!-- LAYOUT -->
     <div class="layout">
@@ -959,6 +826,41 @@
 
     window.mostrarCultura = mostrarCultura;
     window.toggleLinaje = toggleLinaje;
+    </script>
+    <script type="module">
+    import { auth, db } from "../../../js/firebase-config.js";
+    import { onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-auth.js";
+    import { doc, getDoc, collection, query, where, getDocs } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore.js";
+
+    const navbar = document.getElementById('navbar');
+    if(navbar) window.addEventListener('scroll', () => navbar.classList.toggle('scrolled', window.scrollY > 60));
+
+    onAuthStateChanged(auth, async (user) => {
+        if (!user) { window.location.href = '../../login.html'; return; }
+        // Nombre
+        const nombre = user.displayName || 'Cazador';
+        if(document.getElementById('nombre-nav')) document.getElementById('nombre-nav').textContent = nombre;
+        if(document.getElementById('cuenta-nombre-display')) document.getElementById('cuenta-nombre-display').textContent = nombre;
+        if(document.getElementById('cuenta-email-display')) document.getElementById('cuenta-email-display').textContent = user.email;
+        // Avatar
+        const snapU = await getDoc(doc(db, 'usuarios', user.uid));
+        if(snapU.exists()){
+            const avatarUrl = snapU.data().avatar || snapU.data().avatarDirectorUrl || null;
+            if(avatarUrl){
+                const av = document.getElementById('nav-avatar'); const ic = document.getElementById('nav-avatar-icon');
+                if(av){ av.src = avatarUrl; av.classList.add('visible'); }
+                if(ic) ic.style.display = 'none';
+            }
+        }
+        // Badge bandeja
+        try {
+            const qB = query(collection(db,'mensajes'), where('destinatarioUid','==',user.uid), where('leido','==',false));
+            const sB = await getDocs(qB); const badge = document.getElementById('badge-bandeja');
+            if(badge && sB.size > 0){ badge.textContent = sB.size > 99 ? '99+' : sB.size; badge.classList.add('visible'); }
+        } catch(e){}
+        // Logout
+        const btnOut =
+    });
     </script>
 </body>
 </html>

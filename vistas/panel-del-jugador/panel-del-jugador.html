@@ -302,9 +302,6 @@
                     <div class="cuenta-info-nombre" id="cuenta-nombre-display">—</div>
                     <div class="cuenta-info-email" id="cuenta-email-display">—</div>
                 </div>
-                <a href="mi-cuenta.html" class="cuenta-item"><i class="ri-settings-3-line"></i> Mi Cuenta</a>
-                <a href="ficha/mis-personajes.html" class="cuenta-item"><i class="ri-group-line"></i> Mis Personajes</a>
-                <a href="soporte.html" class="cuenta-item"><i class="ri-question-line"></i> Soporte</a>
                 <div class="dropdown-sep"></div>
                 <button class="cuenta-item danger" id="btn-logout">
                     <i class="ri-logout-box-r-line"></i> Cerrar Sesión
@@ -420,11 +417,14 @@
 
         // Avatar navbar
         const snapU = await getDoc(doc(db, 'usuarios', user.uid));
-        if(snapU.exists() && snapU.data().avatarUrl){
-            const av = document.getElementById('nav-avatar');
-            const ic = document.getElementById('nav-avatar-icon');
-            if(av){ av.src = snapU.data().avatarUrl; av.classList.add('visible'); }
-            if(ic) ic.style.display = 'none';
+        if(snapU.exists()){
+            const avatarUrl = snapU.data().avatar || snapU.data().avatarDirectorUrl || null;
+            if(avatarUrl){
+                const av = document.getElementById('nav-avatar');
+                const ic = document.getElementById('nav-avatar-icon');
+                if(av){ av.src = avatarUrl; av.classList.add('visible'); }
+                if(ic) ic.style.display = 'none';
+            }
         }
         // Badge bandeja
         try {

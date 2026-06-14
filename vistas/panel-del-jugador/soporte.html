@@ -196,9 +196,6 @@ body{font-family:var(--sans);background:var(--negro);color:var(--texto);min-heig
                     <div class="cuenta-info-nombre" id="cuenta-nombre-display">—</div>
                     <div class="cuenta-info-email" id="cuenta-email-display">—</div>
                 </div>
-                <a href="mi-cuenta.html" class="cuenta-item"><i class="ri-settings-3-line"></i> Mi Cuenta</a>
-                <a href="ficha/mis-personajes.html" class="cuenta-item"><i class="ri-group-line"></i> Mis Personajes</a>
-                <a href="soporte.html" class="cuenta-item"><i class="ri-question-line"></i> Soporte</a>
                 <div class="dropdown-sep"></div>
                 <button class="cuenta-item danger" id="btn-logout">
                     <i class="ri-logout-box-r-line"></i> Cerrar Sesión
@@ -455,10 +452,13 @@ onAuthStateChanged(auth, async user => {
         if(document.getElementById('cuenta-email-display')) document.getElementById('cuenta-email-display').textContent = user.email;
         // Avatar
         const _snapU = await getDoc(doc(db, 'usuarios', user.uid));
-        if(_snapU.exists() && _snapU.data().avatarUrl){
-            const _av = document.getElementById('nav-avatar'); const _ic = document.getElementById('nav-avatar-icon');
-            if(_av){ _av.src = _snapU.data().avatarUrl; _av.classList.add('visible'); }
-            if(_ic) _ic.style.display = 'none';
+        if(_snapU.exists()){
+            const _avatarUrl = _snapU.data().avatar || _snapU.data().avatarDirectorUrl || null;
+            if(_avatarUrl){
+                const _av = document.getElementById('nav-avatar'); const _ic = document.getElementById('nav-avatar-icon');
+                if(_av){ _av.src = _avatarUrl; _av.classList.add('visible'); }
+                if(_ic) _ic.style.display = 'none';
+            }
         }
         // Badge bandeja
         try {
