@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Verifica tu Correo | Crónicas del Cazador</title>
+    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;800&family=Raleway:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/remixicon@3.5.0/fonts/remixicon.css" rel="stylesheet">
+    <style>
+        :root {
+            --rojo: #c0392b;
+            --rojo-glow: rgba(192,57,43,0.35);
+            --negro: #07070a;
+            --sup2: #16161e;
+            --borde: rgba(255,255,255,0.07);
+            --borde-r: rgba(192,57,43,0.35);
+            --texto: #e8e2d9;
+            --muted: #8a8490;
+            --sec: #b0aab8;
+            --dorado: #c9a84c;
+        }
+        *, *::before, *::after { margin:0; padding:0; box-sizing:border-box; }
+        body {
+            font-family: 'Raleway', sans-serif;
+            background: var(--negro);
+            color: var(--texto);
+            min-height: 100vh;
+            display: flex; flex-direction: column;
+            overflow-x: hidden;
+        }
+        body::before {
+            content: '';
+            position: fixed; inset: 0;
+            background:
+                radial-gradient(ellipse 60% 50% at 20% 10%, rgba(192,57,43,0.08) 0%, transparent 65%),
+                radial-gradient(ellipse 50% 60% at 80% 90%, rgba(192,57,43,0.05) 0%, transparent 65%);
+            pointer-events: none; z-index: 0;
+        }
+        .navbar {
+            position: relative; z-index: 10;
+            display: flex; align-items: center; justify-content: space-between;
+            padding: 0 40px; height: 64px;
+            border-bottom: 1px solid var(--borde);
+            background: rgba(7,7,10,0.8);
+            backdrop-filter: blur(12px);
+        }
+        .logo { display: flex; align-items: center; text-decoration: none; }
+        .logo img { height: 36px; width: auto; filter: invert(1) brightness(0.9); mix-blend-mode: screen; }
+        .nav-login-link {
+            font-size: 12px; font-weight: 600;
+            letter-spacing: 0.1em; text-transform: uppercase;
+            color: var(--muted); text-decoration: none;
+            display: flex; align-items: center; gap: 6px;
+            transition: color 0.2s;
+        }
+        .nav-login-link:hover { color: var(--texto); }
+        main {
+            position: relative; z-index: 1;
+            flex: 1; display: flex;
+            align-items: center; justify-content: center;
+            padding: 40px 20px;
+        }
+        .card {
+            width: 100%; max-width: 440px;
+            background: var(--sup2);
+            border: 1px solid var(--borde);
+            border-top: 2px solid var(--rojo);
+            padding: 40px 40px 36px;
+            text-align: center;
+        }
+        .card-icon {
+            font-size: 48px; color: var(--rojo);
+            margin-bottom: 16px;
+        }
+        .card-eyebrow {
+            font-size: 10px; font-weight: 600;
+            letter-spacing: 0.3em; text-transform: uppercase;
+            color: var(--rojo); margin-bottom: 10px;
+        }
+        .card-titulo {
+            font-family: 'Cinzel', serif;
+            font-size: 24px; font-weight: 800;
+            color: var(--texto); line-height: 1.2;
+            margin-bottom: 12px;
+        }
+        .card-subtitulo {
+            font-size: 13px; color: var(--sec); line-height: 1.7;
+            margin-bottom: 24px;
+        }
+        .card-subtitulo strong { color: var(--texto); }
+        .divisor {
+            width: 40px; height: 1px;
+            background: linear-gradient(90deg, transparent, var(--rojo), transparent);
+            margin: 0 auto 24px;
+        }
+        .btn-submit {
+            display: inline-flex; align-items: center; justify-content: center; gap: 8px;
+            width: 100%; height: 46px;
+            background: var(--rojo); border: none;
+            color: white; font-family: 'Cinzel', serif;
+            font-size: 13px; font-weight: 700;
+            letter-spacing: 0.15em; text-transform: uppercase;
+            cursor: pointer; text-decoration: none;
+            transition: background 0.2s, transform 0.15s;
+            box-shadow: 0 4px 16px rgba(192,57,43,0.3);
+        }
+        .btn-submit:hover { background: #e74c3c; transform: translateY(-1px); }
+        .form-footer {
+            text-align: center; margin-top: 20px;
+            font-size: 13px; color: var(--muted);
+        }
+        .form-footer a { color: var(--rojo); text-decoration: none; font-weight: 600; }
+        .form-footer a:hover { color: #e74c3c; }
+    </style>
+</head>
+<body>
+
+    <nav class="navbar">
+        <a href="../index.html" class="logo">
+            <img src="../imagenes/logo_red.png" alt="Crónicas del Cazador">
+        </a>
+        <a href="login.html" class="nav-login-link">
+            <i class="ri-arrow-left-line"></i> Volver al login
+        </a>
+    </nav>
+
+    <main>
+        <div class="card">
+            <div class="card-icon"><i class="ri-mail-send-line"></i></div>
+            <p class="card-eyebrow">Un paso más</p>
+            <h1 class="card-titulo">Verifica tu Correo</h1>
+            <p class="card-subtitulo">
+                Te enviamos un enlace de verificación a tu correo electrónico.<br><br>
+                Abre el enlace para activar tu cuenta. Si no lo encuentras, revisa tu carpeta de <strong>spam</strong> o correo no deseado.
+            </p>
+            <div class="divisor"></div>
+            <a href="login.html" class="btn-submit">
+                <i class="ri-login-circle-line"></i> Ir al inicio de sesión
+            </a>
+            <p class="form-footer">
+                ¿No recibiste el correo? Inicia sesión para reenviarlo.
+            </p>
+        </div>
+    </main>
+
+</body>
+</html>
