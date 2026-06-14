@@ -90,7 +90,7 @@
             z-index: 1;
             display: grid;
             grid-template-columns: 280px 1fr;
-            min-height: calc(100vh - 60px);
+            min-height: calc(100vh - 64px);
         }
 
         /* ── SIDEBAR ── */
@@ -99,8 +99,8 @@
             background: var(--superficie);
             padding: 32px 0;
             position: sticky;
-            top: 60px;
-            height: calc(100vh - 60px);
+            top: 64px;
+            height: calc(100vh - 64px);
             overflow-y: auto;
         }
 
@@ -449,7 +449,7 @@
             .panel { padding: 28px 20px; }
         }
         /* ══ FOOTER ══ */
-        .site-footer { background:#0a0a0c; border-top:1px solid rgba(255,255,255,0.07); padding:40px 32px 28px; margin-top:0; }
+        .site-footer { background:#0a0a0c; border-top:1px solid rgba(255,255,255,0.07); padding:40px 32px 28px; }
         .footer-inner { max-width:900px; margin:0 auto; display:flex; flex-direction:column; align-items:center; gap:20px; }
         .footer-logo img { height:48px; width:auto; filter:invert(1) brightness(0.85); mix-blend-mode:screen; }
         .footer-divider { width:100%; height:1px; background:rgba(255,255,255,0.07); }
@@ -504,7 +504,7 @@
         <button onclick="abrirBandeja()" class="nav-bandeja" id="nav-bandeja-btn" title="Bandeja de mensajes">
             <i class="ri-mail-line"></i>
             <span class="badge" id="badge-bandeja"></span>
-        </a>
+        </button>
         <div class="cuenta-dropdown">
             <div class="cuenta-trigger">
                 <img class="cuenta-avatar" id="nav-avatar" src="" alt="">
@@ -858,8 +858,8 @@
     <script type="module">
     import { auth, db } from "../../../js/firebase-config.js";
     import { onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-auth.js";
-    import { doc, getDoc, collection, query, where, getDocs } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore.js";
     import { initBandeja } from "../../../js/bandeja.js";
+    import { doc, getDoc, collection, query, where, getDocs } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore.js";
 
     const navbar = document.getElementById('navbar');
     if(navbar) window.addEventListener('scroll', () => navbar.classList.toggle('scrolled', window.scrollY > 60));
@@ -881,6 +881,12 @@
                 if(ic) ic.style.display = 'none';
             }
         }
+        // Badge bandeja
+        try {
+            const qB = query(collection(db,'mensajes'), where('destinatarioUid','==',user.uid), where('leido','==',false));
+            const sB = await getDocs(qB); const badge = document.getElementById('badge-bandeja');
+            if(badge && sB.size > 0){ badge.textContent = sB.size > 99 ? '99+' : sB.size; badge.classList.add('visible'); }
+        } catch(e){}
         // Logout
         const btnOut = document.getElementById('btn-logout');
         if(btnOut) btnOut.addEventListener('click', async () => { await signOut(auth); window.location.href = '../../login.html'; });
