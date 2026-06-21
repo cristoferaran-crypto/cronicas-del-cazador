@@ -407,7 +407,7 @@ html,body{height:100%;background:var(--negro);color:var(--texto);font-family:var
             </select>
           </div>
           <div><label class="admin-label">Tipo</label>
-            <select class="admin-select" id="item-tipo">
+            <select class="admin-select" id="item-tipo" onchange="toggleCamposEquipoAdmin()">
               <option value="objeto">Objeto</option><option value="arma">Arma</option>
               <option value="armadura">Armadura</option><option value="consumible">Consumible</option>
             </select>
@@ -416,13 +416,18 @@ html,body{height:100%;background:var(--negro);color:var(--texto);font-family:var
         <div class="form-grid" style="margin-bottom:12px;">
           <div><label class="admin-label">Peso (kg)</label><input class="admin-input" id="item-peso" type="number" value="0" min="0" step="0.1"></div>
           <div><label class="admin-label">Espacios</label><input class="admin-input" id="item-espacios" type="number" value="1" min="0"></div>
-          <div><label class="admin-label">Ranura</label><input class="admin-input" id="item-ranura" value="—"></div>
-          <div><label class="admin-label">Bono</label><input class="admin-input" id="item-bono" value="—"></div>
+          <div><label class="admin-label">Contenedor (espacios)</label><input class="admin-input" id="item-contenedor" type="number" value="0" min="0" placeholder="0 = no es contenedor" oninput="toggleCamposEquipoAdmin()"></div>
+        </div>
+        <div id="campos-equipo-admin" style="display:none;">
+          <div class="form-grid" style="margin-bottom:12px;">
+            <div><label class="admin-label">Ranura</label><input class="admin-input" id="item-ranura" value="—"></div>
+            <div><label class="admin-label">Bono</label><input class="admin-input" id="item-bono" value="—"></div>
+            <div><label class="admin-label">Equipable</label>
+              <select class="admin-select" id="item-equipable"><option value="true">Sí</option><option value="false">No</option></select>
+            </div>
+          </div>
         </div>
         <div class="form-grid" style="margin-bottom:16px;">
-          <div><label class="admin-label">Equipable</label>
-            <select class="admin-select" id="item-equipable"><option value="true">Sí</option><option value="false">No</option></select>
-          </div>
           <div><label class="admin-label">Quita Condición</label>
             <select class="admin-select" id="item-quita">
               <option value="">— Ninguna —</option>
@@ -439,6 +444,19 @@ html,body{height:100%;background:var(--negro);color:var(--texto);font-family:var
           <button class="btn-guardar" onclick="guardarItemMundo()"><i class="ri-save-line"></i> Guardar Ítem</button>
           <button class="btn-accion" id="btn-cancelar-item" style="display:none;" onclick="cancelarEdicionItem()">Cancelar</button>
         </div>
+      </div>
+      <!-- Acciones masivas -->
+      <div id="items-bulk-toolbar" style="display:none;align-items:center;justify-content:space-between;background:rgba(201,168,76,0.08);border:1px solid var(--borde-d);padding:8px 12px;margin-bottom:10px;flex-wrap:wrap;gap:8px;">
+        <span id="items-bulk-count" style="font-size:11px;color:var(--dorado);font-family:var(--mono);"></span>
+        <div style="display:flex;gap:6px;align-items:center;flex-wrap:wrap;">
+          <select class="item-mover-select" id="bulk-mover-select" style="max-width:140px;"></select>
+          <button class="btn-accion primary" onclick="moverSeleccionados()"><i class="ri-arrow-right-line"></i> Mover seleccionados</button>
+          <button class="btn-accion danger" onclick="eliminarSeleccionados()"><i class="ri-delete-bin-line"></i> Eliminar seleccionados</button>
+          <button class="btn-accion" onclick="limpiarSeleccionItems()">Cancelar</button>
+        </div>
+      </div>
+      <div style="display:flex;justify-content:flex-end;margin-bottom:10px;">
+        <button class="btn-accion danger" onclick="vaciarTiendaCompletaAdmin()"><i class="ri-delete-bin-2-line"></i> Vaciar Tienda Completa (los 4 vendedores)</button>
       </div>
       <!-- Grid de ítems -->
       <div class="item-mundo-grid" id="items-mundo-grid">
@@ -793,6 +811,7 @@ let _editandoItemId = null;
 let _itemTabActivo = 'bazar';
 let _itemsCache = {};
 let _importDataAdmin = null;
+let _itemsSeleccionados = new Set();
 
 const VENDEDORES_ADMIN = ['bazar','armero','drogueria','mercado_negro'];
 const VENDEDORES_LABELS_ADMIN = {bazar:'Bazar',armero:'Armería',drogueria:'Droguería',mercado_negro:'Mercado Negro'};
@@ -808,6 +827,7 @@ async function cargarItemsMundo() {
 
 window.setItemTab = function(v, el) {
   _itemTabActivo = v;
+  _itemsSeleccionados.clear();
   document.querySelectorAll('[id^="itab-"]').forEach(b=>{
     b.style.borderColor=''; b.style.color=''; b.classList.remove('active');
   });
@@ -815,9 +835,22 @@ window.setItemTab = function(v, el) {
   renderItemsAdmin();
 };
 
+// Solo arma/armadura (o un objeto-contenedor) pueden tener ranura/equipable.
+// Un consumible jamás ocupa una ranura de equipo, sin importar lo que diga
+// el resto del formulario — así no se puede repetir el caso del chocolate.
+function permiteEquipoAdmin(tipo, contenedor) {
+  return tipo==='arma' || tipo==='armadura' || (tipo==='objeto' && (contenedor||0)>0);
+}
+window.toggleCamposEquipoAdmin = function() {
+  const tipo = document.getElementById('item-tipo').value;
+  const contenedor = parseInt(document.getElementById('item-contenedor').value)||0;
+  document.getElementById('campos-equipo-admin').style.display = permiteEquipoAdmin(tipo,contenedor) ? 'block' : 'none';
+};
+
 function renderItemsAdmin() {
   const grid = document.getElementById('items-mundo-grid');
   const prods = _itemsCache[_itemTabActivo]||[];
+  renderBulkToolbar();
   if (!prods.length) {
     grid.innerHTML = '<div class="empty-state"><i class="ri-sword-line"></i>Sin ítems en ' + VENDEDORES_LABELS_ADMIN[_itemTabActivo] + '</div>';
     return;
@@ -826,9 +859,14 @@ function renderItemsAdmin() {
   const opcionesMover = otrosVendedores.map(v=>`<option value="${v}">${VENDEDORES_LABELS_ADMIN[v]}</option>`).join('');
   grid.innerHTML = prods.map(it => `
     <div class="item-mundo-card" id="card-${it.id}">
-      <div class="item-mundo-nombre">${it.nombre} ${it.esGlobal?'<span style="font-size:9px;color:var(--dorado);font-family:var(--mono);">GLOBAL</span>':''}</div>
-      <div class="item-mundo-meta">${it.cat||'—'} · ${it.calidad||'Común'} · ${(it.precio||0).toLocaleString()} Marcas</div>
-      <div class="item-mundo-desc">${it.desc||'Sin descripción'}</div>
+      <div style="display:flex;align-items:flex-start;gap:8px;">
+        <input type="checkbox" ${_itemsSeleccionados.has(it.id)?'checked':''} onchange="toggleSeleccionItem('${it.id}')" style="accent-color:var(--dorado);margin-top:3px;flex-shrink:0;">
+        <div style="flex:1;">
+          <div class="item-mundo-nombre">${it.nombre} ${it.esGlobal?'<span style="font-size:9px;color:var(--dorado);font-family:var(--mono);">GLOBAL</span>':''}</div>
+          <div class="item-mundo-meta">${it.cat||'—'} · ${(it.tipo||'objeto')} · ${it.calidad||'Común'} · ${(it.precio||0).toLocaleString()} Marcas</div>
+          <div class="item-mundo-desc">${it.desc||'Sin descripción'}</div>
+        </div>
+      </div>
       <div style="display:flex;gap:6px;align-items:center;margin-top:8px;flex-wrap:wrap;">
         <button class="btn-accion primary" onclick="editarItemMundo('${it.id}','${_itemTabActivo}')">Editar</button>
         <button class="btn-accion danger" onclick="eliminarItemMundo('${it.id}','${_itemTabActivo}')">Eliminar</button>
@@ -846,6 +884,25 @@ function renderItemsAdmin() {
     </div>`).join('');
 }
 
+function renderBulkToolbar() {
+  const bar = document.getElementById('items-bulk-toolbar');
+  const n = _itemsSeleccionados.size;
+  if (!n) { bar.style.display='none'; return; }
+  bar.style.display='flex';
+  document.getElementById('items-bulk-count').textContent = `${n} ítem${n>1?'s':''} seleccionado${n>1?'s':''}`;
+  const sel = document.getElementById('bulk-mover-select');
+  sel.innerHTML = VENDEDORES_ADMIN.filter(v=>v!==_itemTabActivo).map(v=>`<option value="${v}">${VENDEDORES_LABELS_ADMIN[v]}</option>`).join('');
+}
+
+window.toggleSeleccionItem = function(id) {
+  if (_itemsSeleccionados.has(id)) _itemsSeleccionados.delete(id); else _itemsSeleccionados.add(id);
+  renderBulkToolbar();
+};
+window.limpiarSeleccionItems = function() {
+  _itemsSeleccionados.clear();
+  renderItemsAdmin();
+};
+
 window.toggleGlobal = async function(id, vendedor, esGlobal) {
   await updateDoc(doc(db,'tienda',vendedor,'productos',id),{esGlobal});
   const item = (_itemsCache[vendedor]||[]).find(x=>x.id===id);
@@ -857,16 +914,21 @@ window.guardarItemMundo = async function() {
   const nombre = document.getElementById('item-nombre').value.trim();
   if (!nombre) { toast('El nombre es obligatorio.','error'); return; }
   const vendedor = _itemTabActivo;
+  const tipo = document.getElementById('item-tipo').value;
+  const contenedor = parseInt(document.getElementById('item-contenedor').value)||0;
+  const equipo = permiteEquipoAdmin(tipo, contenedor);
   const data = {
     nombre, cat:document.getElementById('item-cat').value.trim(),
+    tipo,
     desc:document.getElementById('item-desc').value.trim(),
     precio:parseInt(document.getElementById('item-precio').value)||0,
     calidad:document.getElementById('item-calidad').value,
     peso:parseFloat(document.getElementById('item-peso').value)||0,
     espacios:parseInt(document.getElementById('item-espacios').value)||1,
-    ranura:document.getElementById('item-ranura').value||'—',
-    bono:document.getElementById('item-bono').value||'—',
-    equipable:document.getElementById('item-equipable').value==='true',
+    contenedor,
+    ranura:equipo?(document.getElementById('item-ranura').value||'—'):'—',
+    bono:equipo?(document.getElementById('item-bono').value||'—'):'—',
+    equipable:equipo?(document.getElementById('item-equipable').value==='true'):false,
     quitaCondicion:document.getElementById('item-quita').value||null,
     esGlobal:false, activo:true,
   };
@@ -891,37 +953,128 @@ window.editarItemMundo = async function(id, vendedor) {
   _editandoItemId = id; _itemTabActivo = vendedor;
   document.getElementById('item-nombre').value    = it.nombre||'';
   document.getElementById('item-cat').value       = it.cat||'';
+  document.getElementById('item-tipo').value      = it.tipo||'objeto';
   document.getElementById('item-desc').value      = it.desc||'';
   document.getElementById('item-precio').value    = it.precio||0;
   document.getElementById('item-calidad').value   = it.calidad||'Común';
   document.getElementById('item-peso').value      = it.peso||0;
   document.getElementById('item-espacios').value  = it.espacios||1;
+  document.getElementById('item-contenedor').value= it.contenedor||0;
   document.getElementById('item-ranura').value    = it.ranura||'—';
   document.getElementById('item-bono').value      = it.bono||'—';
   document.getElementById('item-equipable').value = it.equipable?'true':'false';
   document.getElementById('item-quita').value     = it.quitaCondicion||'';
   document.getElementById('item-form-titulo').textContent = 'Editando: ' + it.nombre;
   document.getElementById('btn-cancelar-item').style.display = 'inline-block';
+  toggleCamposEquipoAdmin();
 };
 
 window.cancelarEdicionItem = function() {
   _editandoItemId = null;
   ['item-nombre','item-cat','item-desc'].forEach(id=>document.getElementById(id).value='');
-  ['item-precio','item-espacios','item-peso'].forEach(id=>document.getElementById(id).value='0');
+  ['item-precio','item-espacios','item-peso','item-contenedor'].forEach(id=>document.getElementById(id).value='0');
   document.getElementById('item-espacios').value='1';
+  document.getElementById('item-tipo').value='objeto';
   document.getElementById('item-ranura').value='—';
   document.getElementById('item-bono').value='—';
   document.getElementById('item-quita').value='';
   document.getElementById('item-form-titulo').textContent='Nuevo Ítem';
   document.getElementById('btn-cancelar-item').style.display='none';
+  toggleCamposEquipoAdmin();
 };
 
+// Quita del inventario (y desequipa si corresponde) las copias de los ítems
+// indicados en TODOS los personajes. El vínculo tienda↔personaje es por
+// nombre (no hay un ID compartido), así que se identifica así.
+async function limpiarItemsDePersonajesAdmin(nombres) {
+  if (!nombres.length) return {personajesAfectados:0, copiasQuitadas:0};
+  const set = new Set(nombres);
+  const snap = await getDocs(collection(db,'personajes'));
+  let personajesAfectados=0, copiasQuitadas=0;
+  for (const d of snap.docs) {
+    const data = d.data();
+    const inventario = data.inventario||[];
+    const equipado = {...(data.equipado||{})};
+    let cambio=false;
+    const invFiltrado = inventario.filter(it=>{
+      if (set.has(it.nombre)) { cambio=true; copiasQuitadas += (it.cantidad||1); return false; }
+      return true;
+    });
+    for (const ranuraId of Object.keys(equipado)) {
+      if (equipado[ranuraId] && set.has(equipado[ranuraId].nombre)) { delete equipado[ranuraId]; cambio=true; copiasQuitadas++; }
+    }
+    if (cambio) {
+      await updateDoc(doc(db,'personajes',d.id),{inventario:invFiltrado, equipado});
+      personajesAfectados++;
+    }
+  }
+  return {personajesAfectados, copiasQuitadas};
+}
+
 window.eliminarItemMundo = async function(id, vendedor) {
-  if (!confirm('¿Eliminar este ítem permanentemente?')) return;
+  const item = (_itemsCache[vendedor]||[]).find(x=>x.id===id);
+  if (!confirm('¿Eliminar este ítem permanentemente? También se quitará de los personajes que ya lo tengan (comprado o equipado).')) return;
   await deleteDoc(doc(db,'tienda',vendedor,'productos',id));
   _itemsCache[vendedor] = (_itemsCache[vendedor]||[]).filter(x=>x.id!==id);
+  _itemsSeleccionados.delete(id);
   renderItemsAdmin();
-  toast('Ítem eliminado.','error');
+  const r = item ? await limpiarItemsDePersonajesAdmin([item.nombre]) : {personajesAfectados:0,copiasQuitadas:0};
+  toast(`Ítem eliminado.${r.copiasQuitadas?` Se quitó de ${r.personajesAfectados} personaje(s).`:''}`,'error');
+};
+
+window.eliminarSeleccionados = async function() {
+  const ids = [..._itemsSeleccionados];
+  if (!ids.length) return;
+  const items = ids.map(id=>(_itemsCache[_itemTabActivo]||[]).find(x=>x.id===id)).filter(Boolean);
+  if (!confirm(`¿Eliminar ${items.length} ítem(s) seleccionado(s) de ${VENDEDORES_LABELS_ADMIN[_itemTabActivo]}? También se quitarán de los personajes que ya los tengan.`)) return;
+  for (const it of items) {
+    try { await deleteDoc(doc(db,'tienda',_itemTabActivo,'productos',it.id)); } catch(e) {}
+  }
+  _itemsCache[_itemTabActivo] = (_itemsCache[_itemTabActivo]||[]).filter(x=>!_itemsSeleccionados.has(x.id));
+  _itemsSeleccionados.clear();
+  renderItemsAdmin();
+  const r = await limpiarItemsDePersonajesAdmin(items.map(it=>it.nombre));
+  toast(`🗑️ ${items.length} ítem(s) eliminados.${r.copiasQuitadas?` Se quitaron de ${r.personajesAfectados} personaje(s).`:''}`,'error');
+};
+
+window.moverSeleccionados = async function() {
+  const ids = [..._itemsSeleccionados];
+  if (!ids.length) return;
+  const destino = document.getElementById('bulk-mover-select').value;
+  if (!destino || destino===_itemTabActivo) return;
+  const items = ids.map(id=>(_itemsCache[_itemTabActivo]||[]).find(x=>x.id===id)).filter(Boolean);
+  if (!confirm(`¿Mover ${items.length} ítem(s) de ${VENDEDORES_LABELS_ADMIN[_itemTabActivo]} a ${VENDEDORES_LABELS_ADMIN[destino]}?`)) return;
+  let ok=0, err=0;
+  for (const it of items) {
+    try {
+      const {id:_, ...datos} = it;
+      const ref = await addDoc(collection(db,'tienda',destino,'productos'), datos);
+      await deleteDoc(doc(db,'tienda',_itemTabActivo,'productos',it.id));
+      if(!_itemsCache[destino]) _itemsCache[destino]=[];
+      _itemsCache[destino].push({...datos, id:ref.id});
+      ok++;
+    } catch(e) { err++; }
+  }
+  _itemsCache[_itemTabActivo] = (_itemsCache[_itemTabActivo]||[]).filter(x=>!_itemsSeleccionados.has(x.id));
+  _itemsSeleccionados.clear();
+  renderItemsAdmin();
+  toast(`${ok} ítem(s) movidos a ${VENDEDORES_LABELS_ADMIN[destino]}.${err?` ⚠ ${err} fallaron.`:''}`,err?'error':'success');
+};
+
+window.vaciarTiendaCompletaAdmin = async function() {
+  const todos = VENDEDORES_ADMIN.flatMap(v=>(_itemsCache[v]||[]).map(p=>({...p,_vendedor:v})));
+  if (!todos.length) { toast('No hay ítems para borrar.','info'); return; }
+  if (!confirm(`⚠ Esto borrará ${todos.length} ítem(s) de TODA la tienda (bazar, armería, droguería y mercado negro), incluidos los globales, y los quitará de los personajes que ya los tengan.\n\nEsta acción NO se puede deshacer. ¿Continuar?`)) return;
+  if (!confirm(`Última confirmación: se eliminarán ${todos.length} ítem(s) permanentemente. ¿Seguro?`)) return;
+  let ok=0, fail=0;
+  for (const p of todos) {
+    try { await deleteDoc(doc(db,'tienda',p._vendedor,'productos',p.id)); ok++; } catch(e) { fail++; }
+  }
+  VENDEDORES_ADMIN.forEach(v=>_itemsCache[v]=[]);
+  _itemsSeleccionados.clear();
+  renderItemsAdmin();
+  const r = await limpiarItemsDePersonajesAdmin(todos.map(p=>p.nombre));
+  toast(`🗑️ ${ok} ítem(s) eliminados de la tienda.${r.copiasQuitadas?` Se quitaron de ${r.personajesAfectados} personaje(s).`:''}${fail?` ⚠ ${fail} fallaron.`:''}`,'error');
 };
 
 window.moverItem = async function(id, vendedorOrigen, vendedorDestino) {
@@ -961,21 +1114,30 @@ window.importarExcelAdmin = async function(input) {
     const wb = XLSX.read(buf,{type:'array'});
     const ws = wb.Sheets[wb.SheetNames[0]];
     const rows = XLSX.utils.sheet_to_json(ws,{defval:''});
-    _importDataAdmin = rows.map(r=>({
-      nombre:     String(r['Nombre']||r['nombre']||'').trim(),
-      cat:        String(r['Categoría']||r['categoria']||r['Categoria']||'').trim(),
-      desc:       String(r['Descripción']||r['descripcion']||'').trim(),
-      precio:     parseInt(r['Precio']||r['precio']||0)||0,
-      calidad:    String(r['Calidad']||r['calidad']||'Común').trim(),
-      peso:       parseFloat(r['Peso']||r['peso']||0)||0,
-      espacios:   parseInt(r['Espacios']||r['espacios']||1)||1,
-      ranura:     String(r['Ranura']||r['ranura']||'—').trim(),
-      bono:       String(r['Bono']||r['bono']||'—').trim(),
-      equipable:  String(r['Equipable']||r['equipable']||'No').toLowerCase()!=='no',
-      contenedor: parseInt(r['Contenedor']||r['contenedor']||0)||0,
-      quitaCondicion: String(r['Quita Condición']||r['quitaCondicion']||'').trim()||null,
-      esGlobal:   false, activo:true,
-    })).filter(r=>r.nombre);
+    _importDataAdmin = rows.map(r=>{
+      const tipoRaw = String(r['Tipo']||r['tipo']||'objeto').trim().toLowerCase();
+      const tipo = ['arma','armadura','consumible','objeto'].includes(tipoRaw) ? tipoRaw : 'objeto';
+      const contenedor = parseInt(r['Contenedor']||r['contenedor']||0)||0;
+      const equipo = permiteEquipoAdmin(tipo, contenedor);
+      return {
+        nombre:     String(r['Nombre']||r['nombre']||'').trim(),
+        cat:        String(r['Categoría']||r['categoria']||r['Categoria']||'').trim(),
+        tipo,
+        desc:       String(r['Descripción']||r['descripcion']||'').trim(),
+        precio:     parseInt(r['Precio']||r['precio']||0)||0,
+        calidad:    String(r['Calidad']||r['calidad']||'Común').trim(),
+        peso:       parseFloat(r['Peso']||r['peso']||0)||0,
+        espacios:   parseInt(r['Espacios']||r['espacios']||1)||1,
+        contenedor,
+        // Solo arma/armadura (o un objeto-contenedor) pueden quedar equipables.
+        // Un consumible nunca ocupa ranura, sin importar lo que diga la planilla.
+        ranura:     equipo ? (String(r['Ranura']||r['ranura']||'—').trim()||'—') : '—',
+        bono:       equipo ? (String(r['Bono']||r['bono']||'—').trim()||'—') : '—',
+        equipable:  equipo && String(r['Equipable']||r['equipable']||'No').toLowerCase()!=='no',
+        quitaCondicion: String(r['Quita Condición']||r['quitaCondicion']||'').trim()||null,
+        esGlobal:   false, activo:true,
+      };
+    }).filter(r=>r.nombre);
     document.getElementById('import-excel-count').textContent = `${_importDataAdmin.length} ítems listos para importar al vendedor: ${VENDEDORES_LABELS_ADMIN[_itemTabActivo]}`;
     document.getElementById('import-excel-preview').style.display='block';
     status.textContent = `✓ ${_importDataAdmin.length} ítems detectados`;
