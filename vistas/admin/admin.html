@@ -376,7 +376,7 @@ html,body{height:100%;background:var(--negro);color:var(--texto);font-family:var
       <!-- Importación masiva -->
       <div class="admin-form" style="margin-bottom:16px;">
         <div class="admin-form-title">📥 Importación Masiva desde Excel</div>
-        <p style="font-size:11px;color:var(--muted);margin-bottom:12px;">Usa la misma plantilla Excel del conversor. Los ítems se importan al vendedor seleccionado arriba.</p>
+        <p style="font-size:11px;color:var(--muted);margin-bottom:12px;">Usa la misma plantilla Excel del conversor (incluye Subcategoría y Acepta). Los ítems se importan al vendedor seleccionado arriba.</p>
         <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap;">
           <input type="file" id="import-excel-admin" accept=".xlsx,.xls" style="display:none;" onchange="importarExcelAdmin(this)">
           <button class="btn-guardar" onclick="document.getElementById('import-excel-admin').click()"><i class="ri-file-excel-line"></i> Subir Excel</button>
@@ -391,9 +391,20 @@ html,body{height:100%;background:var(--negro);color:var(--texto);font-family:var
       <!-- Formulario nuevo/editar ítem -->
       <div class="admin-form">
         <div class="admin-form-title" id="item-form-titulo">Nuevo Ítem</div>
-        <div class="form-grid" style="margin-bottom:12px;">
+        <div class="form-grid three" style="margin-bottom:12px;">
           <div><label class="admin-label">Nombre *</label><input class="admin-input" id="item-nombre" placeholder="Nombre del ítem"></div>
           <div><label class="admin-label">Categoría *</label><input class="admin-input" id="item-cat" placeholder="Ej: Arma, Consumible..."></div>
+          <div><label class="admin-label">Subcategoría</label><input class="admin-input" id="item-subcat" placeholder="Ej: Cuchillos, Flechas... o 'No Aplica'"></div>
+        </div>
+        <div class="form-grid three" style="margin-bottom:12px;">
+          <div><label class="admin-label">ID (planilla)</label><input class="admin-input" id="item-id-planilla" placeholder="Ej: ARM001"></div>
+          <div><label class="admin-label">Stock</label><input class="admin-input" id="item-stock" type="number" value="0" min="0"></div>
+          <div><label class="admin-label">Disponibilidad</label>
+            <select class="admin-select" id="item-disponibilidad">
+              <option>Común</option><option>Escasa</option><option>Rara</option>
+              <option>Muy Rara</option><option>Única</option>
+            </select>
+          </div>
         </div>
         <div class="form-grid one" style="margin-bottom:12px;">
           <div><label class="admin-label">Descripción</label><textarea class="admin-textarea" id="item-desc" placeholder="Descripción del ítem..." rows="2"></textarea></div>
@@ -413,10 +424,13 @@ html,body{height:100%;background:var(--negro);color:var(--texto);font-family:var
             </select>
           </div>
         </div>
-        <div class="form-grid" style="margin-bottom:12px;">
+        <div class="form-grid three" style="margin-bottom:12px;">
           <div><label class="admin-label">Peso (kg)</label><input class="admin-input" id="item-peso" type="number" value="0" min="0" step="0.1"></div>
           <div><label class="admin-label">Espacios</label><input class="admin-input" id="item-espacios" type="number" value="1" min="0"></div>
           <div><label class="admin-label">Contenedor (espacios)</label><input class="admin-input" id="item-contenedor" type="number" value="0" min="0" placeholder="0 = no es contenedor" oninput="toggleCamposEquipoAdmin()"></div>
+        </div>
+        <div class="form-grid one" style="margin-bottom:12px;">
+          <div><label class="admin-label">Acepta (solo si es contenedor)</label><input class="admin-input" id="item-acepta" value="No Aplica" placeholder="Subcategoría que acepta (ej: Flechas), o 'Cualquiera'. 'No Aplica' si no es contenedor."></div>
         </div>
         <div id="campos-equipo-admin" style="display:none;">
           <div class="form-grid" style="margin-bottom:12px;">
@@ -431,6 +445,17 @@ html,body{height:100%;background:var(--negro);color:var(--texto);font-family:var
           <div><label class="admin-label">Quita Condición</label>
             <select class="admin-select" id="item-quita">
               <option value="">— Ninguna —</option>
+              <option value="EST001">Sangrado</option><option value="EST002">Aturdido</option>
+              <option value="EST003">Derribado</option><option value="EST004">Fatiga</option>
+              <option value="EST005">Pánico</option><option value="EST006">Intimidado</option>
+              <option value="EST007">Desorientado</option><option value="EST008">Inmovilizado</option>
+              <option value="EST009">Quemado I</option><option value="EST010">Quemado II</option>
+              <option value="EST011">Quemado III</option><option value="EST012">Envenenado</option>
+            </select>
+          </div>
+          <div><label class="admin-label">Estado Asociado</label>
+            <select class="admin-select" id="item-estado-asociado">
+              <option value="">— Ninguno —</option>
               <option value="EST001">Sangrado</option><option value="EST002">Aturdido</option>
               <option value="EST003">Derribado</option><option value="EST004">Fatiga</option>
               <option value="EST005">Pánico</option><option value="EST006">Intimidado</option>
@@ -863,7 +888,7 @@ function renderItemsAdmin() {
         <input type="checkbox" ${_itemsSeleccionados.has(it.id)?'checked':''} onchange="toggleSeleccionItem('${it.id}')" style="accent-color:var(--dorado);margin-top:3px;flex-shrink:0;">
         <div style="flex:1;">
           <div class="item-mundo-nombre">${it.nombre} ${it.esGlobal?'<span style="font-size:9px;color:var(--dorado);font-family:var(--mono);">GLOBAL</span>':''}</div>
-          <div class="item-mundo-meta">${it.cat||'—'} · ${(it.tipo||'objeto')} · ${it.calidad||'Común'} · ${(it.precio||0).toLocaleString()} Marcas</div>
+          <div class="item-mundo-meta">${it.idPlanilla?`[${it.idPlanilla}] `:''}${it.cat||'—'}${it.subcat&&it.subcat!=='No Aplica'?' / '+it.subcat:''} · ${(it.tipo||'objeto')} · ${it.calidad||'Común'}${it.disponibilidad?' · '+it.disponibilidad:''} · ${(it.precio||0).toLocaleString()} Marcas${it.stock?` · Stock: ${it.stock}`:''}${(it.contenedor>0)?` · 🎒 ${it.contenedor} (acepta: ${it.acepta||'Cualquiera'})`:''}</div>
           <div class="item-mundo-desc">${it.desc||'Sin descripción'}</div>
         </div>
       </div>
@@ -919,6 +944,10 @@ window.guardarItemMundo = async function() {
   const equipo = permiteEquipoAdmin(tipo, contenedor);
   const data = {
     nombre, cat:document.getElementById('item-cat').value.trim(),
+    subcat:document.getElementById('item-subcat').value.trim()||'No Aplica',
+    idPlanilla:document.getElementById('item-id-planilla').value.trim()||null,
+    stock:parseInt(document.getElementById('item-stock').value)||0,
+    disponibilidad:document.getElementById('item-disponibilidad').value,
     tipo,
     desc:document.getElementById('item-desc').value.trim(),
     precio:parseInt(document.getElementById('item-precio').value)||0,
@@ -926,10 +955,13 @@ window.guardarItemMundo = async function() {
     peso:parseFloat(document.getElementById('item-peso').value)||0,
     espacios:parseInt(document.getElementById('item-espacios').value)||1,
     contenedor,
+    // "Acepta" solo tiene sentido si el ítem es un contenedor real (contenedor>0)
+    acepta:contenedor>0?(document.getElementById('item-acepta').value.trim()||'Cualquiera'):'No Aplica',
     ranura:equipo?(document.getElementById('item-ranura').value||'—'):'—',
     bono:equipo?(document.getElementById('item-bono').value||'—'):'—',
     equipable:equipo?(document.getElementById('item-equipable').value==='true'):false,
     quitaCondicion:document.getElementById('item-quita').value||null,
+    estadoAsociado:document.getElementById('item-estado-asociado').value||null,
     esGlobal:false, activo:true,
   };
   if (_editandoItemId) {
@@ -953,6 +985,10 @@ window.editarItemMundo = async function(id, vendedor) {
   _editandoItemId = id; _itemTabActivo = vendedor;
   document.getElementById('item-nombre').value    = it.nombre||'';
   document.getElementById('item-cat').value       = it.cat||'';
+  document.getElementById('item-subcat').value    = it.subcat||'';
+  document.getElementById('item-id-planilla').value = it.idPlanilla||'';
+  document.getElementById('item-stock').value     = it.stock||0;
+  document.getElementById('item-disponibilidad').value = it.disponibilidad||'Común';
   document.getElementById('item-tipo').value      = it.tipo||'objeto';
   document.getElementById('item-desc').value      = it.desc||'';
   document.getElementById('item-precio').value    = it.precio||0;
@@ -960,10 +996,12 @@ window.editarItemMundo = async function(id, vendedor) {
   document.getElementById('item-peso').value      = it.peso||0;
   document.getElementById('item-espacios').value  = it.espacios||1;
   document.getElementById('item-contenedor').value= it.contenedor||0;
+  document.getElementById('item-acepta').value    = it.acepta||'No Aplica';
   document.getElementById('item-ranura').value    = it.ranura||'—';
   document.getElementById('item-bono').value      = it.bono||'—';
   document.getElementById('item-equipable').value = it.equipable?'true':'false';
   document.getElementById('item-quita').value     = it.quitaCondicion||'';
+  document.getElementById('item-estado-asociado').value = it.estadoAsociado||'';
   document.getElementById('item-form-titulo').textContent = 'Editando: ' + it.nombre;
   document.getElementById('btn-cancelar-item').style.display = 'inline-block';
   toggleCamposEquipoAdmin();
@@ -971,13 +1009,16 @@ window.editarItemMundo = async function(id, vendedor) {
 
 window.cancelarEdicionItem = function() {
   _editandoItemId = null;
-  ['item-nombre','item-cat','item-desc'].forEach(id=>document.getElementById(id).value='');
-  ['item-precio','item-espacios','item-peso','item-contenedor'].forEach(id=>document.getElementById(id).value='0');
+  ['item-nombre','item-cat','item-subcat','item-desc','item-id-planilla'].forEach(id=>document.getElementById(id).value='');
+  ['item-precio','item-espacios','item-peso','item-contenedor','item-stock'].forEach(id=>document.getElementById(id).value='0');
   document.getElementById('item-espacios').value='1';
   document.getElementById('item-tipo').value='objeto';
+  document.getElementById('item-disponibilidad').value='Común';
+  document.getElementById('item-acepta').value='No Aplica';
   document.getElementById('item-ranura').value='—';
   document.getElementById('item-bono').value='—';
   document.getElementById('item-quita').value='';
+  document.getElementById('item-estado-asociado').value='';
   document.getElementById('item-form-titulo').textContent='Nuevo Ítem';
   document.getElementById('btn-cancelar-item').style.display='none';
   toggleCamposEquipoAdmin();
@@ -1122,6 +1163,10 @@ window.importarExcelAdmin = async function(input) {
       return {
         nombre:     String(r['Nombre']||r['nombre']||'').trim(),
         cat:        String(r['Categoría']||r['categoria']||r['Categoria']||'').trim(),
+        subcat:     String(r['Subcategoría']||r['subcategoria']||r['Subcategoria']||'No Aplica').trim()||'No Aplica',
+        idPlanilla: String(r['ID']||r['id']||'').trim()||null,
+        stock:      parseInt(r['Stock']||r['stock']||0)||0,
+        disponibilidad: String(r['Disponibilidad']||r['disponibilidad']||'Común').trim()||'Común',
         tipo,
         desc:       String(r['Descripción']||r['descripcion']||'').trim(),
         precio:     parseInt(r['Precio']||r['precio']||0)||0,
@@ -1129,12 +1174,15 @@ window.importarExcelAdmin = async function(input) {
         peso:       parseFloat(r['Peso']||r['peso']||0)||0,
         espacios:   parseInt(r['Espacios']||r['espacios']||1)||1,
         contenedor,
+        // "Acepta" solo aplica si el ítem es realmente un contenedor (contenedor>0)
+        acepta:     contenedor>0 ? (String(r['Acepta']||r['acepta']||'Cualquiera').trim()||'Cualquiera') : 'No Aplica',
         // Solo arma/armadura (o un objeto-contenedor) pueden quedar equipables.
         // Un consumible nunca ocupa ranura, sin importar lo que diga la planilla.
         ranura:     equipo ? (String(r['Ranura']||r['ranura']||'—').trim()||'—') : '—',
         bono:       equipo ? (String(r['Bono']||r['bono']||'—').trim()||'—') : '—',
         equipable:  equipo && String(r['Equipable']||r['equipable']||'No').toLowerCase()!=='no',
         quitaCondicion: String(r['Quita Condición']||r['quitaCondicion']||'').trim()||null,
+        estadoAsociado: String(r['Estado Asociado']||r['estadoAsociado']||'').trim()||null,
         esGlobal:   false, activo:true,
       };
     }).filter(r=>r.nombre);
