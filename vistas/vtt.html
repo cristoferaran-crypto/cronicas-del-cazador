@@ -765,14 +765,14 @@
       <button class="btn-cerrar-modal" onclick="cerrarModalImport()"><i class="ri-close-line"></i></button>
     </div>
     <div class="modal-import-body">
-      <p style="font-size:12px;color:var(--muted);margin-bottom:10px;">Pega un array JSON con los productos. Cada objeto debe tener: nombre, cat, desc, precio, calidad, peso, espacios, equipable, ranura, bono.</p>
+      <p style="font-size:12px;color:var(--muted);margin-bottom:10px;">Pega un array JSON con los productos. Campos: nombre, cat, subcat, idPlanilla, stock, disponibilidad, desc, precio, tipo (objeto/consumible/arma/armadura), calidad, peso, espacios, equipable, ranura, contenedor, acepta, bono, quitaCondicion, estadoAsociado. Solo arma/armadura (o un objeto con contenedor&gt;0) pueden quedar equipables — un consumible nunca ocupa ranura.</p>
       <select class="form-select" id="import-vendedor" style="margin-bottom:10px;">
         <option value="bazar">Bazar</option>
         <option value="armero">Armero</option>
         <option value="drogueria">Droguería</option>
         <option value="mercado_negro">Mercado Negro</option>
       </select>
-      <textarea class="import-textarea" id="import-json" placeholder='[{"nombre":"Ejemplo","cat":"Categoría","desc":"Descripción","precio":1000,"calidad":"Común","peso":0.5,"espacios":1,"equipable":false,"ranura":"—","bono":"—"}]'></textarea>
+      <textarea class="import-textarea" id="import-json" placeholder='[{"nombre":"Ejemplo","cat":"Categoría","subcat":"No Aplica","idPlanilla":"ARM001","stock":10,"disponibilidad":"Común","desc":"Descripción","precio":1000,"tipo":"objeto","calidad":"Común","peso":0.5,"espacios":1,"equipable":false,"ranura":"—","contenedor":0,"acepta":"No Aplica","bono":"—","quitaCondicion":null,"estadoAsociado":null}]'></textarea>
       <button class="btn-import" onclick="ejecutarImport()"><i class="ri-upload-line"></i> Importar a Firestore</button>
       <div class="import-result" id="import-result"></div>
     </div>
@@ -1958,13 +1958,16 @@ function renderTabTiendaDJ(){
     <button class="btn-accion-dj" style="flex:1;height:34px;font-size:11px;" onclick="abrirModalProd(null)"><i class="ri-add-line"></i> Nuevo Producto</button>
     <button class="btn-accion-dj" style="flex:1;height:34px;font-size:11px;background:rgba(46,204,113,0.15);border:1px solid rgba(46,204,113,0.3);color:var(--verde);" onclick="abrirModalImport()"><i class="ri-upload-line"></i> Importar JSON</button>
     <button class="btn-accion-dj" style="width:100%;height:34px;font-size:11px;background:rgba(201,168,76,0.12);border:1px solid var(--borde-d);color:var(--dorado);" onclick="abrirModalImportPacks()"><i class="ri-stack-line"></i> Importar Packs JSON</button>
+    <button class="btn-accion-dj" style="width:100%;height:34px;font-size:11px;background:rgba(192,57,43,0.12);border:1px solid var(--borde-r);color:#ff8080;" onclick="vaciarTiendaCompleta()"><i class="ri-delete-bin-2-line"></i> Vaciar Tienda Completa (los 4 vendedores)</button>
   </div>
   <div id="admin-prods-list"><div style="font-size:12px;color:var(--muted);font-style:italic;padding:10px 0;">Selecciona un vendedor arriba para ver sus productos.</div></div>`;
 }
 
 let adminVendedorActivo='bazar';
+let prodsSeleccionados=new Set();
 window.setAdminVendedor=function(v,el){
   adminVendedorActivo=v;
+  prodsSeleccionados.clear();
   document.querySelectorAll('.tienda-admin-tab').forEach(t=>t.classList.remove('active'));
   el.classList.add('active');
   renderAdminProds();
@@ -1973,25 +1976,94 @@ function renderAdminProds(){
   const list=document.getElementById('admin-prods-list'); if(!list) return;
   const prods=TIENDA_CACHE[adminVendedorActivo]||[];
   if(!prods.length){list.innerHTML=`<div style="font-size:12px;color:var(--muted);font-style:italic;padding:10px 0;">Sin productos en ${VENDEDORES_LABELS[adminVendedorActivo]}. <button onclick="abrirModalProd(null)" style="background:transparent;border:none;color:var(--dorado);cursor:pointer;font-size:12px;">+ Agregar</button></div>`;return;}
-  list.innerHTML=prods.map(p=>{
+  const n=prodsSeleccionados.size;
+  const toolbar=n>0?`<div style="display:flex;align-items:center;justify-content:space-between;background:rgba(192,57,43,0.1);border:1px solid var(--borde-r);padding:6px 10px;margin-bottom:8px;font-size:12px;"><span>${n} seleccionado${n>1?'s':''}</span><button onclick="eliminarProdsSeleccionados()" style="background:rgba(192,57,43,0.25);border:1px solid var(--borde-r);color:#ff8080;padding:4px 10px;cursor:pointer;font-size:11px;"><i class="ri-delete-bin-line"></i> Eliminar seleccionados</button></div>`:'';
+  list.innerHTML=toolbar+prods.map(p=>{
     const cal=CALIDADES[p.calidad||'Común']||{color:'#9ca3af'};
     const esGlobal = p.esGlobal===true;
+    const key=`${adminVendedorActivo}::${p.id}`;
+    const checkbox=esGlobal?`<span style="width:14px;flex-shrink:0;"></span>`:`<input type="checkbox" onchange="toggleSeleccionProd('${key}')" ${prodsSeleccionados.has(key)?'checked':''} style="flex-shrink:0;width:14px;height:14px;cursor:pointer;">`;
     const botonesEdit = esGlobal
       ? `<span style="font-family:var(--mono);font-size:8px;color:var(--dorado);padding:2px 6px;border:1px solid rgba(201,168,76,0.3);">GLOBAL</span>`
       : `<button class="prod-admin-edit" onclick="abrirModalProd('${p.id}')"><i class="ri-edit-line"></i></button><button class="prod-admin-del" onclick="eliminarProd('${adminVendedorActivo}','${p.id}')"><i class="ri-delete-bin-line"></i></button>`;
-    return`<div class="prod-admin-card"><div style="width:6px;height:32px;background:${cal.color};flex-shrink:0;border-radius:1px;"></div><div class="prod-admin-nombre">${p.nombre}<div style="font-size:10px;color:var(--muted);font-weight:400;">${p.cat||''} · ${p.precio?p.precio.toLocaleString():0} Marcas</div></div><button class="prod-admin-toggle ${p.activo!==false?'activo':'inactivo'}" onclick="toggleProdAdmin('${adminVendedorActivo}','${p.id}')">${p.activo!==false?'ON':'OFF'}</button>${botonesEdit}</div>`;
+    return`<div class="prod-admin-card">${checkbox}<div style="width:6px;height:32px;background:${cal.color};flex-shrink:0;border-radius:1px;"></div><div class="prod-admin-nombre">${p.nombre}<div style="font-size:10px;color:var(--muted);font-weight:400;">${p.cat||''}${p.subcat&&p.subcat!=='No Aplica'?' / '+p.subcat:''} · ${p.precio?p.precio.toLocaleString():0} Marcas${p.contenedor>0?` · 🎒 ${p.contenedor} (acepta: ${p.acepta||'Cualquiera'})`:''}</div></div><button class="prod-admin-toggle ${p.activo!==false?'activo':'inactivo'}" onclick="toggleProdAdmin('${adminVendedorActivo}','${p.id}')">${p.activo!==false?'ON':'OFF'}</button>${botonesEdit}</div>`;
   }).join('');
 }
+window.toggleSeleccionProd=function(key){
+  if(prodsSeleccionados.has(key))prodsSeleccionados.delete(key);else prodsSeleccionados.add(key);
+  renderAdminProds();
+};
 
 window.toggleProdAdmin=async function(vendedor,prodId){
   const prod=(TIENDA_CACHE[vendedor]||[]).find(p=>p.id===prodId);if(!prod)return;
   await updateDoc(doc(db,'tienda',vendedor,'productos',prodId),{activo:prod.activo===false?true:false});
   toast(`Producto ${prod.activo===false?'activado':'desactivado'}.`,'info');
 };
+// Quita del inventario (y desequipa si corresponde) las copias de los productos
+// indicados en TODOS los personajes. El vínculo tienda↔personaje es por nombre
+// (no hay un ID compartido), así que se identifica así.
+async function limpiarItemsDePersonajes(nombres){
+  if(!nombres.length)return{personajesAfectados:0,copiasQuitadas:0};
+  const set=new Set(nombres);
+  const snap=await getDocs(collection(db,'personajes'));
+  let personajesAfectados=0,copiasQuitadas=0;
+  for(const d of snap.docs){
+    const data=d.data();
+    const inventario=data.inventario||[];
+    const equipado={...(data.equipado||{})};
+    let cambio=false;
+    const invFiltrado=inventario.filter(it=>{
+      if(set.has(it.nombre)){cambio=true;copiasQuitadas+=(it.cantidad||1);return false;}
+      return true;
+    });
+    for(const ranuraId of Object.keys(equipado)){
+      if(equipado[ranuraId]&&set.has(equipado[ranuraId].nombre)){delete equipado[ranuraId];cambio=true;copiasQuitadas++;}
+    }
+    if(cambio){
+      await updateDoc(doc(db,'personajes',d.id),{inventario:invFiltrado,equipado});
+      personajesAfectados++;
+      if(MI_PERSONAJE&&MI_PERSONAJE.id===d.id){MI_PERSONAJE.inventario=invFiltrado;MI_PERSONAJE.equipado=equipado;}
+    }
+  }
+  return{personajesAfectados,copiasQuitadas};
+}
 window.eliminarProd=async function(vendedor,prodId){
-  if(!confirm('¿Eliminar este producto?'))return;
+  const prod=(TIENDA_CACHE[vendedor]||[]).find(p=>p.id===prodId);
+  if(!confirm('¿Eliminar este producto? También se quitará de los personajes que ya lo tengan (comprado o equipado).'))return;
   await deleteDoc(doc(db,'tienda',vendedor,'productos',prodId));
-  toast('Producto eliminado.','info');
+  const r=prod?await limpiarItemsDePersonajes([prod.nombre]):{personajesAfectados:0,copiasQuitadas:0};
+  toast(`Producto eliminado.${r.copiasQuitadas?` Se quitó de ${r.personajesAfectados} personaje(s).`:''}`,'info');
+};
+window.eliminarProdsSeleccionados=async function(){
+  if(!prodsSeleccionados.size)return;
+  const items=[...prodsSeleccionados].map(key=>{
+    const [vendedor,id]=key.split('::');
+    const prod=(TIENDA_CACHE[vendedor]||[]).find(p=>p.id===id);
+    return prod?{vendedor,id,nombre:prod.nombre}:null;
+  }).filter(Boolean);
+  if(!items.length)return;
+  if(!confirm(`¿Eliminar ${items.length} producto(s) seleccionado(s)? También se quitarán de los personajes que ya los tengan.`))return;
+  for(const it of items){
+    try{await deleteDoc(doc(db,'tienda',it.vendedor,'productos',it.id));}catch(e){}
+  }
+  const r=await limpiarItemsDePersonajes(items.map(it=>it.nombre));
+  prodsSeleccionados.clear();
+  toast(`🗑️ ${items.length} producto(s) eliminados.${r.copiasQuitadas?` Se quitaron de ${r.personajesAfectados} personaje(s).`:''}`,'info');
+};
+window.vaciarTiendaCompleta=async function(){
+  const vendedores=['bazar','armero','drogueria','mercado_negro'];
+  const todos=vendedores.flatMap(v=>(TIENDA_CACHE[v]||[]).map(p=>({...p,_vendedor:v})));
+  const borrables=todos.filter(p=>p.esGlobal!==true);
+  const protegidos=todos.length-borrables.length;
+  if(!borrables.length){toast('No hay productos para borrar.','info');return;}
+  if(!confirm(`⚠ Esto borrará ${borrables.length} producto(s) de TODA la tienda (bazar, armero, droguería y mercado negro), y los quitará de los personajes que ya los tengan.${protegidos?` Se conservarán ${protegidos} ítem(s) global(es).`:''}\n\nEsta acción NO se puede deshacer. ¿Continuar?`))return;
+  if(!confirm(`Última confirmación: se eliminarán ${borrables.length} producto(s) permanentemente. ¿Seguro?`))return;
+  let ok=0,fail=0;
+  for(const p of borrables){
+    try{await deleteDoc(doc(db,'tienda',p._vendedor,'productos',p.id));ok++;}catch(e){fail++;}
+  }
+  const r=await limpiarItemsDePersonajes(borrables.map(p=>p.nombre));
+  toast(`🗑️ ${ok} producto(s) eliminados de la tienda.${r.copiasQuitadas?` Se quitaron de ${r.personajesAfectados} personaje(s).`:''}${fail?` ⚠ ${fail} fallaron.`:''}`,'info');
 };
 window.togglePackDJ=async function(packId){
   const actual=window._tiendaData?.packsActivos||{};
@@ -2018,28 +2090,65 @@ window.toggleMercadoNegro=async function(pid,nombre){
 window.abrirModalProd=function(prodId){
   editandoProdId=prodId; editandoVendedor=adminVendedorActivo||'bazar';
   const prod=prodId?(TIENDA_CACHE[editandoVendedor]||[]).find(p=>p.id===prodId):null;
+  // Inferir tipo para ítems antiguos que no tengan el campo (no debe perder datos al editar)
+  let tipoInicial=prod?.tipo;
+  if(prod&&!tipoInicial){
+    if(prod.equipable!==false&&prod.ranura&&prod.ranura!=='—'){
+      const manoSlots=['Mano Derecha','Mano Izquierda','Mano Der/Izq','Ambas Manos'];
+      tipoInicial=manoSlots.includes(prod.ranura)?'arma':'armadura';
+    } else tipoInicial='objeto';
+  }
+  if(!tipoInicial)tipoInicial='objeto';
   document.getElementById('modal-prod-titulo').textContent=prod?'Editar Producto':'Nuevo Producto';
   document.getElementById('modal-prod-body').innerHTML=`
     <div><label class="form-label">Vendedor</label><select class="form-select" id="prod-vendedor">${['bazar','armero','drogueria','mercado_negro'].map(v=>`<option value="${v}" ${editandoVendedor===v?'selected':''}>${VENDEDORES_LABELS[v]}</option>`).join('')}</select></div>
     <div class="form-row"><div><label class="form-label">Nombre *</label><input class="form-input-vtt" id="prod-nombre" value="${prod?.nombre||''}" placeholder="Nombre del producto"></div><div><label class="form-label">Categoría *</label><input class="form-input-vtt" id="prod-cat" value="${prod?.cat||''}" placeholder="Ej: Supervivencia"></div></div>
+    <div class="form-row"><div><label class="form-label">Subcategoría</label><input class="form-input-vtt" id="prod-subcat" value="${prod?.subcat||''}" placeholder="Ej: Cuchillos, Flechas... o 'No Aplica'"></div><div><label class="form-label">ID (planilla)</label><input class="form-input-vtt" id="prod-id-planilla" value="${prod?.idPlanilla||''}" placeholder="Ej: ARM001"></div></div>
+    <div class="form-row"><div><label class="form-label">Stock</label><input class="form-input-vtt" id="prod-stock" type="number" value="${prod?.stock||0}" min="0"></div><div><label class="form-label">Disponibilidad</label><select class="form-select" id="prod-disponibilidad">${['Común','Escasa','Rara','Muy Rara','Única'].map(d=>`<option value="${d}" ${(prod?.disponibilidad||'Común')===d?'selected':''}>${d}</option>`).join('')}</select></div></div>
+    <div class="form-row"><div><label class="form-label">Tipo</label><select class="form-select" id="prod-tipo" onchange="toggleCamposEquipo()">
+      <option value="objeto" ${tipoInicial==='objeto'?'selected':''}>Objeto</option>
+      <option value="consumible" ${tipoInicial==='consumible'?'selected':''}>Consumible</option>
+      <option value="arma" ${tipoInicial==='arma'?'selected':''}>Arma</option>
+      <option value="armadura" ${tipoInicial==='armadura'?'selected':''}>Armadura</option>
+    </select></div><div><label class="form-label">Calidad</label><select class="form-select" id="prod-calidad">${Object.keys(CALIDADES).map(c=>`<option value="${c}" ${prod?.calidad===c?'selected':''}>${c}</option>`).join('')}</select></div></div>
     <div><label class="form-label">Descripción</label><textarea class="form-textarea-vtt" id="prod-desc" style="min-height:55px;">${prod?.desc||''}</textarea></div>
-    <div class="form-row"><div><label class="form-label">Precio (Marcas) *</label><input class="form-input-vtt" id="prod-precio" type="number" value="${prod?.precio||0}" min="0"></div><div><label class="form-label">Calidad</label><select class="form-select" id="prod-calidad">${Object.keys(CALIDADES).map(c=>`<option value="${c}" ${prod?.calidad===c?'selected':''}>${c}</option>`).join('')}</select></div></div>
-    <div class="form-row"><div><label class="form-label">Peso (kg)</label><input class="form-input-vtt" id="prod-peso" type="number" step="0.1" value="${prod?.peso||0}" min="0"></div><div><label class="form-label">Espacios</label><input class="form-input-vtt" id="prod-espacios" type="number" value="${prod?.espacios||1}" min="0"></div></div>
-    <div class="form-row"><div><label class="form-label">Ranura</label><input class="form-input-vtt" id="prod-ranura" value="${prod?.ranura||'—'}" placeholder="Ej: Torso, Mano Der/Izq"></div><div><label class="form-label">Bono</label><input class="form-input-vtt" id="prod-bono" value="${prod?.bono||'—'}" placeholder="Ej: +1 Atletismo"></div></div>
-    <div class="form-row"><div><label class="form-label">Equipable</label><select class="form-select" id="prod-equipable"><option value="true" ${prod?.equipable!==false?'selected':''}>Sí</option><option value="false" ${prod?.equipable===false?'selected':''}>No</option></select></div><div><label class="form-label">Contenedor (espacios)</label><input class="form-input-vtt" id="prod-contenedor" type="number" value="${prod?.contenedor||0}" min="0" placeholder="0 = no es contenedor"></div></div>
+    <div class="form-row"><div><label class="form-label">Precio (Marcas) *</label><input class="form-input-vtt" id="prod-precio" type="number" value="${prod?.precio||0}" min="0"></div><div><label class="form-label">Peso (kg)</label><input class="form-input-vtt" id="prod-peso" type="number" step="0.1" value="${prod?.peso||0}" min="0"></div></div>
+    <div class="form-row"><div><label class="form-label">Espacios</label><input class="form-input-vtt" id="prod-espacios" type="number" value="${prod?.espacios||1}" min="0"></div><div><label class="form-label">Contenedor (espacios)</label><input class="form-input-vtt" id="prod-contenedor" type="number" value="${prod?.contenedor||0}" min="0" placeholder="0 = no es contenedor" oninput="toggleCamposEquipo()"></div></div>
+    <div><label class="form-label">Acepta (solo si es contenedor)</label><input class="form-input-vtt" id="prod-acepta" value="${prod?.acepta||'No Aplica'}" placeholder="Subcategoría que acepta (ej: Flechas), o 'Cualquiera'. 'No Aplica' si no es contenedor."></div>
+    <div id="campos-equipo" style="display:none;">
+      <div class="form-row"><div><label class="form-label">Ranura</label><input class="form-input-vtt" id="prod-ranura" value="${prod?.ranura||'—'}" placeholder="Ej: Torso, Mano Der/Izq"></div><div><label class="form-label">Bono</label><input class="form-input-vtt" id="prod-bono" value="${prod?.bono||'—'}" placeholder="Ej: +1 Atletismo"></div></div>
+      <div><label class="form-label">Equipable</label><select class="form-select" id="prod-equipable"><option value="true" ${prod?.equipable!==false?'selected':''}>Sí</option><option value="false" ${prod?.equipable===false?'selected':''}>No</option></select></div>
+    </div>
     <div class="form-row"><div><label class="form-label">Quita Condición</label><select class="form-select" id="prod-quita-condicion"><option value="">— Ninguna —</option>${CONDICIONES.map(c=>`<option value="${c.id}" ${prod?.quitaCondicion===c.id?'selected':''}>${c.nombre}</option>`).join('')}</select></div><div><label class="form-label">Estado Asociado</label><select class="form-select" id="prod-estado-asociado"><option value="">— Ninguno —</option>${CONDICIONES.map(c=>`<option value="${c.id}" ${prod?.estadoAsociado===c.id?'selected':''}>${c.nombre}</option>`).join('')}</select></div></div>
     <button class="btn-modal-guardar" onclick="guardarProd()"><i class="ri-save-line"></i> Guardar Producto</button>
     <button class="btn-modal-cancel" onclick="cerrarModalProd()">Cancelar</button>`;
   document.getElementById('modal-prod').classList.add('open');
+  toggleCamposEquipo();
 };
 window.cerrarModalProd=()=>document.getElementById('modal-prod').classList.remove('open');
+// Solo Arma/Armadura pueden equiparse en ranuras de equipo. Un Objeto solo
+// las muestra si además es un contenedor (mochila, bolsa, etc). Consumible nunca.
+window.toggleCamposEquipo=function(){
+  const tipoEl=document.getElementById('prod-tipo');
+  if(!tipoEl)return;
+  const tipo=tipoEl.value;
+  const contenedor=parseInt(document.getElementById('prod-contenedor')?.value)||0;
+  const mostrar=tipo==='arma'||tipo==='armadura'||(tipo==='objeto'&&contenedor>0);
+  const el=document.getElementById('campos-equipo');
+  if(el)el.style.display=mostrar?'block':'none';
+};
 window.guardarProd=async function(){
   const nombre=document.getElementById('prod-nombre').value.trim();
   const cat=document.getElementById('prod-cat').value.trim();
+  const tipo=document.getElementById('prod-tipo').value;
   const precio=parseInt(document.getElementById('prod-precio').value)||0;
-  const equipable=document.getElementById('prod-equipable').value==='true';
-  const ranura=document.getElementById('prod-ranura').value.trim();
-  const bono=document.getElementById('prod-bono').value.trim();
+  const contenedor=parseInt(document.getElementById('prod-contenedor').value)||0;
+  // Solo arma/armadura (o un objeto-contenedor) pueden tener ranura/equipable.
+  // Un consumible (chocolates, pociones, etc.) jamás puede ir en una ranura de equipo.
+  const permiteEquipo=tipo==='arma'||tipo==='armadura'||(tipo==='objeto'&&contenedor>0);
+  const equipable=permiteEquipo&&document.getElementById('prod-equipable').value==='true';
+  const ranura=permiteEquipo?(document.getElementById('prod-ranura').value.trim()||'—'):'—';
+  const bono=permiteEquipo?(document.getElementById('prod-bono').value.trim()||'—'):'—';
   // Validar parámetros faltantes
   const faltantes=[];
   if(!nombre) faltantes.push('Nombre');
@@ -2049,16 +2158,21 @@ window.guardarProd=async function(){
   if(faltantes.length){toast('⚠ Faltan parámetros: '+faltantes.join(', '),'error');return;}
   const vendedor=document.getElementById('prod-vendedor').value;
   const data={
-    nombre,cat,
+    nombre,cat,tipo,
+    subcat:document.getElementById('prod-subcat').value.trim()||'No Aplica',
+    idPlanilla:document.getElementById('prod-id-planilla').value.trim()||null,
+    stock:parseInt(document.getElementById('prod-stock').value)||0,
+    disponibilidad:document.getElementById('prod-disponibilidad').value,
     desc:document.getElementById('prod-desc').value.trim(),
     precio,
     calidad:document.getElementById('prod-calidad').value,
     peso:parseFloat(document.getElementById('prod-peso').value)||0,
     espacios:parseInt(document.getElementById('prod-espacios').value)||0,
-    ranura:document.getElementById('prod-ranura').value.trim()||'—',
-    bono:document.getElementById('prod-bono').value.trim()||'—',
-    equipable:document.getElementById('prod-equipable').value==='true',
-    contenedor:parseInt(document.getElementById('prod-contenedor').value)||0,
+    ranura,
+    bono,
+    equipable,
+    contenedor,
+    acepta:contenedor>0?(document.getElementById('prod-acepta').value.trim()||'Cualquiera'):'No Aplica',
     quitaCondicion:document.getElementById('prod-quita-condicion').value||null,
     estadoAsociado:document.getElementById('prod-estado-asociado').value||null,
     activo:true,
@@ -2123,11 +2237,28 @@ window.ejecutarImport=async function(){
   for(const p of productos){
     if(!p.nombre){fail++;continue;}
     try{
+      // Igual que en el formulario manual: solo arma/armadura (o un objeto-contenedor)
+      // pueden llevar ranura/equipable. Un consumible jamás ocupa una ranura de equipo,
+      // sin importar lo que traiga el JSON pegado.
+      const tipo=['arma','armadura','consumible','objeto'].includes(p.tipo)?p.tipo:'objeto';
+      const contenedor=parseInt(p.contenedor)||0;
+      const permiteEquipo=tipo==='arma'||tipo==='armadura'||(tipo==='objeto'&&contenedor>0);
       await addDoc(collection(db,'tienda',vendedor,'productos'),{
         nombre:p.nombre||'',cat:p.cat||'General',desc:p.desc||'',precio:parseInt(p.precio)||0,
+        tipo,
+        subcat:p.subcat||'No Aplica',
+        idPlanilla:p.idPlanilla||p.id||null,
+        stock:parseInt(p.stock)||0,
+        disponibilidad:p.disponibilidad||'Común',
         calidad:p.calidad||'Común',peso:parseFloat(p.peso)||0,espacios:parseInt(p.espacios)||1,
-        ranura:p.ranura||'—',bono:p.bono||'—',equipable:p.equipable!==false,
-        contenedor:parseInt(p.contenedor)||0,activo:true,createdAt:serverTimestamp(),
+        ranura:permiteEquipo?(p.ranura||'—'):'—',
+        bono:permiteEquipo?(p.bono||'—'):'—',
+        equipable:permiteEquipo&&p.equipable!==false,
+        contenedor,
+        acepta:contenedor>0?(p.acepta||'Cualquiera'):'No Aplica',
+        quitaCondicion:p.quitaCondicion||null,
+        estadoAsociado:p.estadoAsociado||null,
+        activo:true,createdAt:serverTimestamp(),
       });
       ok++;
     }catch(e){fail++;}
@@ -2444,7 +2575,7 @@ window.comprarProducto=async function(prodId,vendedor){
   if(espacios.libre<cantidad){toast(`Solo tienes ${espacios.libre} espacio${espacios.libre!==1?'s':''} libre${espacios.libre!==1?'s':''}.`,'error');return;}
   const idx=inventario.findIndex(o=>o.nombre===prod.nombre);
   if(idx>=0)inventario[idx].cantidad=(inventario[idx].cantidad||1)+cantidad;
-  else inventario.push({nombre:prod.nombre,desc:prod.desc||'',cantidad,tipo:prod.tipo||'objeto',cat:prod.cat,calidad:prod.calidad||'Común',peso:prod.peso||0,espacios:prod.espacios||0,equipable:prod.equipable!==false,ranura:prod.ranura||'—',bono:prod.bono||'—',contenedor:prod.contenedor||0,quitaCondicion:prod.quitaCondicion||null});
+  else inventario.push({nombre:prod.nombre,desc:prod.desc||'',cantidad,tipo:prod.tipo||'objeto',cat:prod.cat,subcat:prod.subcat||'No Aplica',calidad:prod.calidad||'Común',peso:prod.peso||0,espacios:prod.espacios||0,equipable:prod.equipable!==false,ranura:prod.ranura||'—',bono:prod.bono||'—',contenedor:prod.contenedor||0,acepta:prod.acepta||'No Aplica',quitaCondicion:prod.quitaCondicion||null,estadoAsociado:prod.estadoAsociado||null});
   const nuevoSaldo=saldoActual-costoTotal;
   await updateDoc(pRef,{inventario,dinero:nuevoSaldo});
   MI_PERSONAJE.dinero=nuevoSaldo;MI_PERSONAJE.inventario=inventario;
@@ -2481,11 +2612,12 @@ window.comprarPack=async function(packId){
       inventario.push(prodReal ? {
         nombre:prodReal.nombre, cantidad,
         desc:prodReal.desc||'', tipo:prodReal.tipo||'objeto',
-        cat:prodReal.cat||'', calidad:prodReal.calidad||'Común',
+        cat:prodReal.cat||'', subcat:prodReal.subcat||'No Aplica', calidad:prodReal.calidad||'Común',
         peso:prodReal.peso||0, espacios:prodReal.espacios||0,
         equipable:prodReal.equipable!==false,
         ranura:prodReal.ranura||'—', bono:prodReal.bono||'—',
-        contenedor:prodReal.contenedor||0, quitaCondicion:prodReal.quitaCondicion||null,
+        contenedor:prodReal.contenedor||0, acepta:prodReal.acepta||'No Aplica',
+        quitaCondicion:prodReal.quitaCondicion||null, estadoAsociado:prodReal.estadoAsociado||null,
       } : {
         nombre, cantidad, desc:'Pack: '+pack.nombre,
         tipo:'objeto', calidad:'Común', peso:0,
@@ -2678,8 +2810,6 @@ window.abrirModalEquipar=function(personajeId,idx){
   const p=PERSONAJES_CAMPANA.find(x=>x.id===personajeId)||MI_PERSONAJE;if(!p)return;
   const inventario=p.inventario||[];const item=inventario[idx];if(!item)return;
   itemEquipandoIdx=idx;itemEquipandoData=item;personajeEquipando=p;
-  document.getElementById('equipar-titulo').textContent=`Equipar: ${item.nombre}`;
-  document.getElementById('equipar-sub').textContent=`Selecciona la ranura donde va este ítem.`;
   const todasRanuras=[...RANURAS_EQUIPO,...RANURAS_CONTENEDOR];
   // Ranuras válidas respetando la ranura del ítem aunque sea contenedor
   let ranuraValidas;
@@ -2694,6 +2824,14 @@ window.abrirModalEquipar=function(personajeId,idx){
   } else {
     ranuraValidas=RANURAS_EQUIPO;
   }
+  // Si hay una sola ranura posible, no hay nada que decidir: se equipa directo,
+  // sin abrir el modal. Solo se pregunta cuando hay ambigüedad real (ej: cualquier mano).
+  if(ranuraValidas.length===1){
+    confirmarEquipar(ranuraValidas[0].id);
+    return;
+  }
+  document.getElementById('equipar-titulo').textContent=`Equipar: ${item.nombre}`;
+  document.getElementById('equipar-sub').textContent=`Selecciona la ranura donde va este ítem.`;
   const equipado=p.equipado||{};
   document.getElementById('equipar-ranuras').innerHTML=ranuraValidas.map(r=>{
     const actual=equipado[r.id];
