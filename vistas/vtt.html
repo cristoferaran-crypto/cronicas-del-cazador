@@ -2867,8 +2867,9 @@ window.cerrarConfirmacion = function() {
 };
 
 window.ejecutarAccionConfirmada = function() {
+  const fn = accionConfirmadaFn;
   cerrarConfirmacion();
-  if(accionConfirmadaFn) accionConfirmadaFn();
+  if(fn) fn();
 };
 
 async function ejecutarLiberarPersonaje() {
