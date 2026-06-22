@@ -2855,7 +2855,7 @@ function renderTabInventarioFicha(p,esPropia){
       <div class="inv-item-v2-actions">
         <span class="inv-item-v2-cant">×${it.cantidad||1}</span>
         ${esPropia&&esEquipable?`<button class="inv-btn-equipar" onclick="abrirModalEquipar('${p.id}',${idx})">Equipar</button>`:''}
-        ${esPropia?`<button class="inv-btn-usar" onclick="jugadorUsarItem('${p.id}',${idx})">Usar</button>`:''}
+        ${esPropia&&it.tipo==='consumible'?`<button class="inv-btn-usar" onclick="jugadorUsarItem('${p.id}',${idx})">Usar</button>`:''}
       </div>
     </div>`;
   }).join(''):`<div style="text-align:center;padding:20px;color:var(--muted);font-size:13px;font-style:italic;"><i class="ri-inbox-line" style="font-size:24px;display:block;margin-bottom:8px;opacity:0.4;"></i>Sin ítems en el inventario.</div>`;
@@ -2945,10 +2945,11 @@ window.confirmarEquipar=async function(ranuraId){
   equipado[ranuraId]=item;
   await updateDoc(pRef,{inventario,equipado});
   if(MI_PERSONAJE&&MI_PERSONAJE.id===personajeEquipando.id){MI_PERSONAJE.inventario=inventario;MI_PERSONAJE.equipado=equipado;}
+  // Guardar el id ANTES de cerrar el modal (cerrarModalEquipar pone personajeEquipando = null)
+  const pId=personajeEquipando.id;
   cerrarModalEquipar();
   toast(`✅ ${item.nombre} equipado.`,'success');
-  // Rerenderizado parcial: solo el tab inventario, sin reconstruir el modal entero
-  refrescarTabInventario({...data,inventario,equipado,id:personajeEquipando.id});
+  refrescarTabInventario({...data,inventario,equipado,id:pId});
 };
 window.desequiparItem=async function(personajeId,ranuraId){
   const pRef=doc(db,'personajes',personajeId);const pSnap=await getDoc(pRef);const data=pSnap.data();
