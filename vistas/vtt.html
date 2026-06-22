@@ -2918,6 +2918,23 @@ window.abrirModalEquipar=function(personajeId,idx){
   }).join('')||`<p style="color:var(--muted);font-size:12px;">No hay ranuras compatibles.</p>`;
   document.getElementById('modal-equipar').classList.add('open');
 };
+// Rerenderiza SOLO el contenido del tab inventario sin reconstruir todo el modal.
+// Se llama después de equipar/desequipar para que el cambio se vea al instante
+// sin parpadeo ni pérdida del scroll.
+function refrescarTabInventario(p){
+  const esPropia=!ES_DIRECTOR&&MI_PERSONAJE&&MI_PERSONAJE.id===p.id;
+  const el=document.getElementById('ftab-inv');
+  if(!el)return; // el modal no está abierto, nada que hacer
+  const nuevoHTML=renderTabInventarioFicha(p,esPropia);
+  // renderTabInventarioFicha devuelve un <div id="ftab-inv"> completo; reemplazamos el nodo
+  const tmp=document.createElement('div');
+  tmp.innerHTML=nuevoHTML;
+  const nuevo=tmp.firstElementChild;
+  // Preservar la clase 'active' si el tab inv estaba visible
+  if(el.classList.contains('active'))nuevo.classList.add('active');
+  el.replaceWith(nuevo);
+}
+
 window.confirmarEquipar=async function(ranuraId){
   if(!personajeEquipando||itemEquipandoIdx===null)return;
   const pRef=doc(db,'personajes',personajeEquipando.id);const pSnap=await getDoc(pRef);const data=pSnap.data();
@@ -2928,8 +2945,10 @@ window.confirmarEquipar=async function(ranuraId){
   equipado[ranuraId]=item;
   await updateDoc(pRef,{inventario,equipado});
   if(MI_PERSONAJE&&MI_PERSONAJE.id===personajeEquipando.id){MI_PERSONAJE.inventario=inventario;MI_PERSONAJE.equipado=equipado;}
-  cerrarModalEquipar();toast(`✅ ${item.nombre} equipado.`,'success');
-  abrirFichaPersonaje({...data,inventario,equipado,id:personajeEquipando.id});
+  cerrarModalEquipar();
+  toast(`✅ ${item.nombre} equipado.`,'success');
+  // Rerenderizado parcial: solo el tab inventario, sin reconstruir el modal entero
+  refrescarTabInventario({...data,inventario,equipado,id:personajeEquipando.id});
 };
 window.desequiparItem=async function(personajeId,ranuraId){
   const pRef=doc(db,'personajes',personajeId);const pSnap=await getDoc(pRef);const data=pSnap.data();
@@ -2939,7 +2958,8 @@ window.desequiparItem=async function(personajeId,ranuraId){
   await updateDoc(pRef,{inventario,equipado});
   if(MI_PERSONAJE&&MI_PERSONAJE.id===personajeId){MI_PERSONAJE.inventario=inventario;MI_PERSONAJE.equipado=equipado;}
   toast(`${item.nombre} desequipado.`,'info');
-  abrirFichaPersonaje({...data,inventario,equipado,id:personajeId});
+  // Rerenderizado parcial: solo el tab inventario
+  refrescarTabInventario({...data,inventario,equipado,id:personajeId});
 };
 window.cerrarModalEquipar=function(){document.getElementById('modal-equipar').classList.remove('open');itemEquipandoIdx=null;itemEquipandoData=null;personajeEquipando=null;};
 window.jugadorUsarItem=async function(personajeId,idx){
