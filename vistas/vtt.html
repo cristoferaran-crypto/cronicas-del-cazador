@@ -787,12 +787,19 @@
       <button class="btn-cerrar-modal" onclick="cerrarModalImportPacks()"><i class="ri-close-line"></i></button>
     </div>
     <div class="modal-import-body">
-      <p style="font-size:12px;color:var(--muted);margin-bottom:10px;">Pega un array JSON con los packs. Cada objeto debe tener: nombre, icono, desc, precio, valorIndividual, items (array de strings), pesoTotal, espacios, destacado.</p>
+      <p style="font-size:12px;color:var(--muted);margin-bottom:10px;">Pega un array JSON con los packs. Cada objeto puede incluir <strong>vendedor</strong> ('bazar','armero','drogueria','mercado_negro'). Si no lo incluye, se usa el selector de abajo.</p>
       <div style="background:rgba(201,168,76,0.05);border:1px solid var(--borde-d);padding:10px;margin-bottom:10px;font-size:11px;color:var(--muted);font-family:monospace;line-height:1.7;">
-        {"nombre":"Kit Ejemplo","icono":"🎒","desc":"Descripción","precio":35000,"valorIndividual":40000,"items":["Objeto ×2","Otro Objeto"],"pesoTotal":3.5,"espacios":10,"destacado":false}
+        {"nombre":"Kit Ejemplo","icono":"🎒","desc":"Descripción","precio":35000,"valorIndividual":40000,"items":["Objeto ×2","Otro Objeto"],"pesoTotal":3.5,"espacios":10,"destacado":false,"vendedor":"bazar"}
       </div>
-      <textarea class="import-textarea" id="import-packs-json" placeholder='[{"nombre":"..."}]' style="border-color:rgba(201,168,76,0.3);"></textarea>
+      <select class="form-select" id="import-packs-vendedor" style="margin-bottom:10px;">
+        <option value="bazar">Bazar (por defecto)</option>
+        <option value="armero">Armero</option>
+        <option value="drogueria">Droguería</option>
+        <option value="mercado_negro">Mercado Negro</option>
+      </select>
+      <textarea class="import-textarea" id="import-packs-json" placeholder='[{"nombre":"...","vendedor":"bazar"}]' style="border-color:rgba(201,168,76,0.3);"></textarea>
       <button class="btn-import" style="background:var(--dorado);color:var(--negro);" onclick="ejecutarImportPacks()"><i class="ri-upload-line"></i> Importar Packs a Firestore</button>
+      <button onclick="migrarPacksSinVendedor()" style="margin-top:8px;width:100%;padding:7px;background:transparent;border:1px solid var(--borde);color:var(--muted);font-size:11px;cursor:pointer;">🔧 Migrar packs sin vendedor → asignar 'bazar'</button>
       <div class="import-result" id="import-packs-result"></div>
     </div>
   </div>
@@ -913,9 +920,13 @@ let destinoChat='general', criteriosCheck=new Array(8).fill(false), bibliotecaAc
 let tabActiva='dashboard';
 // Tienda state
 let tiendaVendedorActivo='bazar', tiendaFiltroActivo='todos', tiendaVistaActiva='productos';
+let tiendaSubfiltro='todos'; // 2do eje: por Ranura (Cabeza, Torso, etc.) o 'todos'
+let tiendaOrden='nombre';    // 'nombre' | 'precio-asc' | 'precio-desc'
 let TIENDA_CACHE={}; // {vendedor: [productos]}
 let PACKS_CACHE=[];  // todos los packs
 let unsubTienda=null, unsubPacks=null;
+// Ficha state
+let fichaTabActivo='estado'; // persiste el tab al rerenderizar
 // Equipar state
 let itemEquipandoIdx=null, itemEquipandoData=null, personajeEquipando=null;
 // Modal prod
@@ -2196,6 +2207,7 @@ window.abrirModalImportPacks=()=>document.getElementById('modal-import-packs').c
 window.cerrarModalImportPacks=()=>document.getElementById('modal-import-packs').classList.remove('open');
 window.ejecutarImportPacks=async function(){
   const raw=document.getElementById('import-packs-json').value.trim();
+  const vendedorPack=document.getElementById('import-packs-vendedor')?.value||'bazar';
   const result=document.getElementById('import-packs-result');
   result.style.display='block';result.style.color='var(--muted)';result.textContent='Importando packs...';
   let packs;
@@ -2215,6 +2227,7 @@ window.ejecutarImportPacks=async function(){
         pesoTotal:parseFloat(p.pesoTotal)||0,
         espacios:parseInt(p.espacios)||0,
         destacado:p.destacado===true,
+        vendedor:p.vendedor||vendedorPack,
         activo:true,
         createdAt:serverTimestamp(),
       });
@@ -2222,7 +2235,7 @@ window.ejecutarImportPacks=async function(){
     }catch(e){fail++;}
   }
   result.style.color=fail>0?'var(--amarillo)':'var(--verde)';
-  result.textContent=`✅ ${ok} packs importados a tienda_packs. ${fail>0?`⚠ ${fail} fallaron.`:''}`;
+  result.textContent=`✅ ${ok} packs importados a tienda_packs (vendedor: ${vendedorPack}). ${fail>0?`⚠ ${fail} fallaron.`:''}`;
   toast(`${ok} packs importados.`,fail>0?'info':'success');
 };
 window.ejecutarImport=async function(){
@@ -2451,16 +2464,51 @@ function renderTiendaTabs(){
     tabs.map(k=>`<button class="tienda-tab ${k==='mercado_negro'?'mercado':''} ${k===tiendaVendedorActivo&&tiendaVistaActiva==='productos'?'active':''}" onclick="setTiendaVendedor('${k}')">${VENDEDORES_LABELS[k]}</button>`).join('')+
     `<button class="tienda-tab ofertas-tab ${tiendaVistaActiva==='ofertas'?'active':''}" style="margin-left:auto;" onclick="setTiendaVista('ofertas')">✨ Ofertas</button>`;
 }
-window.setTiendaVendedor=function(key){tiendaVendedorActivo=key;tiendaFiltroActivo='todos';tiendaVistaActiva='productos';renderTiendaTabs();document.getElementById('tienda-vendedor-nombre').textContent='';renderTiendaProductos();};
+window.setTiendaVendedor=function(key){tiendaVendedorActivo=key;tiendaFiltroActivo='todos';tiendaSubfiltro='todos';tiendaVistaActiva='productos';renderTiendaTabs();document.getElementById('tienda-vendedor-nombre').textContent='';renderTiendaProductos();};
 window.setTiendaVista=function(vista){tiendaVistaActiva=vista;renderTiendaTabs();if(vista==='ofertas')renderTiendaOfertas();else renderTiendaProductos();};
-window.setTiendaFiltro=function(cat,el){tiendaFiltroActivo=cat;document.querySelectorAll('.filtro-btn').forEach(b=>b.classList.remove('active'));el.classList.add('active');renderTiendaProductos();};
+window.setTiendaFiltro=function(cat,el){tiendaFiltroActivo=cat;tiendaSubfiltro='todos';document.querySelectorAll('.filtro-cat').forEach(b=>b.classList.remove('active'));el.classList.add('active');renderTiendaProductos();};
+window.setTiendaSubfiltro=function(val,el){tiendaSubfiltro=val;document.querySelectorAll('.filtro-sub').forEach(b=>b.classList.remove('active'));el.classList.add('active');renderTiendaProductos();};
+window.setTiendaOrden=function(val){tiendaOrden=val;renderTiendaProductos();};
 
 function renderTiendaProductos(){
   const productos=(TIENDA_CACHE[tiendaVendedorActivo]||[]).filter(p=>p.activo!==false);
   const saldo=MI_PERSONAJE?.dinero||0;
-  const cats=['todos',...new Set(productos.map(p=>p.cat))];
-  const filtroHTML=cats.map(c=>`<button class="filtro-btn ${c===tiendaFiltroActivo?'active':''}" onclick="setTiendaFiltro('${c}',this)">${c==='todos'?'Todos':c}</button>`).join('');
-  const filtrados=tiendaFiltroActivo==='todos'?productos:productos.filter(p=>p.cat===tiendaFiltroActivo);
+
+  // — Filtro por categoría (1er eje) —
+  const cats=['todos',...new Set(productos.map(p=>p.cat).filter(Boolean))];
+  const catHTML=cats.map(c=>`<button class="filtro-btn filtro-cat ${c===tiendaFiltroActivo?'active':''}" onclick="setTiendaFiltro('${c}',this)">${c==='todos'?'Todos':c}</button>`).join('');
+
+  const porCat=tiendaFiltroActivo==='todos'?productos:productos.filter(p=>p.cat===tiendaFiltroActivo);
+
+  // — Filtro por subcategoría/ranura (2do eje) — solo muestra si hay más de 1 valor —
+  const subfiltros=[...new Set(porCat.map(p=>{
+    // Para armadura/arma usamos ranura; para el resto usamos subcat si existe
+    if(p.ranura&&p.ranura!=='—'&&p.ranura!=='Ninguna')return p.ranura;
+    if(p.subcat&&p.subcat!=='No Aplica')return p.subcat;
+    return null;
+  }).filter(Boolean))].sort();
+
+  const subHTML=subfiltros.length>1
+    ?`<div style="display:flex;flex-wrap:wrap;gap:4px;margin-top:6px;">
+        <button class="filtro-btn filtro-sub ${tiendaSubfiltro==='todos'?'active':''}" onclick="setTiendaSubfiltro('todos',this)" style="font-size:9px;opacity:0.7;">Todos</button>
+        ${subfiltros.map(s=>`<button class="filtro-btn filtro-sub ${tiendaSubfiltro===s?'active':''}" onclick="setTiendaSubfiltro('${s.replace(/'/g,"\\'")}',this)" style="font-size:9px;">${s}</button>`).join('')}
+      </div>`:'' ;
+
+  // — Ordenación —
+  const ordenHTML=`<div style="display:flex;align-items:center;gap:6px;margin-top:6px;">
+    <span style="font-size:9px;color:var(--muted);text-transform:uppercase;letter-spacing:.08em;">Ordenar:</span>
+    ${[['nombre','A–Z'],['precio-asc','Precio ↑'],['precio-desc','Precio ↓']].map(([v,l])=>`<button onclick="setTiendaOrden('${v}')" style="font-size:9px;padding:2px 8px;border:1px solid ${tiendaOrden===v?'var(--borde-d)':'var(--borde)'};background:${tiendaOrden===v?'rgba(201,168,76,0.08)':'transparent'};color:${tiendaOrden===v?'var(--dorado)':'var(--muted)'};cursor:pointer;">${l}</button>`).join('')}
+  </div>`;
+
+  // — Aplicar 2do filtro + orden —
+  let filtrados=tiendaSubfiltro==='todos'?porCat:porCat.filter(p=>{
+    if(p.ranura===tiendaSubfiltro||p.subcat===tiendaSubfiltro)return true;
+    return false;
+  });
+  if(tiendaOrden==='precio-asc') filtrados=[...filtrados].sort((a,b)=>(a.precio||0)-(b.precio||0));
+  else if(tiendaOrden==='precio-desc') filtrados=[...filtrados].sort((a,b)=>(b.precio||0)-(a.precio||0));
+  else filtrados=[...filtrados].sort((a,b)=>a.nombre.localeCompare(b.nombre));
+
   const esMN=tiendaVendedorActivo==='mercado_negro';
   const prodsHTML=filtrados.map(p=>{
     const puedePagar=saldo>=p.precio;
@@ -2473,7 +2521,7 @@ function renderTiendaProductos(){
         <span style="font-size:10px;color:var(--muted);">${p.peso||0}kg · ${p.espacios||0} esp.</span>
       </div>
       <div class="prod-nombre">${p.nombre}</div>
-      <div class="prod-cat">${p.cat||''}</div>
+      <div class="prod-cat">${p.cat||''}${p.subcat&&p.subcat!=='No Aplica'?` <span style="opacity:.6;">· ${p.subcat}</span>`:''}</div>
       <div class="prod-desc">${p.desc||''}</div>
       ${ranuraInfo}<div style="margin-top:2px;">${bonoInfo}</div>
       <div class="prod-footer" style="flex-direction:column;gap:8px;">
@@ -2489,17 +2537,45 @@ function renderTiendaProductos(){
       </div>
     </div>`;
   }).join('');
+
   if(!filtrados.length&&!Object.keys(TIENDA_CACHE).length){
     document.getElementById('tienda-body').innerHTML=`<div class="tienda-empty"><i class="ri-loader-4-line" style="font-size:24px;display:block;margin-bottom:8px;"></i>Cargando productos...</div>`;return;
   }
-  document.getElementById('tienda-body').innerHTML=`<div class="tienda-filtro">${filtroHTML}</div><div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:10px;">${prodsHTML||'<div class="tienda-empty">Sin productos en esta categoría.</div>'}</div>`;
+  document.getElementById('tienda-body').innerHTML=`
+    <div class="tienda-filtro">${catHTML}</div>
+    ${subHTML}${ordenHTML}
+    <div style="height:10px;"></div>
+    <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:10px;">${prodsHTML||'<div class="tienda-empty">Sin productos en esta categoría.</div>'}</div>`;
 }
+
+// Migra packs existentes sin campo vendedor → bazar
+window.migrarPacksSinVendedor=async function(){
+  const result=document.getElementById('import-packs-result');
+  result.style.display='block';result.style.color='var(--muted)';result.textContent='Revisando packs sin vendedor...';
+  const sin=PACKS_CACHE.filter(p=>!p.vendedor);
+  if(!sin.length){result.style.color='var(--verde)';result.textContent='✅ Todos los packs ya tienen vendedor asignado.';return;}
+  let ok=0;
+  for(const p of sin){
+    try{await updateDoc(doc(db,'tienda_packs',p.id),{vendedor:'bazar'});ok++;}catch(e){}
+  }
+  result.style.color='var(--verde)';result.textContent=`✅ ${ok} packs migrados a vendedor='bazar'.`;
+  toast(`${ok} packs migrados.`,'success');
+};
 
 function renderTiendaOfertas(){
   const saldo=MI_PERSONAJE?.dinero||0;
   const packsActivos=window._packsActivos||{};
-  const packsVisibles=PACKS_CACHE.filter(p=>packsActivos[p.id]!==false);
-  if(!packsVisibles.length){document.getElementById('tienda-body').innerHTML=`<div class="tienda-empty"><p style="font-size:18px;margin-bottom:8px;">🏪</p>No hay ofertas disponibles en este momento.<br><span style="font-size:11px;color:var(--muted);">El director activará packs especiales durante la sesión.</span></div>`;return;}
+  // Filtrar por vendedor activo y que estén activos/habilitados
+  const packsVisibles=PACKS_CACHE.filter(p=>{
+    if(packsActivos[p.id]===false)return false;
+    // Packs sin campo vendedor se consideran del bazar (legado)
+    const v=p.vendedor||'bazar';
+    return v===tiendaVendedorActivo;
+  });
+  if(!packsVisibles.length){
+    document.getElementById('tienda-body').innerHTML=`<div class="tienda-empty"><p style="font-size:18px;margin-bottom:8px;">🏪</p>No hay ofertas disponibles en ${VENDEDORES_LABELS[tiendaVendedorActivo]}.<br><span style="font-size:11px;color:var(--muted);">El director activará packs especiales durante la sesión.</span></div>`;
+    return;
+  }
   const html=packsVisibles.map(pack=>{
     const puedePagar=saldo>=(pack.precio||0);
     const ahorro=(pack.valorIndividual||0)-(pack.precio||0);
@@ -2522,7 +2598,7 @@ function renderTiendaOfertas(){
       </div>
     </div>`;
   }).join('');
-  document.getElementById('tienda-body').innerHTML=`<p style="font-size:12px;color:var(--muted);font-style:italic;margin-bottom:16px;">Packs con descuento. El director los activa según la narrativa.</p><div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:12px;">${html}</div>`;
+  document.getElementById('tienda-body').innerHTML=`<p style="font-size:12px;color:var(--muted);font-style:italic;margin-bottom:16px;">Ofertas de ${VENDEDORES_LABELS[tiendaVendedorActivo]} — packs con descuento activos por el director.</p><div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:12px;">${html}</div>`;
 }
 
 
@@ -2708,12 +2784,15 @@ window.abrirFichaPersonaje=function(p){
 
   document.getElementById('modal-ficha-body').innerHTML=`
     <div class="ficha-tabs">
-      <button class="ficha-tab active" onclick="switchFichaTab('estado',this)">Estado</button>
-      <button class="ficha-tab" onclick="switchFichaTab('stats',this)">Stats</button>
-      <button class="ficha-tab" onclick="switchFichaTab('inv',this)">Inventario</button>
-      <button class="ficha-tab" onclick="switchFichaTab('obj',this)">Objetivos</button>
+      <button class="ficha-tab ${fichaTabActivo==='estado'?'active':''}" onclick="switchFichaTab('estado',this)">Estado</button>
+      <button class="ficha-tab ${fichaTabActivo==='stats'?'active':''}" onclick="switchFichaTab('stats',this)">Stats</button>
+      <button class="ficha-tab ${fichaTabActivo==='inv'?'active':''}" onclick="switchFichaTab('inv',this)">Inventario</button>
+      <button class="ficha-tab ${fichaTabActivo==='obj'?'active':''}" onclick="switchFichaTab('obj',this)">Objetivos</button>
     </div>
     ${tabEstado}${tabStats}${tabInv}${tabObj}`;
+  // Restaurar el tab activo sin resetear a Estado
+  document.querySelectorAll('.ficha-tab-body').forEach(b=>b.classList.remove('active'));
+  document.getElementById('ftab-'+fichaTabActivo)?.classList.add('active');
   document.getElementById('modal-ficha').classList.add('open');
 };
 
@@ -2893,7 +2972,7 @@ window.jugadorUsarItem=async function(personajeId,idx){
   if(inventario[idx]===undefined)toast(`${nombre} agotado.`,'info');
   abrirFichaPersonaje({...data,inventario,condiciones,id:personajeId});
 };
-window.switchFichaTab=function(tab,el){document.querySelectorAll('.ficha-tab').forEach(t=>t.classList.remove('active'));document.querySelectorAll('.ficha-tab-body').forEach(b=>b.classList.remove('active'));el.classList.add('active');document.getElementById('ftab-'+tab)?.classList.add('active');};
+window.switchFichaTab=function(tab,el){fichaTabActivo=tab;document.querySelectorAll('.ficha-tab').forEach(t=>t.classList.remove('active'));document.querySelectorAll('.ficha-tab-body').forEach(b=>b.classList.remove('active'));el.classList.add('active');document.getElementById('ftab-'+tab)?.classList.add('active');};
 window.lanzarIniciativaVTT=async function(personajeId,nombrePersonaje,valorIniciativa){
   if(!valorIniciativa||valorIniciativa<1)return;
   const dados=Array.from({length:valorIniciativa},()=>Math.floor(Math.random()*6)+1);
@@ -2945,7 +3024,7 @@ window.jugadorCambiarPA=async function(personajeId,actual,maximo,delta){
 function cargarNotasJugador(){const g=localStorage.getItem(`notas-jugador-${CAMPANA_ID}-${ME?.uid}`)||'';const a=document.getElementById('notas-jugador');if(a)a.value=g;}
 window.guardarNotasJugador=()=>localStorage.setItem(`notas-jugador-${CAMPANA_ID}-${ME?.uid}`,document.getElementById('notas-jugador')?.value||'');
 window.abrirNotas=()=>document.getElementById('modal-notas').classList.add('open');
-window.cerrarModal=id=>document.getElementById(id).classList.remove('open');
+window.cerrarModal=function(id){document.getElementById(id).classList.remove('open');if(id==='modal-ficha')fichaTabActivo='estado';};
 window.cerrarModalFuera=(e,id)=>{if(e.target.id===id)cerrarModal(id);};
 function notifMapa(msg){const el=document.getElementById('mapa-notif');if(!el)return;el.textContent=msg;el.style.opacity='1';clearTimeout(el._t);el._t=setTimeout(()=>{el.style.opacity='0';},3000);}
 function toast(msg,tipo){
