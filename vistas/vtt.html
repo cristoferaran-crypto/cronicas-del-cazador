@@ -2377,6 +2377,16 @@ window.otorgarXP=async function(){
   await addDoc(collection(db,'campanas',CAMPANA_ID,'mensajes'),{autorId:ME.uid,autorNombre:(ME.displayName||'Director')+' [DJ]',tipo:'xp',paraId:pId,paraName:pNom,xp,motivo:nota,timestamp:serverTimestamp()});
   criteriosCheck=new Array(8).fill(false);toast(`✅ ${xp} XP otorgados a ${pNom}`,'success');renderTab('xp');
 };
+// ── Tabs inventario DJ ──
+window.setInvTipo=function(tipo,el){
+  ['objeto','dinero'].forEach(t=>{
+    const f=document.getElementById(`inv-form-${t}`);
+    if(f) f.style.display=t===tipo?'block':'none';
+  });
+  document.querySelectorAll('.inv-tipo-btn').forEach(b=>b.classList.remove('active'));
+  el.classList.add('active');
+};
+
 // ── Búsqueda en tienda para DJ ──
 window.buscarEnTiendaDJ = function(query) {
   const sugs = document.getElementById('inv-sugerencias');
