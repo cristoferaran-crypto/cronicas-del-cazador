@@ -1015,6 +1015,53 @@ function iniciarPersonajesRealtime() {
       const u = PERSONAJES_CAMPANA.find(p=>p.id===MI_PERSONAJE.id);
       if (u) MI_PERSONAJE = u;
     }
+    // Refrescar modal de ficha si está abierto (sync automático desde ficha.html)
+    const modalFicha = document.getElementById('modal-ficha');
+    if (modalFicha?.classList.contains('open')) {
+      // Buscar qué personaje está abierto por el título
+      const tituloEl = document.getElementById('modal-ficha-titulo');
+      if (tituloEl) {
+        const pAbierto = PERSONAJES_CAMPANA.find(p => p.nombre === tituloEl.textContent);
+        if (pAbierto) {
+          // Guardar tab activo y refrescar solo las secciones que cambian
+          const esPropia = !ES_DIRECTOR && MI_PERSONAJE && MI_PERSONAJE.id === pAbierto.id;
+          // Refrescar tab stats
+          const ftabStats = document.getElementById('ftab-stats');
+          if (ftabStats) {
+            const attrsHTML = Object.entries(pAbierto.atributosEfectivos||pAbierto.atributos||{}).map(([k,v])=>`<div class="ficha-attr"><span class="ficha-attr-val">${v}</span><span class="ficha-attr-lbl">${ATTRS_LABELS[k]||k}</span></div>`).join('');
+            const skillsHTML = Object.entries(pAbierto.habilidadesEfectivas||pAbierto.habilidades||{}).filter(([,v])=>v>0).map(([k,v])=>`<div class="ficha-skill-row"><span class="ficha-skill-nombre">${k}</span><span class="ficha-skill-val">${v}</span></div>`).join('');
+            const xpDisp = (pAbierto.xpTotal||0)-(pAbierto.xpGastada||0);
+            ftabStats.innerHTML = `
+              <div style="display:flex;gap:8px;margin-bottom:12px;flex-wrap:wrap;">
+                <span style="font-size:12px;color:var(--muted);">Cultura: <strong style="color:var(--texto);">${pAbierto.cultura||'—'}${pAbierto.linaje?' · '+pAbierto.linaje:''}</strong></span>
+                <span style="font-size:12px;color:var(--muted);">Camino: <strong style="color:var(--texto);">${pAbierto.camino||'—'}</strong></span>
+                <span style="font-size:12px;color:var(--muted);">Nv: <strong style="color:var(--dorado);">${pAbierto.nivel||1}</strong></span>
+                <span style="font-size:12px;color:var(--muted);">XP disp.: <strong style="color:var(--dorado);">${xpDisp}</strong></span>
+              </div>
+              ${attrsHTML?`<div class="ficha-seccion-titulo">Atributos</div><div class="ficha-attrs" style="margin-bottom:14px;">${attrsHTML}</div>`:''}
+              ${skillsHTML?`<div class="ficha-seccion-titulo">Habilidades</div><div class="ficha-skills-grid">${skillsHTML}</div>`:''}
+              ${pAbierto.habilidadCultura?`<div class="ficha-seccion-titulo" style="margin-top:14px;">Habilidad de Cultura</div><div style="background:rgba(192,57,43,0.05);border:1px solid var(--borde-r);border-left:3px solid var(--rojo);padding:12px;"><strong style="font-family:'Cinzel',serif;font-size:13px;color:var(--texto);display:block;margin-bottom:4px;">${pAbierto.habilidadCultura.name}</strong><span style="font-size:12px;color:var(--sec);line-height:1.6;">${pAbierto.habilidadCultura.desc}</span></div>`:''}`;
+          }
+          // Refrescar tab inventario
+          refrescarTabInventario(pAbierto);
+          // Refrescar historial XP
+          const ftabHist = document.getElementById('ftab-historial');
+          if (ftabHist) {
+            const histXP = pAbierto.historialXP || [];
+            ftabHist.innerHTML = `<div style="font-family:'Cinzel',serif;font-size:11px;font-weight:700;letter-spacing:0.15em;text-transform:uppercase;color:var(--dorado);margin-bottom:12px;">Historial de Gasto de XP</div>
+            ${!histXP.length
+              ? `<div style="text-align:center;padding:24px;color:var(--muted);font-size:12px;font-style:italic;">Sin registros todavía.</div>`
+              : histXP.map(entry => {
+                  const fecha = new Date(entry.fecha);
+                  const fechaStr = fecha.toLocaleDateString('es-CL',{day:'2-digit',month:'short',year:'numeric'})+' '+fecha.toLocaleTimeString('es-CL',{hour:'2-digit',minute:'2-digit'});
+                  const chips = (entry.items||[]).map(it=>`<span style="display:inline-flex;align-items:center;gap:3px;padding:2px 7px;border-radius:3px;font-size:10px;font-family:'Cinzel',serif;border:1px solid ${it.tipo==='attr'?'rgba(192,57,43,0.4)':'rgba(126,200,227,0.35)'};color:${it.tipo==='attr'?'#ff8080':'#7ec8e3'};background:${it.tipo==='attr'?'rgba(192,57,43,0.06)':'rgba(126,200,227,0.06)'};">${it.label} ${it.de}→${it.a} <em style="opacity:0.6;font-style:normal;">−${it.costo}</em></span>`).join('');
+                  return `<div style="padding:10px 12px;border-radius:4px;background:rgba(255,255,255,0.02);border:1px solid var(--borde);margin-bottom:6px;"><div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;"><span style="font-size:10px;color:var(--muted);">📅 ${fechaStr}</span><span style="font-family:'Cinzel',serif;font-size:12px;font-weight:700;color:var(--dorado);">−${entry.totalXP} XP</span></div><div style="display:flex;flex-wrap:wrap;gap:4px;">${chips}</div></div>`;
+                }).join('')
+            }`;
+          }
+        }
+      }
+    }
     renderPartyBar();
     if(Object.keys(tokensData).length) renderTokensCanvas(tokensData);
     if (ES_DIRECTOR && tabActiva==='jugadores') renderTab('jugadores');
@@ -1545,7 +1592,36 @@ function renderTabXP(){
 
 function renderTabInventario(){
   const opts=PERSONAJES_CAMPANA.map(p=>`<option value="${p.id}" data-nombre="${p.nombre}">${p.nombre}</option>`).join('');
-  return`<div><label class="form-label">Jugador destino</label><select class="form-select" id="inv-personaje" style="margin-bottom:14px;">${opts}</select><div class="inv-tipo-selector"><button class="inv-tipo-btn active" onclick="setInvTipo('objeto',this)">Objeto</button><button class="inv-tipo-btn" onclick="setInvTipo('arma',this)">Arma</button><button class="inv-tipo-btn" onclick="setInvTipo('dinero',this)">⚖️ Marcas</button></div><div id="inv-form-objeto"><label class="form-label">Nombre del objeto</label><input class="form-input-vtt" type="text" id="inv-nombre-objeto" placeholder="Ej: Poción..." style="margin-bottom:8px;"><label class="form-label">Cantidad</label><input class="form-input-vtt" type="number" id="inv-cantidad-objeto" value="1" min="1" style="margin-bottom:8px;"><label class="form-label">Descripción (opcional)</label><textarea class="form-textarea-vtt" id="inv-desc-objeto" placeholder="Descripción..." style="margin-bottom:8px;"></textarea><button class="btn-accion-dj" onclick="entregarObjeto()"><i class="ri-gift-line"></i> Entregar objeto</button></div><div id="inv-form-arma" style="display:none;"><label class="form-label">Nombre del arma</label><input class="form-input-vtt" type="text" id="inv-nombre-arma" placeholder="Ej: Daga..." style="margin-bottom:8px;"><textarea class="form-textarea-vtt" id="inv-desc-arma" placeholder="Daño, características..." style="margin-bottom:8px;"></textarea><button class="btn-accion-dj" onclick="entregarArma()"><i class="ri-sword-line"></i> Entregar arma</button></div><div id="inv-form-dinero" style="display:none;"><label class="form-label">Cantidad de Marcas</label><input class="form-input-vtt" type="number" id="inv-jenny" value="100" min="1" style="margin-bottom:8px;"><button class="btn-accion-dj" onclick="entregarDinero()"><i class="ri-money-dollar-circle-line"></i> Entregar Marcas</button></div></div>`;
+  return`<div>
+    <label class="form-label">Jugador destino</label>
+    <select class="form-select" id="inv-personaje" style="margin-bottom:14px;">${opts}</select>
+    <div class="inv-tipo-selector">
+      <button class="inv-tipo-btn active" onclick="setInvTipo('objeto',this)">Objeto</button>
+      <button class="inv-tipo-btn" onclick="setInvTipo('dinero',this)">⚖️ Marcas</button>
+    </div>
+
+    <div id="inv-form-objeto">
+      <label class="form-label">Buscar en tienda (nombre o ID)</label>
+      <div style="position:relative;margin-bottom:6px;">
+        <input class="form-input-vtt" type="text" id="inv-buscar-tienda" placeholder="Ej: Poción... o #ID"
+          oninput="buscarEnTiendaDJ(this.value)" autocomplete="off" style="margin-bottom:0;">
+        <div id="inv-sugerencias" style="display:none;position:absolute;top:100%;left:0;right:0;background:var(--sup2);border:1px solid var(--borde-d);z-index:200;max-height:180px;overflow-y:auto;border-top:none;"></div>
+      </div>
+      <label class="form-label">Nombre del objeto</label>
+      <input class="form-input-vtt" type="text" id="inv-nombre-objeto" placeholder="Ej: Poción..." style="margin-bottom:8px;">
+      <label class="form-label">ID de planilla</label>
+      <input class="form-input-vtt" type="text" id="inv-id-planilla-obj" placeholder="Ej: B-042" style="margin-bottom:8px;">
+      <label class="form-label">Cantidad</label>
+      <input class="form-input-vtt" type="number" id="inv-cantidad-objeto" value="1" min="1" style="margin-bottom:8px;">
+      <button class="btn-accion-dj" onclick="entregarObjeto()"><i class="ri-gift-line"></i> Entregar objeto</button>
+    </div>
+
+    <div id="inv-form-dinero" style="display:none;">
+      <label class="form-label">Cantidad de Marcas</label>
+      <input class="form-input-vtt" type="number" id="inv-jenny" value="100" min="1" style="margin-bottom:8px;">
+      <button class="btn-accion-dj" onclick="entregarDinero()"><i class="ri-money-dollar-circle-line"></i> Entregar Marcas</button>
+    </div>
+  </div>`;
 }
 
 function renderTabBiblioteca(){
@@ -2301,32 +2377,92 @@ window.otorgarXP=async function(){
   await addDoc(collection(db,'campanas',CAMPANA_ID,'mensajes'),{autorId:ME.uid,autorNombre:(ME.displayName||'Director')+' [DJ]',tipo:'xp',paraId:pId,paraName:pNom,xp,motivo:nota,timestamp:serverTimestamp()});
   criteriosCheck=new Array(8).fill(false);toast(`✅ ${xp} XP otorgados a ${pNom}`,'success');renderTab('xp');
 };
-window.setInvTipo=function(tipo,el){['objeto','arma','dinero'].forEach(t=>{document.getElementById(`inv-form-${t}`).style.display=t===tipo?'block':'none';});document.querySelectorAll('.inv-tipo-btn').forEach(b=>b.classList.remove('active'));el.classList.add('active');};
+// ── Búsqueda en tienda para DJ ──
+window.buscarEnTiendaDJ = function(query) {
+  const sugs = document.getElementById('inv-sugerencias');
+  if (!sugs) return;
+  const q = query.trim().toLowerCase();
+  if (!q || q.length < 2) { sugs.style.display='none'; return; }
+
+  // Buscar en las 4 tiendas
+  const vendedores = ['bazar','armero','drogueria','mercado_negro'];
+  const VEND_LABELS = {'bazar':'Bazar','armero':'Armería','drogueria':'Droguería','mercado_negro':'M. Negro'};
+  let resultados = [];
+  vendedores.forEach(v => {
+    (TIENDA_CACHE[v]||[]).forEach(prod => {
+      if (!prod.activo && prod.activo !== undefined) return;
+      const matchNombre = prod.nombre?.toLowerCase().includes(q);
+      const matchId = prod.idPlanilla?.toLowerCase().includes(q.replace('#',''));
+      if (matchNombre || matchId) resultados.push({...prod, _vendedor: v});
+    });
+  });
+  resultados = resultados.slice(0, 12);
+
+  if (!resultados.length) { sugs.style.display='none'; return; }
+  sugs.style.display = 'block';
+  sugs.innerHTML = resultados.map(p => `
+    <div onclick="seleccionarProductoDJ('${p.id}','${p._vendedor}')"
+      style="padding:8px 12px;cursor:pointer;border-bottom:1px solid var(--borde);display:flex;align-items:center;gap:10px;transition:background 0.1s;"
+      onmouseover="this.style.background='rgba(201,168,76,0.08)'" onmouseout="this.style.background='transparent'">
+      <div style="flex:1;">
+        <div style="font-size:12px;color:var(--texto);font-weight:600;">${p.nombre}</div>
+        <div style="font-size:10px;color:var(--muted);">${VEND_LABELS[p._vendedor]||p._vendedor}${p.idPlanilla?` · #${p.idPlanilla}`:''}${p.cat?` · ${p.cat}`:''}</div>
+      </div>
+      <span style="font-size:11px;color:var(--dorado);font-weight:700;">${(p.precio||0).toLocaleString()} M</span>
+    </div>`).join('');
+};
+
+window.seleccionarProductoDJ = function(prodId, vendedor) {
+  const prod = (TIENDA_CACHE[vendedor]||[]).find(p=>p.id===prodId);
+  if (!prod) return;
+  const nombreInput = document.getElementById('inv-nombre-objeto');
+  const idInput = document.getElementById('inv-id-planilla-obj');
+  const buscarInput = document.getElementById('inv-buscar-tienda');
+  const sugs = document.getElementById('inv-sugerencias');
+  if (nombreInput) nombreInput.value = prod.nombre || '';
+  if (idInput) idInput.value = prod.idPlanilla || '';
+  if (buscarInput) buscarInput.value = prod.nombre || '';
+  if (sugs) sugs.style.display = 'none';
+  // Guardar datos completos del producto para entregarlo con atributos
+  window._prodDJSeleccionado = prod;
+};
+
+// Cerrar sugerencias al hacer click fuera
+document.addEventListener('click', function(e) {
+  if (!e.target.closest('#inv-buscar-tienda') && !e.target.closest('#inv-sugerencias')) {
+    const sugs = document.getElementById('inv-sugerencias');
+    if (sugs) sugs.style.display = 'none';
+  }
+});
+
 window.entregarObjeto=async function(){
   const sel=document.getElementById('inv-personaje');const pId=sel.value;const pNom=sel.options[sel.selectedIndex]?.dataset.nombre||'?';
-  const nombre=document.getElementById('inv-nombre-objeto').value.trim();const cant=parseInt(document.getElementById('inv-cantidad-objeto').value)||1;const desc=document.getElementById('inv-desc-objeto').value.trim();
+  const nombre=document.getElementById('inv-nombre-objeto').value.trim();
+  const cant=parseInt(document.getElementById('inv-cantidad-objeto').value)||1;
+  const idPlanilla=document.getElementById('inv-id-planilla-obj')?.value.trim()||null;
   if(!nombre){toast('Escribe el nombre del objeto.','error');return;}
   const pRef=doc(db,'personajes',pId);const pSnap=await getDoc(pRef);
   const inventario=[...(pSnap.data().inventario||[])];
   const espDJ=calcularEspacios({equipado:pSnap.data().equipado||{},inventario});
   if(espDJ.libre<=0){toast(`¡${pNom} tiene la mochila llena!`,'error');return;}
-  inventario.push({nombre,cantidad:cant,desc,tipo:'objeto',calidad:'Común',peso:0,espacios:1,equipable:false,ranura:'—',bono:'—'});
+  // Si hay producto seleccionado de tienda, usar sus atributos completos
+  const prod = window._prodDJSeleccionado?.nombre === nombre ? window._prodDJSeleccionado : null;
+  const itemData = prod
+    ? {nombre:prod.nombre,cantidad:cant,desc:prod.desc||'',tipo:prod.tipo||'objeto',
+       calidad:prod.calidad||'Común',peso:prod.peso||0,espacios:prod.espacios||1,
+       equipable:prod.equipable||false,ranura:prod.ranura||'—',bono:prod.bono||'—',
+       contenedor:prod.contenedor||0,idPlanilla:prod.idPlanilla||null}
+    : {nombre,cantidad:cant,desc:'',tipo:'objeto',calidad:'Común',peso:0,espacios:1,
+       equipable:false,ranura:'—',bono:'—',idPlanilla:idPlanilla||null};
+  inventario.push(itemData);
   await updateDoc(pRef,{inventario});
   await addDoc(collection(db,'campanas',CAMPANA_ID,'mensajes'),{autorId:ME.uid,autorNombre:(ME.displayName||'Director')+' [DJ]',tipo:'item',paraId:pId,paraName:pNom,item:nombre,cantidad:cant,timestamp:serverTimestamp()});
-  toast(`🎒 ${nombre} entregado a ${pNom}`,'success');
-};
-window.entregarArma=async function(){
-  const sel=document.getElementById('inv-personaje');const pId=sel.value;const pNom=sel.options[sel.selectedIndex]?.dataset.nombre||'?';
-  const nombre=document.getElementById('inv-nombre-arma').value.trim();const desc=document.getElementById('inv-desc-arma').value.trim();
-  if(!nombre){toast('Escribe el nombre del arma.','error');return;}
-  const pRef=doc(db,'personajes',pId);const pSnap=await getDoc(pRef);
-  const inventario=[...(pSnap.data().inventario||[])];
-  const espDJ2=calcularEspacios({equipado:pSnap.data().equipado||{},inventario});
-  if(espDJ2.libre<=0){toast(`¡${pNom} tiene la mochila llena!`,'error');return;}
-  inventario.push({nombre,cantidad:1,desc,tipo:'arma',calidad:'Común',peso:0,espacios:1,equipable:true,ranura:'Mano Derecha',bono:'+1 Armas C/C'});
-  await updateDoc(pRef,{inventario});
-  await addDoc(collection(db,'campanas',CAMPANA_ID,'mensajes'),{autorId:ME.uid,autorNombre:(ME.displayName||'Director')+' [DJ]',tipo:'item',paraId:pId,paraName:pNom,item:`⚔️ ${nombre}`,cantidad:1,timestamp:serverTimestamp()});
-  toast(`⚔️ ${nombre} entregada a ${pNom}`,'success');
+  window._prodDJSeleccionado = null;
+  toast(`🎒 ${nombre} (×${cant}) entregado a ${pNom}`,'success');
+  // Limpiar campos
+  const nb=document.getElementById('inv-nombre-objeto');if(nb)nb.value='';
+  const ib=document.getElementById('inv-buscar-tienda');if(ib)ib.value='';
+  const ip=document.getElementById('inv-id-planilla-obj');if(ip)ip.value='';
 };
 window.entregarDinero=async function(){
   const sel=document.getElementById('inv-personaje');const pId=sel.value;const pNom=sel.options[sel.selectedIndex]?.dataset.nombre||'?';
@@ -2782,14 +2918,47 @@ window.abrirFichaPersonaje=function(p){
     ${p.objetivoVida?`<div class="ficha-seccion-titulo">Objetivo de Vida</div><p style="font-size:13px;color:var(--sec);font-style:italic;line-height:1.7;">${p.objetivoVida}</p>`:''}
   </div>`;
 
+  // ── Tab Historial XP ──
+  const histXP = p.historialXP || [];
+  const tabHistorial = `<div class="ficha-tab-body" id="ftab-historial">
+    <div style="font-family:'Cinzel',serif;font-size:11px;font-weight:700;letter-spacing:0.15em;text-transform:uppercase;color:var(--dorado);margin-bottom:12px;">
+      Historial de Gasto de XP
+    </div>
+    ${!histXP.length
+      ? `<div style="text-align:center;padding:24px;color:var(--muted);font-size:12px;font-style:italic;">Sin registros todavía.</div>`
+      : histXP.map(entry => {
+          const fecha = new Date(entry.fecha);
+          const fechaStr = fecha.toLocaleDateString('es-CL',{day:'2-digit',month:'short',year:'numeric'})
+                         + ' ' + fecha.toLocaleTimeString('es-CL',{hour:'2-digit',minute:'2-digit'});
+          const chips = (entry.items||[]).map(it =>
+            `<span style="display:inline-flex;align-items:center;gap:3px;padding:2px 7px;border-radius:3px;font-size:10px;font-family:'Cinzel',serif;
+              border:1px solid ${it.tipo==='attr'?'rgba(192,57,43,0.4)':'rgba(126,200,227,0.35)'};
+              color:${it.tipo==='attr'?'#ff8080':'#7ec8e3'};
+              background:${it.tipo==='attr'?'rgba(192,57,43,0.06)':'rgba(126,200,227,0.06)'};">
+              ${it.label} ${it.de}→${it.a}
+              <em style="opacity:0.6;font-style:normal;">−${it.costo}</em>
+            </span>`
+          ).join('');
+          return `<div style="padding:10px 12px;border-radius:4px;background:rgba(255,255,255,0.02);border:1px solid var(--borde);margin-bottom:6px;">
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;">
+              <span style="font-size:10px;color:var(--muted);">📅 ${fechaStr}</span>
+              <span style="font-family:'Cinzel',serif;font-size:12px;font-weight:700;color:var(--dorado);">−${entry.totalXP} XP</span>
+            </div>
+            <div style="display:flex;flex-wrap:wrap;gap:4px;">${chips}</div>
+          </div>`;
+        }).join('')
+    }
+  </div>`;
+
   document.getElementById('modal-ficha-body').innerHTML=`
     <div class="ficha-tabs">
       <button class="ficha-tab ${fichaTabActivo==='estado'?'active':''}" onclick="switchFichaTab('estado',this)">Estado</button>
       <button class="ficha-tab ${fichaTabActivo==='stats'?'active':''}" onclick="switchFichaTab('stats',this)">Stats</button>
       <button class="ficha-tab ${fichaTabActivo==='inv'?'active':''}" onclick="switchFichaTab('inv',this)">Inventario</button>
       <button class="ficha-tab ${fichaTabActivo==='obj'?'active':''}" onclick="switchFichaTab('obj',this)">Objetivos</button>
+      <button class="ficha-tab ${fichaTabActivo==='historial'?'active':''}" onclick="switchFichaTab('historial',this)" style="color:var(--dorado);">XP</button>
     </div>
-    ${tabEstado}${tabStats}${tabInv}${tabObj}`;
+    ${tabEstado}${tabStats}${tabInv}${tabObj}${tabHistorial}`;
   // Restaurar el tab activo sin resetear a Estado
   document.querySelectorAll('.ficha-tab-body').forEach(b=>b.classList.remove('active'));
   document.getElementById('ftab-'+fichaTabActivo)?.classList.add('active');
@@ -2856,6 +3025,7 @@ function renderTabInventarioFicha(p,esPropia){
         <span class="inv-item-v2-cant">×${it.cantidad||1}</span>
         ${esPropia&&esEquipable?`<button class="inv-btn-equipar" onclick="abrirModalEquipar('${p.id}',${idx})">Equipar</button>`:''}
         ${esPropia&&it.tipo==='consumible'?`<button class="inv-btn-usar" onclick="jugadorUsarItem('${p.id}',${idx})">Usar</button>`:''}
+        ${ES_DIRECTOR?`<button onclick="djEliminarItem('${p.id}',${idx})" title="Eliminar ítem" style="padding:2px 7px;font-size:10px;font-weight:700;letter-spacing:0.06em;background:rgba(192,57,43,0.1);border:1px solid var(--borde-r);color:#ff8080;cursor:pointer;border-radius:2px;transition:all 0.15s;" onmouseover="this.style.background='rgba(192,57,43,0.25)'" onmouseout="this.style.background='rgba(192,57,43,0.1)'">🗑</button>`:''}
       </div>
     </div>`;
   }).join(''):`<div style="text-align:center;padding:20px;color:var(--muted);font-size:13px;font-style:italic;"><i class="ri-inbox-line" style="font-size:24px;display:block;margin-bottom:8px;opacity:0.4;"></i>Sin ítems en el inventario.</div>`;
@@ -3024,6 +3194,27 @@ window.jugadorToggleCondicion=async function(personajeId,condNombre,tieneC){
   } else if(tieneC) {
     toast('Solo el Director puede quitar condiciones.','error');
   }
+};
+
+window.djEliminarItem = async function(personajeId, idx) {
+  if (!ES_DIRECTOR) return;
+  const p = PERSONAJES_CAMPANA.find(x=>x.id===personajeId);
+  if (!p) return;
+  const inventario = [...(p.inventario||[])];
+  const item = inventario[idx];
+  if (!item) return;
+  if (!confirm(`¿Eliminar "${item.nombre}" del inventario de ${p.nombre}?`)) return;
+  inventario.splice(idx, 1);
+  await updateDoc(doc(db,'personajes',personajeId), {inventario});
+  p.inventario = inventario;
+  if (MI_PERSONAJE && MI_PERSONAJE.id === personajeId) MI_PERSONAJE.inventario = inventario;
+  refrescarTabInventario(p);
+  toast(`🗑 "${item.nombre}" eliminado del inventario de ${p.nombre}.`, 'info');
+  await addDoc(collection(db,'campanas',CAMPANA_ID,'mensajes'), {
+    autorId: ME.uid, autorNombre: (ME.displayName||'Director')+' [DJ]',
+    tipo: 'sistema', texto: `🗑 El Director eliminó "${item.nombre}" del inventario de ${p.nombre}.`,
+    timestamp: serverTimestamp()
+  });
 };
 
 window.jugadorCambiarEstado=async function(personajeId,nuevoEstado){
