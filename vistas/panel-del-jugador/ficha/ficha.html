@@ -216,6 +216,105 @@
     }
     .descuento-check input { accent-color: var(--green); width: 14px; height: 14px; cursor: pointer; }
     .descuento-check label { font-family: var(--mono); font-size: 0.62rem; letter-spacing: 0.08em; color: var(--bonus-color); cursor: pointer; }
+    /* ── CARRITO PENDIENTE ── */
+    .carrito-banner {
+      display: none; align-items: center; gap: 10px; flex-wrap: wrap;
+      padding: 10px 14px; margin-bottom: 14px;
+      background: rgba(201,168,76,0.1); border: 1px solid rgba(201,168,76,0.4);
+      border-radius: 6px; animation: fadeUp 0.25s ease;
+    }
+    .carrito-banner.visible { display: flex; }
+    .carrito-banner-label { font-family: var(--mono); font-size: 0.62rem; letter-spacing: 0.12em; text-transform: uppercase; color: var(--gold); flex: 1; }
+    .carrito-items { display: flex; flex-wrap: wrap; gap: 5px; }
+    .carrito-item-chip {
+      display: inline-flex; align-items: center; gap: 5px;
+      padding: 2px 8px; border-radius: 3px;
+      background: rgba(201,168,76,0.12); border: 1px solid rgba(201,168,76,0.3);
+      font-family: var(--mono); font-size: 0.6rem; color: var(--gold);
+    }
+    .carrito-item-chip button {
+      background: none; border: none; color: rgba(201,168,76,0.6);
+      cursor: pointer; font-size: 0.7rem; padding: 0; line-height: 1;
+      transition: color 0.15s;
+    }
+    .carrito-item-chip button:hover { color: #ef4444; }
+    .btn-guardar-mejoras {
+      padding: 7px 16px; font-family: var(--mono); font-size: 0.65rem;
+      letter-spacing: 0.1em; text-transform: uppercase; cursor: pointer;
+      background: rgba(201,168,76,0.15); border: 1px solid rgba(201,168,76,0.5);
+      color: var(--gold); border-radius: 4px; transition: all 0.2s; white-space: nowrap;
+    }
+    .btn-guardar-mejoras:hover { background: var(--gold); color: #000; }
+    /* mejora-card con cambio pendiente */
+    .mejora-card.pendiente { border-color: rgba(201,168,76,0.5); background: rgba(201,168,76,0.05); }
+    .mejora-dot.pendiente-dot { background: rgba(201,168,76,0.4); border-color: rgba(201,168,76,0.6); }
+    /* ── MODAL CONFIRMACION ── */
+    .xp-modal-overlay {
+      display: none; position: fixed; inset: 0; z-index: 8000;
+      background: rgba(0,0,0,0.75); backdrop-filter: blur(6px);
+      align-items: center; justify-content: center;
+    }
+    .xp-modal-overlay.visible { display: flex; }
+    .xp-modal {
+      background: var(--card); border: 1px solid rgba(201,168,76,0.35);
+      border-radius: 10px; padding: 24px; max-width: 480px; width: 90%;
+      box-shadow: 0 20px 60px rgba(0,0,0,0.6); animation: fadeUp 0.25s ease;
+    }
+    .xp-modal-title {
+      font-family: var(--serif); font-size: 1.1rem; color: #fff;
+      margin-bottom: 6px; display: flex; align-items: center; gap: 8px;
+    }
+    .xp-modal-sub { font-family: var(--mono); font-size: 0.6rem; letter-spacing: 0.12em; color: var(--muted); text-transform: uppercase; margin-bottom: 18px; }
+    .xp-modal-lista { display: flex; flex-direction: column; gap: 5px; margin-bottom: 18px; }
+    .xp-modal-item {
+      display: flex; justify-content: space-between; align-items: center;
+      padding: 7px 12px; border-radius: 4px;
+      background: rgba(201,168,76,0.06); border: 1px solid rgba(201,168,76,0.15);
+    }
+    .xp-modal-item-name { font-size: 0.85rem; color: var(--text); }
+    .xp-modal-item-detail { font-family: var(--mono); font-size: 0.62rem; color: var(--muted); margin-top: 1px; }
+    .xp-modal-item-costo { font-family: var(--mono); font-size: 0.72rem; font-weight: 700; color: var(--gold); }
+    .xp-modal-total {
+      display: flex; justify-content: space-between; align-items: center;
+      padding: 10px 12px; border-top: 1px solid var(--border); margin-bottom: 18px;
+      border-radius: 4px; background: rgba(255,255,255,0.02);
+    }
+    .xp-modal-total-lbl { font-family: var(--mono); font-size: 0.62rem; letter-spacing: 0.12em; text-transform: uppercase; color: var(--muted); }
+    .xp-modal-total-val { font-family: var(--serif); font-size: 1.3rem; font-weight: 800; color: var(--gold); }
+    .xp-modal-btns { display: flex; gap: 8px; justify-content: flex-end; }
+    .btn-modal-cancel {
+      padding: 8px 18px; font-family: var(--mono); font-size: 0.65rem; letter-spacing: 0.1em;
+      text-transform: uppercase; cursor: pointer; background: transparent;
+      border: 1px solid var(--border); color: var(--muted); border-radius: 4px; transition: all 0.15s;
+    }
+    .btn-modal-cancel:hover { border-color: var(--text); color: var(--text); }
+    .btn-modal-confirm {
+      padding: 8px 18px; font-family: var(--mono); font-size: 0.65rem; letter-spacing: 0.1em;
+      text-transform: uppercase; cursor: pointer; background: var(--gold);
+      border: 1px solid var(--gold); color: #000; border-radius: 4px; transition: all 0.15s; font-weight: 700;
+    }
+    .btn-modal-confirm:hover { background: #e6c054; }
+    /* ── HISTORIAL XP ── */
+    .historial-xp-lista { display: flex; flex-direction: column; gap: 6px; }
+    .historial-entry {
+      padding: 10px 14px; border-radius: 5px;
+      background: rgba(255,255,255,0.02); border: 1px solid var(--border);
+      transition: border-color 0.2s;
+    }
+    .historial-entry:hover { border-color: var(--border2); }
+    .historial-entry-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px; }
+    .historial-entry-fecha { font-family: var(--mono); font-size: 0.58rem; letter-spacing: 0.1em; color: var(--muted); }
+    .historial-entry-total { font-family: var(--mono); font-size: 0.7rem; font-weight: 700; color: var(--gold); }
+    .historial-entry-items { display: flex; flex-wrap: wrap; gap: 4px; }
+    .historial-chip {
+      display: inline-flex; align-items: center; gap: 4px;
+      padding: 2px 8px; border-radius: 3px;
+      background: rgba(255,255,255,0.03); border: 1px solid var(--border);
+      font-family: var(--mono); font-size: 0.58rem; color: var(--text);
+    }
+    .historial-chip.attr-chip { border-color: rgba(255,51,51,0.25); color: #ffbbbb; }
+    .historial-chip.skill-chip { border-color: rgba(126,200,227,0.25); color: var(--blue); }
+    .historial-empty { text-align: center; padding: 24px; font-family: var(--mono); font-size: 0.68rem; color: var(--muted); letter-spacing: 0.1em; }
     #toast{position:fixed;bottom:1.5rem;right:1.5rem;z-index:9999;padding:0.75rem 1.25rem;border-radius:5px;font-family:var(--mono);font-size:0.75rem;opacity:0;transition:opacity 0.3s;border-left:3px solid;pointer-events:none;}
     ::-webkit-scrollbar{width:3px;}
     ::-webkit-scrollbar-thumb{background:rgba(255,51,51,0.25);border-radius:2px;}
@@ -457,6 +556,16 @@
           <span class="xp-banner-desc" style="display:block;">XP Gastada: <strong id="xp-gastada-disp" style="color:var(--muted);">0</strong></span>
         </div>
       </div>
+      <!-- Carrito pendiente -->
+      <div class="carrito-banner" id="carrito-banner">
+        <div style="flex:1;">
+          <div class="carrito-banner-label">⏳ Mejoras pendientes — sin guardar</div>
+          <div class="carrito-items" id="carrito-items"></div>
+        </div>
+        <button class="btn-guardar-mejoras" onclick="abrirModalConfirmacion()">
+          <i class="ri-save-3-line"></i> Confirmar y Guardar
+        </button>
+      </div>
       <div class="descuento-check" id="descuento-wrap">
         <input type="checkbox" id="descuento-cb" onchange="renderMejorar()">
         <label for="descuento-cb">Aplicar descuento de entrenamiento (−20%) — requiere aprobación del DJ</label>
@@ -464,7 +573,33 @@
       <div id="mejorar-contenido"></div>
     </div>
   </div>
+  <!-- Historial XP -->
+  <div class="fc">
+    <div class="fc-header"><i class="ri-history-line" style="color:var(--muted);font-size:0.8rem;"></i><span class="fc-title">Historial de XP</span></div>
+    <div class="fc-body">
+      <div id="historial-xp-contenido" class="historial-xp-lista">
+        <div class="historial-empty">Sin registros aún.</div>
+      </div>
+    </div>
+  </div>
 </div>
+</div>
+
+<!-- Modal confirmación XP -->
+<div class="xp-modal-overlay" id="xp-modal-overlay">
+  <div class="xp-modal">
+    <div class="xp-modal-title">⚠ Confirmar gasto de XP</div>
+    <div class="xp-modal-sub">Esta acción es permanente y quedará registrada en el historial.</div>
+    <div class="xp-modal-lista" id="xp-modal-lista"></div>
+    <div class="xp-modal-total">
+      <span class="xp-modal-total-lbl">Total a gastar</span>
+      <span class="xp-modal-total-val" id="xp-modal-total-val">0 XP</span>
+    </div>
+    <div class="xp-modal-btns">
+      <button class="btn-modal-cancel" onclick="cerrarModalConfirmacion()">Cancelar</button>
+      <button class="btn-modal-confirm" onclick="confirmarGuardarMejoras()">✓ Confirmar y Gastar</button>
+    </div>
+  </div>
 </div>
 
 <div id="toast"></div>
@@ -861,14 +996,12 @@ onAuthStateChanged(auth, async (user) => {
 });
 
 // ══════════════════════════════════════
-// SISTEMA DE MEJORA DE XP
+// SISTEMA DE MEJORA DE XP (con carrito)
 // ══════════════════════════════════════
 
-// Costos según el documento de progresión
-const COSTO_ATTR  = [0, 4, 8, 12, 16, 35, 42]; // índice = nivel destino
+const COSTO_ATTR  = [0, 4, 8, 12, 16, 35, 42];
 const COSTO_SKILL = [0, 2, 4,  6,  8, 20, 24];
 
-// Límites por nivel
 function getLimites(nivel) {
   const n = parseInt(nivel)||1;
   if (n <= 2)  return { attrMax:3, attrResto:2, skillMax:2, skillResto:2 };
@@ -890,13 +1023,46 @@ const SKILL_DEFS = [
   'Investigación','Medicina','Academicismo','Informática','Conducir','Política'
 ];
 
+// Carrito: { key, tipo:'attr'|'skill', label, nivelAntes, nivelDespues, costo }
+let carrito = [];
+
+function xpPendiente() {
+  return carrito.reduce((s,c)=>s+c.costo,0);
+}
+
+// XP disponible real (descontando carrito pendiente)
+function xpDisponibleReal() {
+  return (p.xpTotal||0) - (p.xpGastada||0) - xpPendiente();
+}
+
+function actualizarCarritoBanner() {
+  const banner = document.getElementById('carrito-banner');
+  const itemsEl = document.getElementById('carrito-items');
+  if (!carrito.length) {
+    banner.classList.remove('visible');
+    return;
+  }
+  banner.classList.add('visible');
+  itemsEl.innerHTML = carrito.map((c,i) => `
+    <span class="carrito-item-chip">
+      ${c.label} ${c.nivelAntes}→${c.nivelDespues} <em style="color:rgba(201,168,76,0.7);">-${c.costo}xp</em>
+      <button onclick="revertirCarrito(${i})" title="Revertir">✕</button>
+    </span>`).join('');
+}
+
+window.revertirCarrito = function(idx) {
+  carrito.splice(idx, 1);
+  actualizarCarritoBanner();
+  renderMejorar();
+};
+
 window.renderMejorar = function() {
   if (!p) return;
-  const xpDisp  = (p.xpTotal||0) - (p.xpGastada||0);
-  const lim      = getLimites(p.nivel);
+  const xpDisp   = xpDisponibleReal();
+  const lim       = getLimites(p.nivel);
   const descuento = document.getElementById('descuento-cb')?.checked || false;
 
-  document.getElementById('xp-disp').textContent = xpDisp;
+  document.getElementById('xp-disp').textContent      = xpDisp;
   document.getElementById('xp-total-disp').textContent  = p.xpTotal||0;
   document.getElementById('xp-gastada-disp').textContent= p.xpGastada||0;
 
@@ -907,10 +1073,21 @@ window.renderMejorar = function() {
     return descuento ? Math.floor(costo * 0.8) : costo;
   }
 
-  function dotsMejora(actual, maximo) {
+  // Nivel efectivo = base + subidas en carrito aún sin guardar
+  function nivelPendienteAttr(key) {
+    const base = getAttr(p.atributos||{}, key);
+    return carrito.filter(c=>c.tipo==='attr'&&c.key===key).reduce((n)=>n+1, base);
+  }
+  function nivelPendienteSkill(nombre) {
+    const base = getSkill(p.habilidades||{}, nombre);
+    return carrito.filter(c=>c.tipo==='skill'&&c.key===nombre).reduce((n)=>n+1, base);
+  }
+
+  function dotsMejora(actual, pendiente, maximo) {
     return Array.from({length:6}, (_,i) => {
       const d = i+1;
       if (d <= actual) return `<div class="mejora-dot filled"></div>`;
+      if (d <= pendiente) return `<div class="mejora-dot pendiente-dot" title="Pendiente"></div>`;
       if (d === maximo) return `<div class="mejora-dot max-dot" title="Máximo"></div>`;
       return `<div class="mejora-dot"></div>`;
     }).join('');
@@ -926,23 +1103,25 @@ window.renderMejorar = function() {
     <div class="mejora-grid">`;
 
   ATTR_DEFS.forEach(a => {
-    const baseVal  = getAttr(p.atributos||{}, a.k);
-    const bonoVal  = getBonusFor(a.k, 'attr');
-    const effVal   = baseVal + bonoVal;
-    const esEsp    = a.k === attrEspecial;
-    const maxPerm  = esEsp ? lim.attrMax : lim.attrResto;
-    const sigNivel = baseVal + 1;
-    const maxed    = baseVal >= maxPerm || baseVal >= 5;
-    const costo    = maxed ? 0 : costoConDescuento(COSTO_ATTR[sigNivel] || 0);
+    const baseVal   = getAttr(p.atributos||{}, a.k);
+    const pendiente = nivelPendienteAttr(a.k);
+    const bonoVal   = getBonusFor(a.k, 'attr');
+    const esEsp     = a.k === attrEspecial;
+    const maxPerm   = esEsp ? lim.attrMax : lim.attrResto;
+    const sigNivel  = pendiente + 1;
+    const maxed     = pendiente >= maxPerm || pendiente >= 5;
+    const costo     = maxed ? 0 : costoConDescuento(COSTO_ATTR[sigNivel] || 0);
     const puedeComprar = !maxed && xpDisp >= costo && costo > 0;
+    const tienePendiente = pendiente > baseVal;
 
     attrsHTML += `
-      <div class="mejora-card ${maxed?'maxed':''} ${esEsp?'especializado':''}">
+      <div class="mejora-card ${maxed?'maxed':''} ${esEsp?'especializado':''} ${tienePendiente?'pendiente':''}">
         <div style="display:flex;justify-content:space-between;align-items:center;">
           <span class="mejora-nombre">${a.i} ${a.l}</span>
           ${esEsp ? `<span style="font-family:var(--mono);font-size:0.52rem;color:var(--gold);">★ Dest.</span>` : ''}
+          ${tienePendiente ? `<span style="font-family:var(--mono);font-size:0.52rem;color:rgba(201,168,76,0.8);">⏳${pendiente}</span>` : ''}
         </div>
-        <div class="mejora-nivel-row">${dotsMejora(baseVal, maxPerm)}</div>
+        <div class="mejora-nivel-row">${dotsMejora(baseVal, pendiente, maxPerm)}</div>
         <div class="mejora-meta">
           <div class="mejora-costo">
             ${bonoVal > 0 ? `<span style="color:var(--bonus-color);">base ${baseVal} +${bonoVal}</span><br>` : ''}
@@ -951,7 +1130,7 @@ window.renderMejorar = function() {
               : `Subir a ${sigNivel}: <span class="costo-val">${costo} XP</span>${descuento?' (-20%)':''}`}
           </div>
           <button class="btn-comprar"
-            onclick="comprarAtributo('${a.k}',${baseVal},${costo})"
+            onclick="agregarAlCarritoAttr('${a.k}',${pendiente},${costo})"
             ${!puedeComprar ? 'disabled' : ''}>
             ${maxed ? 'Máx' : '▲ Subir'}
           </button>
@@ -972,22 +1151,25 @@ window.renderMejorar = function() {
     <div class="mejora-grid">`;
 
   SKILL_DEFS.forEach(s => {
-    const baseVal  = getSkill(p.habilidades||{}, s);
-    const bonoVal  = getBonusFor(s, 'skill');
-    const esEsp    = s === skillEspecial;
-    const maxPerm  = (parseInt(p.nivel||1) >= 6 && esEsp) ? lim.skillMax : lim.skillResto;
-    const sigNivel = baseVal + 1;
-    const maxed    = baseVal >= maxPerm || baseVal >= 5;
-    const costo    = maxed ? 0 : costoConDescuento(COSTO_SKILL[sigNivel] || 0);
+    const baseVal   = getSkill(p.habilidades||{}, s);
+    const pendiente = nivelPendienteSkill(s);
+    const bonoVal   = getBonusFor(s, 'skill');
+    const esEsp     = s === skillEspecial;
+    const maxPerm   = (parseInt(p.nivel||1) >= 6 && esEsp) ? lim.skillMax : lim.skillResto;
+    const sigNivel  = pendiente + 1;
+    const maxed     = pendiente >= maxPerm || pendiente >= 5;
+    const costo     = maxed ? 0 : costoConDescuento(COSTO_SKILL[sigNivel] || 0);
     const puedeComprar = !maxed && xpDisp >= costo && costo > 0;
+    const tienePendiente = pendiente > baseVal;
 
     skillsHTML += `
-      <div class="mejora-card ${maxed?'maxed':''} ${esEsp?'especializado':''}">
+      <div class="mejora-card ${maxed?'maxed':''} ${esEsp?'especializado':''} ${tienePendiente?'pendiente':''}">
         <div style="display:flex;justify-content:space-between;align-items:center;">
           <span class="mejora-nombre" style="font-size:0.75rem;">${s}</span>
           ${esEsp ? `<span style="font-family:var(--mono);font-size:0.52rem;color:var(--gold);">★</span>` : ''}
+          ${tienePendiente ? `<span style="font-family:var(--mono);font-size:0.52rem;color:rgba(201,168,76,0.8);">⏳${pendiente}</span>` : ''}
         </div>
-        <div class="mejora-nivel-row">${dotsMejora(baseVal, maxPerm)}</div>
+        <div class="mejora-nivel-row">${dotsMejora(baseVal, pendiente, maxPerm)}</div>
         <div class="mejora-meta">
           <div class="mejora-costo">
             ${bonoVal > 0 ? `<span style="color:var(--bonus-color);">+${bonoVal} bono</span><br>` : ''}
@@ -996,7 +1178,7 @@ window.renderMejorar = function() {
               : `A ${sigNivel}: <span class="costo-val">${costo} XP</span>`}
           </div>
           <button class="btn-comprar"
-            onclick="comprarHabilidad('${s.replace(/'/g,"\'")}',${baseVal},${costo})"
+            onclick="agregarAlCarritoSkill('${s.replace(/'/g,"\\'")}',${pendiente},${costo})"
             ${!puedeComprar ? 'disabled' : ''}>
             ${maxed ? 'Máx' : '▲ Subir'}
           </button>
@@ -1007,81 +1189,138 @@ window.renderMejorar = function() {
   skillsHTML += `</div></div>`;
 
   document.getElementById('mejorar-contenido').innerHTML = attrsHTML + skillsHTML;
+  actualizarCarritoBanner();
+  renderHistorial();
 };
 
-window.comprarAtributo = async function(key, nivelActual, costo) {
+// ── Agregar al carrito ──
+window.agregarAlCarritoAttr = function(key, nivelActual, costo) {
   if (!p || costo <= 0) return;
-  const xpDisp = (p.xpTotal||0) - (p.xpGastada||0);
-  if (xpDisp < costo) { showToast('XP insuficiente.','error'); return; }
-
-  const nuevoNivel = nivelActual + 1;
-  if (!p.atributos) p.atributos = {};
-  p.atributos[key] = nuevoNivel;
-
-  // Actualizar efectivos
-  if (!p.atributosEfectivos) p.atributosEfectivos = {...p.atributos};
-  const bono = getBonusFor(key,'attr');
-  p.atributosEfectivos[key] = nuevoNivel + bono;
-
-  p.xpGastada = (p.xpGastada||0) + costo;
-
-  try {
-    await updateDoc(doc(db,'personajes',charId), {
-      [`atributos.${key}`]:         nuevoNivel,
-      [`atributosEfectivos.${key}`]: nuevoNivel + bono,
-      xpGastada:                    p.xpGastada,
-      updatedAt:                    serverTimestamp(),
-    });
-
-    // Re-renderizar todo
-    const attrs = p.atributosEfectivos || p.atributos || {};
-    const skills = p.habilidadesEfectivas || p.habilidades || {};
-    renderAttrs(attrs);
-    renderCombate(attrs, skills);
-    renderRecursos();
-    renderMejorar();
-    showToast(`✓ ${ATTR_DEFS.find(a=>a.k===key)?.l} subido a ${nuevoNivel}. -${costo} XP`,'success');
-  } catch(e) {
-    console.error(e);
-    showToast('Error al guardar.','error');
-  }
+  if (xpDisponibleReal() < costo) { showToast('XP insuficiente.','error'); return; }
+  const label = ATTR_DEFS.find(a=>a.k===key)?.l || key;
+  carrito.push({ key, tipo:'attr', label, nivelAntes: nivelActual, nivelDespues: nivelActual+1, costo });
+  renderMejorar();
 };
 
-window.comprarHabilidad = async function(nombre, nivelActual, costo) {
+window.agregarAlCarritoSkill = function(nombre, nivelActual, costo) {
   if (!p || costo <= 0) return;
-  const xpDisp = (p.xpTotal||0) - (p.xpGastada||0);
-  if (xpDisp < costo) { showToast('XP insuficiente.','error'); return; }
+  if (xpDisponibleReal() < costo) { showToast('XP insuficiente.','error'); return; }
+  carrito.push({ key: nombre, tipo:'skill', label: nombre, nivelAntes: nivelActual, nivelDespues: nivelActual+1, costo });
+  renderMejorar();
+};
 
-  const nuevoNivel = nivelActual + 1;
-  if (!p.habilidades) p.habilidades = {};
-  p.habilidades[nombre] = nuevoNivel;
+// ── Modal ──
+window.abrirModalConfirmacion = function() {
+  if (!carrito.length) return;
+  const lista = document.getElementById('xp-modal-lista');
+  const total = xpPendiente();
+  lista.innerHTML = carrito.map(c => `
+    <div class="xp-modal-item">
+      <div>
+        <div class="xp-modal-item-name">${c.tipo==='attr'?'⚔ Atributo':'⚡ Habilidad'} — ${c.label}</div>
+        <div class="xp-modal-item-detail">Nivel ${c.nivelAntes} → ${c.nivelDespues}</div>
+      </div>
+      <div class="xp-modal-item-costo">−${c.costo} XP</div>
+    </div>`).join('');
+  document.getElementById('xp-modal-total-val').textContent = `${total} XP`;
+  document.getElementById('xp-modal-overlay').classList.add('visible');
+};
 
-  if (!p.habilidadesEfectivas) p.habilidadesEfectivas = {...p.habilidades};
-  const bono = getBonusFor(nombre,'skill');
-  p.habilidadesEfectivas[nombre] = nuevoNivel + bono;
+window.cerrarModalConfirmacion = function() {
+  document.getElementById('xp-modal-overlay').classList.remove('visible');
+};
 
-  p.xpGastada = (p.xpGastada||0) + costo;
+// ── Confirmar y guardar ──
+window.confirmarGuardarMejoras = async function() {
+  if (!p || !carrito.length) return;
+  cerrarModalConfirmacion();
+
+  const totalXP = xpPendiente();
+  const updates = {};
+
+  // Aplicar cada mejora al objeto local
+  carrito.forEach(c => {
+    if (c.tipo === 'attr') {
+      if (!p.atributos) p.atributos = {};
+      p.atributos[c.key] = c.nivelDespues;
+      if (!p.atributosEfectivos) p.atributosEfectivos = {...p.atributos};
+      const bono = getBonusFor(c.key,'attr');
+      p.atributosEfectivos[c.key] = c.nivelDespues + bono;
+      updates[`atributos.${c.key}`] = c.nivelDespues;
+      updates[`atributosEfectivos.${c.key}`] = c.nivelDespues + bono;
+    } else {
+      if (!p.habilidades) p.habilidades = {};
+      p.habilidades[c.key] = c.nivelDespues;
+      if (!p.habilidadesEfectivas) p.habilidadesEfectivas = {...p.habilidades};
+      const bono = getBonusFor(c.key,'skill');
+      p.habilidadesEfectivas[c.key] = c.nivelDespues + bono;
+      updates[`habilidades.${c.key}`] = c.nivelDespues;
+      updates[`habilidadesEfectivas.${c.key}`] = c.nivelDespues + bono;
+    }
+  });
+
+  p.xpGastada = (p.xpGastada||0) + totalXP;
+  updates.xpGastada = p.xpGastada;
+  updates.updatedAt = serverTimestamp();
+
+  // Registro de historial
+  const entrada = {
+    fecha: new Date().toISOString(),
+    totalXP,
+    items: carrito.map(c=>({ tipo:c.tipo, key:c.key, label:c.label, de:c.nivelAntes, a:c.nivelDespues, costo:c.costo }))
+  };
+  if (!p.historialXP) p.historialXP = [];
+  p.historialXP.unshift(entrada);
+  updates.historialXP = p.historialXP;
 
   try {
-    await updateDoc(doc(db,'personajes',charId), {
-      [`habilidades.${nombre}`]:         nuevoNivel,
-      [`habilidadesEfectivas.${nombre}`]: nuevoNivel + bono,
-      xpGastada:                          p.xpGastada,
-      updatedAt:                          serverTimestamp(),
-    });
+    await updateDoc(doc(db,'personajes',charId), updates);
 
     const attrs  = p.atributosEfectivos  || p.atributos  || {};
     const skills = p.habilidadesEfectivas || p.habilidades || {};
+    renderAttrs(attrs);
     renderSkills(skills);
     renderCombate(attrs, skills);
     renderRecursos();
+
+    // Limpiar carrito
+    carrito = [];
     renderMejorar();
-    showToast(`✓ ${nombre} subido a ${nuevoNivel}. -${costo} XP`,'success');
+    showToast(`✓ ${entrada.items.length} mejora${entrada.items.length>1?'s':''} guardada${entrada.items.length>1?'s':''}. −${totalXP} XP`,'success');
   } catch(e) {
     console.error(e);
-    showToast('Error al guardar.','error');
+    showToast('Error al guardar mejoras.','error');
   }
 };
+
+// ── Historial ──
+function renderHistorial() {
+  const contenedor = document.getElementById('historial-xp-contenido');
+  if (!contenedor) return;
+  const hist = p.historialXP || [];
+  if (!hist.length) {
+    contenedor.innerHTML = '<div class="historial-empty">Sin registros aún. Las mejoras guardadas aparecerán aquí.</div>';
+    return;
+  }
+  contenedor.innerHTML = hist.map(entry => {
+    const fecha = new Date(entry.fecha);
+    const fechaStr = fecha.toLocaleDateString('es-CL',{day:'2-digit',month:'short',year:'numeric'}) +
+                     ' ' + fecha.toLocaleTimeString('es-CL',{hour:'2-digit',minute:'2-digit'});
+    const chips = entry.items.map(it =>
+      `<span class="historial-chip ${it.tipo==='attr'?'attr-chip':'skill-chip'}">
+        ${it.label} ${it.de}→${it.a} <em style="opacity:0.6;">−${it.costo}xp</em>
+      </span>`
+    ).join('');
+    return `
+      <div class="historial-entry">
+        <div class="historial-entry-header">
+          <span class="historial-entry-fecha">📅 ${fechaStr}</span>
+          <span class="historial-entry-total">−${entry.totalXP} XP</span>
+        </div>
+        <div class="historial-entry-items">${chips}</div>
+      </div>`;
+  }).join('');
+}
 
 // Hook en switchTab para renderizar Mejorar al entrar
 const _origSwitchTab = window.switchTab;
